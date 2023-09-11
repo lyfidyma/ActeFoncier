@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template2}">
+<head>
+<meta charset="UTF-8"/>
+<title>Mes Documents</title>
+	
+</head>
+<body>
+	<div layout:fragment="content">
+		<div class="container">
+			<div class="col-md-6">
+     		 	<form th:action="@{cons}" id="searchForm" method="get">
+        	      <input id="motCle" type="text" name="motCle" th:value=${motCle}
+                	placeholder="mot clé"/>
+            	  <button type="submit" class="btn btn-secondary">Chercher</button>
+         		</form>
+         	</div>
+      </div>
+         
+		<div class="container">
+			<div class="col-md">
+				<div class="panel panel-primary" th:if="${listDocuments}">
+					<div class="panel-heading">Consultation documents</div>
+					<div class="panel-body">
+						<table class="table table-striped">
+							<tr>
+							<th>Numero d'ordre</th><th>Type document</th><th>Bénéficiaire</th><th>Lot</th><th>Titre foncier</th>
+							<th>Superficie</th><th>Site</th><th>Date d'approbation</th><th>Responsable</th><th>Statut</th>
+							</tr>
+							
+							
+								
+								<tr th:each="d:${listDocuments}">
+									<td th:text="${d.idDocument}"></td>
+									<th:block th:each="td:${d.typeDocument}">
+									<td th:text="${td.typeDoc}"></td>
+									</th:block>
+									<th:block th:each="b:${d.beneficiaire}">
+									<th:block th:if="${d.typeBeneficiaire} eq 'Particulier'">
+									<td th:text="${b.nomPersonne}"></td>
+									</th:block>
+									
+									<th:block th:if="${d.typeBeneficiaire} eq 'Entreprise'">
+									<td th:text="${b.nomEntreprise}"></td>
+									</th:block>
+									</th:block>
+									<td th:text="${d.lot}"></td>
+									<td th:text="${d.titreGlobal}"></td>	
+									<td th:text="${d.superficie}"></td>
+									<th:block th:each="l:${d.localisation}">
+									<td th:text="${l.commune}"></td>
+									</th:block>
+									<td th:text="${d.dateApprobation}"></td>
+									<td th:text="${d.responsableDocument}"></td>
+									<td th:text="${d.statutDocument}"></td>				
+								
+								<td><a th:href="@{visualiser(id=${d.idDocument})}"><i class="fas fa-phone"></i> <span class="glyphicon glyphicon-eye-open"></span></a></td>
+								<td><a th:href="@{modifier(id=${d.idDocument})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
+								<td><a th:href="@{supprimer(id=${d.idDocument},page=${currentPage},size=${size},motCle=${motCle})}"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>																				
+								</tr>	
+						</table>
+						
+							<!-- Pagination -->
+		
+<div th:if="${totalPages > 1}">
+      <div class="row col-sm-10">
+       	 <div class="col-md">
+        	<span th:each="i: ${#numbers.sequence(0, totalPages-1)}">
+        		<a th:if="${currentPage!=i}" th:href="@{cons(page=${i})}">[[${i}]]</a>
+        		<span th:unless="${currentPage !=i}">[[${i}]]</span> &nbsp; &nbsp;
+     		</span>
+     		 <span>
+     		 	<a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1})}">Next</a>
+     		 	<span th:unless="${currentPage < totalPages}">Next</span>
+     		 </span> &nbsp; &nbsp;
+     		 <span>
+     		 	<a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1})}">Last</a>
+     		 	<span th:unless="${currentPage < totalPages-1}">Last</span>
+     		 </span>
+     		  </div>
+      </div>
+   </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+</body>
+</html>

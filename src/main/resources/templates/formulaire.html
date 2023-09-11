@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template2}">
+<head>
+<meta charset="UTF-8"/>
+<title>Mes Documents</title>
+
+</head>
+<body>
+	<div layout:fragment="content">
+		<div class="container">
+			<div class="col-md">
+				<div class="panel panel-primary " >
+					<div class="panel-heading">Ajouter un document</div>
+					
+					<div class="panel-body">
+						<form th:action="@{/sauvegarderDocument}" method="post" th:object="${unDocument}">	
+						<input type="hidden" th:field="*{idDocument}" name="idDocument"/>
+							  <div class="col-md-3">
+							      <select id="typeDoc" name="typeDoc" class="form-control">
+							      <option value="" hidden>Type de document</option>
+							      <option >Bail</option>
+							       <option>Arrêté</option>
+							       <option>Décision</option>
+							       <option>Décret</option>
+							       <option>Autres</option>
+							    </select>
+							  </div>
+							  
+							  <div class="col-md-3">
+							    <input type="text" name = "numDocument" class="form-control" th:field="*{numDocument}" id="numDocument" placeholder="Numéro du document" aria-label="Numéro du document">
+							  </div>
+
+							  <div class="col-md-3">
+								<textarea class="form-control" name="objetDocument" th:field="*{objetDocument}" id="objetDocument" rows="4"  placeholder="Objet" ></textarea>
+							  </div>
+							   <br style="clear: both;">
+						  
+						 <div class="col-md-3">
+						     	<label for="dateDocument" >Date du document</label>
+							    <input type="date" name="dateDocument" th:field="*{dateDocument}" class="form-control" id="dateDocument"/>
+                		</div>		
+                		
+                		 <div class="col-md-3">
+						     	<label for="dateApprobation" >Date approbation</label>
+							    <input type="date" name="dateApprobation" th:field="*{dateApprobation}" class="form-control" id="dateApprobation"/>
+                		</div>		
+						   <br style="clear: both;"/>
+						   
+							  <div class="col-md-3">
+							    <label for="beneficiaire" class="form-label">Bénéficiaire</label>
+							    <select id="typeBeneficiaire" name="typeBeneficiaire" th:field="*{typeBeneficiaire}" class="form-control" onchange="showDiv('forEntreprise', this)">
+							      <option value="" hidden>Bénéficiaire</option>
+							      <option value="Entreprise">Entreprise</option>
+							       <option value="Particulier">Particulier</option>						       
+							    </select>
+							  </div>
+							  <script>
+      							function showDiv(divId, element) {
+      							   document.getElementById(divId).style.display = element.value == "Entreprise" ? 'block' : 'none';
+    							  }
+  							  </script> 
+							   <div class="col-md-3" id="forEntreprise" style="display: none">
+							    <input type="text" name ="nomEntreprise" class="form-control" placeholder="Nom de l'Entreprise" aria-label="Nom de l'Entreprise">
+							  
+							    <input type="text" name ="ninea" class="form-control" placeholder="ninea" aria-label="ninea">
+							  </div>
+							
+							 <br style="clear: both;"/>
+							 	<p></p>
+							   <div class="col-md-3">
+							    <input type="text" name ="nomPersonne" class="form-control" id="nomPersonne" placeholder="Nom" aria-label="Nom">
+							  <p></p>
+							    <input type="text" name ="prenom" class="form-control" id="prenom" placeholder="Prénom" aria-label="Prénom">
+							  </div>
+							
+						   					
+							  <div class="col-md-6">
+							    <label for="responsable" class="form-label"></label>
+							    <input type="text" name = "responsableDocument" th:field="*{responsableDocument}" class="form-control" id="responsableDocument" placeholder="Responsable" aria-label="Responsable">
+							  </div>
+							   <div class="col-md-3">
+							    <label for="lot" class="form-label"></label>
+							    <input type="text" name ="lot" class="form-control" id="lot" placeholder="Lot" aria-label="Lot">
+							  </div>
+							 
+							  <div class="col-md-4">
+							    <label for="titreGlobal" class="form-label"></label>
+							    <input type="text" name ="titreGlobal" th:field="*{titreGlobal}" class="form-control" id="titreGlobal" placeholder="Titre global" aria-label="TitreGlobal">
+							  </div>
+						 
+						  <div class="col-md-3">
+						     	<label for="superficie" class="form-label"></label>
+							    <input type="text" name="superficie" th:field="*{superficie}" class="form-control" id="superficie" placeholder="Superficie" aria-label="Superficie">
+						  </div>
+						  
+						  <div class="col-md-3">
+						     	<label for="nicad" class="form-label"></label>
+							    <input type="text" name="nicad" class="form-control" id="nicad" placeholder="nicad" aria-label="nicad">
+						  </div>
+						   <br style="clear: both;"/>
+						   
+						   <div class="col-md-4">
+						     	<label for="cni" class="form-label"></label>
+							    <input type="text" name="cni" class="form-control" id="cni" placeholder="Numéro de la pièce d'identité"/>
+						  </div>						   
+						   <div class="col-md-4">
+						     	<label for="nin" class="form-label"></label>
+							    <input type="text" name="nin" class="form-control" id="nin" placeholder="Numéro CEDEAO"/>
+						  </div>
+						  
+						   <br style="clear: both;"/>
+						   
+						   <div class="col-md-4">
+						     	<label for="dateDelivrance" class="form-label">Date délivrance</label>
+							    <input type="date" name="dateDelivrance" class="form-control" id="dateDelivrance"/>
+						  </div>	
+						  
+						  <br style="clear: both;"/>
+						   
+						   <div class="col-md-3">
+						     	<label for="commune" class="form-label"></label>
+							    <input type="text" name="commune" class="form-control" id="commune" placeholder="Commune"/>
+						  </div>	
+						  <div class="col-md-3">
+						     	<label for="communeArrond" class="form-label"></label>
+							    <input type="text" name="communeArrond" class="form-control" id="communeArrond" placeholder="Commune d'arrondissement"/>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="departement" class="form-label"></label>
+							    <input type="text" name="departement" class="form-control" id="departement" placeholder="Département"/>
+						  </div>
+						  <div class="col-md-2">
+						     	<label for="region" class="form-label"></label>
+							    <input type="text" name="region" class="form-control" id="region" placeholder="Région"/>
+						  </div>
+						  
+						  <br style="clear: both;"/>
+						   
+						  <div class="col-md-3">
+						     	<label for="numPj" class="form-label"></label>
+							    <input type="text" name="numPj" class="form-control" id="numPj" placeholder="Numéro de la pièce jointe"/>
+						  </div>	
+						  <div class="col-md-3">
+						     	<label for="datePieceJointe" class="form-label">Date pièce jointe</label>
+							    <input type="date" name="datePj" class="form-control" id="datePj"/>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="objetPj" class="form-label"></label>
+							    <input type="text" name="objetPj" class="form-control" id="objetPj" placeholder="Objet pièce jointe"/>
+						  </div>
+						  <br style="clear: both;"/>
+						 
+					  <div class="col-md-3" th:if="*{idDocument == null}">
+					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					  </div>
+					  <div class="col-md-3" th:if="*{idDocument}">
+					    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+					  </div>
+					</form>	
+					</div>
+				</div>
+			</div>
+		</div>	
+	 </div>
+	 
+	 
+</body>
+</html>

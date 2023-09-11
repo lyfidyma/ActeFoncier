@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+				xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src=
+"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+    </script>
+    <script src=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js">
+    </script>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <!--<a class="navbar-brand" href="#">
+                    MFB</a>-->
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Accueil</a></li>
+               <li><a th:href="@{/doc}">Ajouter</a></li>
+				<li><a th:href="@{/cons}">Consulter</a></li>
+            </ul>
+        </div>
+    </nav>
+    </header>
+    <section layout:fragment="content"></section>
+    <footer>
+		<div class="navbar-fixed-bottom">
+			<small>Ministère des Finances et du Budget</small>
+		</div>
+	</footer>
+</body>
+</html>
