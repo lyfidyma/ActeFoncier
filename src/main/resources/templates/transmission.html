@@ -55,9 +55,13 @@ span {
 						</div>
 						<p></p>
 						
+						<div th:each="pj:${piecesJointes}">
+						<span><label>Pièces jointes :</label></span>
+						<span th:text="${pj.numPj}"></span>
+						<span th:text="${pj.objetPj}"></span>
+						<span th:text="${pj.datePj}"></span>
 						
-						<span><label>Pièces jointes :</label></span><span th:text="${d.piecesJointes}"></span>
-						</th>
+						</div>
 						<p></p>
 						<div class="col-md-12">
 					    <button type="submit" class="btn btn-primary">Transmettre</button>

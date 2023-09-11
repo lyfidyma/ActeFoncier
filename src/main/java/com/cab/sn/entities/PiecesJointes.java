@@ -30,7 +30,7 @@ public class PiecesJointes {
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	private Date datePj;
 	@ManyToOne
-	@JoinColumn(name="CODE_DOCUMENT")
+	@JoinColumn(name="idDocument")
 	private Documents documents;
 	
 	public PiecesJointes(String numPj, String objetPj, Date datePj, Documents documents) {

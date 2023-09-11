@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.cab.sn.dao.DocumentsRepository;
+import com.cab.sn.dao.PiecesJointesRepository;
 import com.cab.sn.entities.Documents;
 import com.cab.sn.entities.PiecesJointes;
 import com.cab.sn.metier.ICabMetier;
@@ -25,6 +26,7 @@ public class CabController {
 	private ICabMetier cabMetier;
 	@Autowired
 	private DocumentsRepository documentsRepository;
+	private PiecesJointesRepository pjRepository;
 	
 	@RequestMapping("/doc")
 	public String index(Model model, @ModelAttribute("unDocument") Documents documents) {
@@ -95,8 +97,9 @@ public class CabController {
 	@RequestMapping(value="/visualiser", method=RequestMethod.GET)
 	public String visualiser(Model model, Long id) {
 		Documents doc = cabMetier.visualiserDocuments(id);
-		//Collection <PiecesJointes> pj= doc.getPiecesJointes();
+		PiecesJointes pj= cabMetier.chercherPiecesJointes(id);
 		model.addAttribute("document", doc);
+		model.addAttribute("piecesJointes", pj);
 		return "transmission";
 	}
 	

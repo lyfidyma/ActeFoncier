@@ -6,6 +6,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.cab.sn.dao.BeneficiaireRepository;
@@ -65,7 +66,8 @@ public class CabMetierImpl implements ICabMetier{
 			//  Entreprise entreprise = entRepository.findById(idBenefMaj).get();
 			  TypeDocument typeDocument= tdRepository.findById(doc.getTypeDocument().getIdTypeDocument()).get();
 			  
-			 // PiecesJointes piecesJointes = pjRepository.getById(idDocument).g;
+			  
+			  PiecesJointes piecesJointes = pjRepository.chercherPiecesJointes(idDocument);
 			  Long idLocalisation = doc.getLocalisation().getIdLocalisation();
 			  Localisation localisation = lRepository.findById(idLocalisation).get();
 			  
@@ -83,11 +85,9 @@ public class CabMetierImpl implements ICabMetier{
 			  doc.setBeneficiaire(beneficiaire);
 			  doc.setLocalisation(localisation);
 			  doc.setTypeDocument(typeDocument);
-				/*
-				 * piecesJointes.setDatePj(datePj); piecesJointes.setNumPj(numPj);
-				 * piecesJointes.setObjetPj(objetPj); piecesJointes.setDocuments(doc);
-				 * pjRepository.save(piecesJointes);
-				 */
+			  piecesJointes.setDatePj(datePj); piecesJointes.setNumPj(numPj);
+			  piecesJointes.setObjetPj(objetPj); piecesJointes.setDocuments(doc);
+			  pjRepository.save(piecesJointes);
 			  docRepository.save(doc);
 			 
 			return null;
@@ -165,5 +165,7 @@ public class CabMetierImpl implements ICabMetier{
 		docRepository.save(doc);
 		
 	}
-
+	public PiecesJointes chercherPiecesJointes(Long idDoc) {
+		return pjRepository.chercherPiecesJointes(idDoc);
+	}
 }

@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
 
 import com.cab.sn.entities.Documents;
+import com.cab.sn.entities.PiecesJointes;
 
 
 public interface ICabMetier {
@@ -23,5 +25,6 @@ public interface ICabMetier {
 	public Documents modifierDocuments(Long idDocument);
 	public Documents visualiserDocuments(Long idDocument);
 	public void transmettreDocuments(Long idDocument);
+	public PiecesJointes chercherPiecesJointes(Long idDoc);
 
 }
