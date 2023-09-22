@@ -1,75 +1,130 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
-      layout:decorate="~{template2}">
+      layout:decorate="~{template3}">
 <head>
 <meta charset="UTF-8"/>
 <title>Mes Documents</title>
 <style>
-span {
-  
-  
-  justify-content: center;
+label{
+	vertical-align:top;
+	width: 200px; 
+	margin-left:350px;
 }
+span{     
+	margin-left:10px;
+}
+
 </style>
 </head>
 <body>
 	<div layout:fragment="content">
 		<div class="container">
-			<form th:action="@{/transmettre}" method="post" th:object="${document}">	
+			<form th:action="@{/transmettre}" method="post" th:object="${unDocument}">	
 			<input type="hidden" th:field="*{idDocument}" name="idDocument"/>
-				<div class="panel panel-default"  th:if="${document}">
+				<div class="panel panel-default"  th:if="${unDocument}">
 					<div class="panel-heading">Détails d'un document</div>
-					<div style=text-align:center class="panel-body" th:each="d:${document}">
+					<div class="panel-body" th:each="d:${unDocument}">
 						
 						<div th:each="td:${d.typeDocument}">
-						<span><label>Type de document :</label></span>
+						<label>Type de document : </label>
 						<span th:text="${td.typeDoc}"></span>
+						
+						<label>Numéro du document : </label>
+						<span th:text="${d.numDocument}"></span>
+						
+						<label>Date : </label>
+						<span th:text="${d.dateDocument}"></span>
+						
+						<label>Date d'approbation : </label>
+						<span th:text="${d.dateApprobation}"></span>
+						
+						<label>Statut du document : </label>
+						<span th:text="${d.statutDocument}"></span>
+						
+						<label>Lot : </label>
+						<span th:text="${d.lot}"></span>
+						
+						<label>Titre global : </label>
+						<span th:text="${d.titreGlobal}"></span>
+						
+						<label>Superficie : </label>
+						<span th:text="${d.superficie}"></span>
+						
+						<label>Nicad : </label>
+						<span th:text="${d.nicad}"></span>
+						
+						<label>Objet du document : </label>
+						<span th:text="${d.objetDocument}"></span>
+						
 						</div>
-						<p></p>
-						<span><label>Numéro du document :</label></span><span th:text="${d.numDocument}"></span>
-						<p></p>
-						<span><label>Date :</label></span><span th:text="${d.dateDocument}"></span>
-						<p></p>	
-						<p></p>
-						<span><label>Statut du document :</label></span><span th:text="${d.statutDocument}"></span>
-						<p></p>
-						<span><label>Superficie :</label></span><span th:text="${d.superficie}"></span>
-						<p></p>
-						<span><label>Objet :</label></span><span th:text="${d.objetDocument}"></span>
+						
 						<p></p>
 						<div th:each="b:${d.beneficiaire}">
 						
 						<div th:if="${d.typeBeneficiaire} eq 'Particulier'">
-						<span><label>Bénéficiaire :</label></span>
+						
+						<label>Nom :</label>
 						<span th:text="${b.nomPersonne}"></span>
+						<label>Prénom :</label>
 						<span th:text="${b.prenom}"></span>
+						<label>Cni:</label>
 						<span th:text="${b.cni}"></span>
+						<label>Nin:</label>
+						<span th:text="${b.nin}"></span>
+						<label>Date délivrance :</label>
 						<span th:text="${b.dateDelivrance}"></span>
 						</div>
+						
 						<div th:if="${d.typeBeneficiaire} eq 'Entreprise'">
-						<span><label>Bénéficiaire :</label></span>
+						<label>Nom de l'entreprise :</label>
 						<span th:text="${b.nomEntreprise}"></span>
+						<label>Ninea :</label>
 						<span th:text="${b.ninea}"></span>
+						
+						<label>Nom :</label>
+						<span th:text="${b.Personne.nomPersonne}"></span>
+						<label>Prénom :</label>
+						<span th:text="${b.Personne.prenom}"></span>
+						<label>Cni:</label>
+						<span th:text="${b.Personne.cni}"></span>
+						<label>Nin:</label>
+						<span th:text="${b.Personne.nin}"></span>
+						<label>Date délivrance :</label>
+						<span th:text="${b.Personne.dateDelivrance}"></span>
 						</div>
 						</div>
+						
 						<p></p>
 						
+						<div th:each="l:${d.localisation}">
+						<label>Commune :</label>
+						<span th:text="${l.commune}"></span>
+						<label>Commune Arrond. :</label>
+						<span th:text="${l.communeArrond}"></span>
+						<label>Département:</label>
+						<span th:text="${l.departement}"></span>
+						<label>Région:</label>
+						<span th:text="${l.region}"></span>
+						</div>
+						
+						
 						<div th:each="pj:${piecesJointes}">
-						<span><label>Pièces jointes :</label></span>
+						<label>Pièce jointe : </label>
 						<span th:text="${pj.numPj}"></span>
 						<span th:text="${pj.objetPj}"></span>
 						<span th:text="${pj.datePj}"></span>
-						
 						</div>
-						<p></p>
+							
 						<div class="col-md-12">
 					    <button type="submit" class="btn btn-primary">Transmettre</button>
 					  </div>
 								
 					</div>
 				</div>
+				
 					</form>
+					
 			</div>
 		</div>
 </body>

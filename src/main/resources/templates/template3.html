@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8"/>
+<title>template</title>
+	
+	<link rel="stylesheet" type="text/css"
+	href="../static/css/myStyle.css"
+	th:href="@{/css/myStyle.css}"/>
+	<title>Template3</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src=
+"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+    </script>
+    <script src=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js">
+    </script>
+</head>
+<body>
+	<div id="viewport">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <header>
+      <a href="#">Actes fonciers</a>
+    </header>
+    <ul class="nav">
+      <li>
+        <a th:href="@{/index}">
+          <i class="zmdi zmdi-view-dashboard"></i> Accueil
+        </a>
+      </li>
+      <li>
+        <a th:href="@{/ajouter}">
+          <i class="zmdi zmdi-link"></i> Ajouter
+        </a>
+      </li>
+      <li>
+        <a th:href="@{/cons}">
+          <i class="zmdi zmdi-widgets"></i> Consulter
+        </a>
+      </li>
+ 		<li>
+        <a href="#">
+          <i class="zmdi zmdi-view-dashboard"></i>Tableau de bord
+        </a>
+      </li>
+    </ul>
+  </div>
+  <!-- Content -->
+  <div id="content">
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <a href="#"><i class="zmdi zmdi-notifications text-danger" th:text="${#authentication.name}"></i>
+            </a>
+          </li>
+          <li>
+	          <form method = "post" th:action = "@{/logout}">
+	          <button class=dropdown-item type="submit">Déconnexion</button>
+	          </form>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container-fluid">
+      <section layout:fragment="content"></section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

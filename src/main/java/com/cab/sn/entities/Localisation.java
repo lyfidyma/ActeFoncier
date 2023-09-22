@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,13 +18,14 @@ public class Localisation {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idLocalisation;
 	private String commune;
-	private String commueArrond;
+	private String communeArrond;
 	private String departement;
 	private String region;
+	
 	public Localisation(String commune, String communeArrond, String departement, String region) {
 		super();
 		this.commune = commune;
-		this.commueArrond = communeArrond;
+		this.communeArrond = communeArrond;
 		this.departement = departement;
 		this.region = region;
 	}

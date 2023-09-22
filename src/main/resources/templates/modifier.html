@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8"/>
+<title>Mes Documents</title>
+<style>
+.error{
+	color:red;
+}
+div{
+padding:3px;
+}
+</style>
+</head>
+<body>
+	<div layout:fragment="content">
+		<div class="container">
+			<div class="col-md">
+				<div class="panel panel-primary " >
+					<div class="panel-heading">Modifier un document</div>
+					
+					<div class="panel-body">
+						<form th:action="@{/sauvegarderDocument}" method="post" th:object="${unDocument}" >	
+						<div th:each="d:${unDocument}">
+						<div th:object="${unDocument.typeDocument}">
+						<div th:each="td:${d.typeDocument}">
+							  <div class="col-md-3">
+							      <select id="typeDoc" class="form-control"  th:name= "typeDoc">
+							      <option value="" hidden>Type de document</option>
+							      <option  value= "Bail"  >Bail</option>
+							       <option value= "Arrêté" >Arrêté</option>
+							       <option value= "Décision" >Décision</option>
+							       <option value= "Décret" >Décret</option>
+							       <option value= "Autres" >Autres</option>
+							       <option th:value="${td.typeDoc}" th:text="${td.typeDoc}" th:selected="${td.typeDoc}" ></option>
+							    </select>
+							     <p th:if="${messageTypeDoc}" th:text="${messageTypeDoc}" style= color:red></p>
+							  </div> 
+							</div> 
+							   </div>
+							   
+							  <div class="col-md-3">
+							    <input type="text" class="form-control" th:field="*{numDocument}" placeholder="Numéro du document" />
+							    <p th:if="${#fields.hasErrors('numDocument')}" th:errors="*{numDocument}" th:errorclass="error"></p>
+							  </div>
+							  <div class="col-md-3">
+							
+								<textarea style="resize:none" class="form-control"  th:field="*{objetDocument}" rows="4"  placeholder="Objet" ></textarea>
+							  </div>
+							   
+						<br style="clear: both;"/>
+						
+						
+						 <div class="col-md-3">
+						     	<label for="dateDocument" style="font-size:12px" >Date du document</label>
+							    <input type="date" name="dateDocument"  class="form-control" th:value="${dateDocumentString}"/>
+							    </div>
+							    <div class="col-md-3">
+                	
+						     	<label for="dateApprobation" style="font-size:12px">Date approbation</label>
+							    <input type="date" th:name="dateApprobation"  class="form-control" th:value="${dateApprobationString}"/>
+                		</div>	
+							
+						   <br style="clear: both;"/>
+						   <div class="col-md-6">
+							    <label for="responsable" class="form-label"></label>
+							    <input type="text" class="form-control" th:field="*{responsableDocument}" placeholder="Responsable" aria-label="Responsable"/>
+							  </div>
+							  <br style="clear: both;"/>
+							  <br style="clear: both;"/>
+						   <p></p>
+						   <fieldset style="border:1px solid #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; "  >
+						<legend style="font-size:14px; color:green"><b>Bénéficiaire</b></legend>
+						
+							  <div class="col-md-3">
+							    <select id="typeBeneficiaire" class="form-control" th:field="*{typeBeneficiaire}" onchange="showDiv('forEntreprise', this)" readonly>
+							      <option value="" hidden>------------</option>
+							      <option th:value="*{typeBeneficiaire}" th:text="Entreprise" ></option>
+							       <option th:value="*{typeBeneficiaire}" th:text="Particulier"></option>						       
+							    </select>
+							  </div>
+							  <script>
+      							function showDiv(divId, element) {
+      							   document.getElementById(divId).style.display = element.value == "Entreprise" ? 'block' : 'none';
+    							  }
+  							  </script> 
+  							  
+  							 
+							   <div class="col-md-3" th:if="*{typeBeneficiaire=='Particulier'}">
+							   <div th:each="b:${d.beneficiaire}">
+							    <input type="text"  th:name ="nomPersonne" class="form-control" th:value="*{beneficiaire.nomPersonne}" placeholder="Nom" readonly />
+							  <p></p>
+							    <input type="text" th:name ="prenom" class="form-control" th:value="*{beneficiaire.prenom}" placeholder="Prénom" readonly />
+							  </div>
+							   </div>
+							  <div th:if="*{typeBeneficiaire=='Entreprise'}">
+							  <div th:each="f:${d.beneficiaire}">
+							   <div class="col-md-3" >
+							    <input type="text"  th:name ="nomPersonne" class="form-control" th:value="*{beneficiaire.Personne.nomPersonne}" placeholder="Nom" readonly />
+							  <p></p>
+							    <input type="text" th:name ="prenom" class="form-control" th:value="*{beneficiaire.Personne.prenom}" placeholder="Prénom" readonly />
+							  </div>
+							   <div class="col-md-6"  id="forEntreprise"  > 
+							   <input type="text"  th:name ="nomEntreprise" class="form-control" th:value="*{beneficiaire.nomEntreprise}" style="background-color: #BCEAF8"
+							   			placeholder="Nom de l'Entreprise" aria-label="Nom de l'Entreprise" readonly/>
+							  <p></p>
+							    <input type="text"  th:name ="ninea" class="form-control" th:value="*{beneficiaire.ninea}" style="background-color: #BCEAF8" placeholder="Ninea" aria-label="ninea" readonly/>
+							  </div>
+							  </div>
+							    </div>
+
+						   <br style="clear: both;"/>
+						   <div th:if="*{typeBeneficiaire=='Particulier'}">
+						   <div th:each="c:${d.beneficiaire}">
+						   <div class="col-md-3">
+						     	<label for="cni" class="form-label"></label>
+							    <input type="text" th:name="cni" class="form-control" th:value="*{beneficiaire.cni}" placeholder="Numéro de la pièce d'identité" readonly/>
+						  </div>	
+						  			   
+						   <div class="col-md-3">
+						     	<label for="nin" class="form-label"></label>
+							    <input type="text"  th:name="nin" class="form-control" th:value="*{beneficiaire.nin}" placeholder="Numéro CEDEAO" readonly/>
+						  </div>
+						  
+						   
+						   <div class="col-md-3" >
+						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
+							    <input type="date" th:name="dateDelivrance" class="form-control" th:value="${dateDelivranceString}" readonly/>
+						  </div>	
+						  </div>
+						  </div>
+						  
+						   <div th:if="*{typeBeneficiaire=='Entreprise'}">
+						   <div th:each="c:${d.beneficiaire}">
+						   <div class="col-md-3">
+						     	<label for="cni" class="form-label"></label>
+							    <input type="text"  th:name="cni" class="form-control" th:value="*{beneficiaire.Personne.cni}" placeholder="Numéro de la pièce d'identité" readonly/>
+						  </div>	
+						   <div class = "text-danger" th:if="${exception}" th:text="${exception.message}"> 	
+						  </div>	
+						  					   
+						   <div class="col-md-3">
+						     	<label for="nin" class="form-label"></label>
+							    <input type="text"  th:name="nin" class="form-control" th:value="*{beneficiaire.Personne.nin}" placeholder="Numéro CEDEAO" readonly/>
+						  </div>
+						   
+						   <div class="col-md-3" >
+						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
+							    <input type="date" th:name="dateDelivrance" class="form-control" th:value="${dateDelivranceString}" readonly/>
+						  </div>	
+						</div>
+						</div>
+						 </fieldset>
+						 <br style="clear: both;"/>
+						 
+						  <div class="col-md-2">
+							    <label for="lot" class="form-label"></label>
+							    <input type="text" class="form-control" th:field="*{lot}" placeholder="Lot" />
+							    <p th:if="${#fields.hasErrors('lot')}" th:errors="*{lot}" th:errorclass="error"></p>
+							  </div>
+							 
+							  <div class="col-md-2">
+							    <label for="titreGlobal" class="form-label"></label>
+							    <input type="text" class="form-control" th:field="*{titreGlobal}" placeholder="Titre global" />
+							     <p th:if="${#fields.hasErrors('titreGlobal')}" th:errors="*{titreGlobal}" th:errorclass="error"></p>
+							  </div>
+						 
+						  <div class="col-md-2">
+						     	<label for="superficie" class="form-label"></label>
+							    <input type="text" class="form-control" th:field="*{superficie}" placeholder="Superficie" />
+							     <p th:if="${#fields.hasErrors('superficie')}" th:errors="*{superficie}" th:errorclass="error"></p>
+						  </div>
+						  
+						  <div class="col-md-3">
+						     	<label for="nicad" class="form-label"></label>
+							    <input type="text" class="form-control" th:field="*{nicad}" placeholder="nicad" />
+							     <p th:if="${#fields.hasErrors('nicad')}" th:errors="*{nicad}" th:errorclass="error"></p>
+						  </div>
+						  <br style="clear: both;"/>
+						  
+						<div th:each="l:${d.localisation}">
+						   <div class="col-md-3" >
+						     	<label for="commune" class="form-label"></label>
+							    <input type="text" class="form-control" name = "commune" th:value="${l.commune}" placeholder="Commune"/>
+						  </div>	
+						  <div class="col-md-3">
+						     	<label for="communeArrond" class="form-label"></label>
+							    <input type="text" class="form-control" name = "communeArrond" th:value="${l.communeArrond}" placeholder="Commune d'arrondissement"/>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="departement" class="form-label"></label>
+							    <input type="text" class="form-control" name = "departement" th:value="${l.departement}" placeholder="Département"/>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="region" class="form-label"></label>
+							    <input type="text" class="form-control"  name = "region" th:value="${l.region}" placeholder="Région"/>
+						  </div>
+						  </div>
+						  
+						  
+						  <br style="clear: both;"/>
+						   
+						   <div th:each="pj:${piecesJointes}">
+						  <div class="col-md-3">
+						     	<label for="numPj" class="form-label"></label>
+							    <input type="text" th:name="numPj" class="form-control" th:value="${pj.numPj}" placeholder="Numéro de la pièce jointe"/>
+						 	</div>
+						  <div class="col-md-3">
+						     	<label for="datePieceJointe" class="form-label" style="font-size:12px">Date pièce jointe</label>
+							    <input type="date" th:name="datePj" class="form-control" th:value="${datePieceJointeString}"/>
+						  </div>
+						  <div class="col-md-4">
+						     	<label for="objetPj" class="form-label"></label>
+							    <input type="text" th:name="objetPj" class="form-control" th:value="${pj.objetPj}" placeholder="Objet pièce jointe"/>
+						  </div>
+						 
+						  </div>
+						  <div class="col-md-2">
+						  <label></label>
+						  <p></p>
+						  <p><a><span id="spanPj" class="glyphicon glyphicon-plus"></span></a></p>
+						  </div>
+				 
+						    
+						  <script>
+						  var b1 = document.getElementById("spanPj");
+						  b1.addEventListener("click", showPj);
+						  function showPj() {
+								document.getElementById("forPj").style.display= "block";
+							  }
+  						  </script> 
+  						  
+						  <br style="clear: both;"/>
+						   
+  						  <div id="forPj" style="display: none;">
+						  <div class="col-md-3" >
+						     	<label for="numPj1" class="form-label"></label>
+							    <input type="text" th:name="numPj1"  class="form-control"  placeholder="Numéro de la pièce jointe"/>
+						  </div>	
+						  <div class="col-md-3">
+						     	<label style="font-size:12px">Date pièce jointe</label>
+							    <input type="date" th:name="datePj1" class="form-control" />
+						  </div>
+						  <div class="col-md-4" >
+						     	<label for="objetPj1" class="form-label"></label>
+							    <input type="text" th:name="objetPj1"  class="form-control" placeholder="Objet pièce jointe"/>
+						  </div>
+						   <div class="col-md-2">
+						  <label></label>
+						  <p></p>
+						
+						  <p><a><span id="spanPj1" class="glyphicon glyphicon-minus"></span></a></p> 
+						  </div>
+						  </div>
+						   <script>
+						  var b2 = document.getElementById("spanPj1");
+						  b2.addEventListener("click", hidePj);
+						  function hidePj() {
+								
+								document.getElementById("forPj").style.display= "none";
+							  }
+    							
+  							  </script> 
+						 
+					 
+					  <div class="col-md-3">
+					  <input type="hidden" th:field="*{idDocument}" name="idDocument"/>
+					    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+					  </div>
+					  </div>
+					</form>	
+					</div>
+				</div>
+			</div>
+		</div>	
+	 </div>
+</body>
+</html>

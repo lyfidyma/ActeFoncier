@@ -1,6 +1,5 @@
 package com.cab.sn.entities;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +16,7 @@ public class TypeDocument {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idTypeDocument;
-	@Column(unique = true)
+	//@Column(unique = true)
 	private String typeDoc;
 	
 	public TypeDocument(String typeDoc) {

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+>
+    <head>
+        <title> Authentification </title>
+       <link rel="stylesheet" href=
+"https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+<style>
+fieldset{
+	vertical-align:center;
+	margin-left:600px;
+	margin-top:150px;
+	
+}
+
+</style>
+    </head>
+    <body>
+     
+    <div class="row mt-3">
+    <div class="col-md-7 offset-3">
+    <fieldset style="border:1px solid #999; padding:6px; ">
+     <legend style="font-size:14px"> Authentification </legend>
+    <div class="card-header"> </div>
+        <div th:if="${param.error}" class= text-danger>
+            Username ou password invalide.
+        </div>
+        <div th:if="${param.logout}" class= text-danger>
+            Vous êtes déconnecté.
+        </div>
+        <form th:action="@{/login}" method="post">
+
+            <div class="mb-3 mt-3">
+            <label for="username" class="form-label"> User :</label>
+             <input type="text" name="username" class="form-control" id="username" placeholder="username"/> 
+            </div>
+             <p></p>
+           <div class="mb-3 mt-3">
+            <label for="password" class="form-label"> Password :</label>
+             <input type="password" name="password" class="form-control" id="password" placeholder="password"/> 
+            </div>
+            <p></p>
+            <button type="submit" class="btn btn-primary">Connexion </button>
+           
+        </form>
+        </fieldset>
+        </div>
+		</div>
+		
+    </body>
+</html>
