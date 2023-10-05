@@ -34,16 +34,16 @@ public class Documents {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idDocument;
 	@NotEmpty(message="Renseigner le numéro du document")
-	//@Size(min=1, max=250)
 	private String numDocument;
+	private String codeUniqueDocument;
 	//@NotEmpty(message="Renseigner la date du document")
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	@Column(nullable=true)
 	private LocalDate dateDocument;
-	private Date dateSysteme= new Date();
+	//private Date dateSysteme= new Date();
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	@Column(nullable=true)
-	private LocalDate dateCreation ;
+	private Date dateCreation = new Date() ;
 	@NotEmpty(message="Renseigner le titre")
 	private String titreGlobal;
 	
@@ -52,17 +52,15 @@ public class Documents {
 	
 	private String typeBeneficiaire;
 	private String responsableDocument;
-	@NotNull(message="Renseigner le lot")
-	@Min(value=1)
-	private int lot;
+	@NotEmpty(message="Renseigner le lot")
+	private String lot;
 	@NotEmpty(message="Renseigner le nicad")
 	private String nicad;
 	//@DateTimeFormat(pattern="dd/mm/yyyy")
 	@Column(nullable=true)
-	private LocalDate dateApprobation;
-	@NotNull(message="Renseigner la superficie")
-	@Min(value=1)
-	private int superficie;
+	private Date dateApprobation;
+	@NotEmpty(message="Renseigner la superficie")
+	private String superficie;
 	
 	@OneToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="idBeneficiaire")
@@ -75,14 +73,14 @@ public class Documents {
 	private TypeDocument typeDocument;
 	@OneToMany(mappedBy = "documents", cascade = CascadeType.ALL)
 	private Collection<PiecesJointes> piecesJointes;
-	public Documents(String numDocument, LocalDate dateDocument, LocalDate dateCreation, String titreGlobal, String objetDocument,
-			String statutDocument, String typeBeneficiaire, String responsableDocument, int lot, String nicad,
-			LocalDate dateApprobation, int superficie, Beneficiaire beneficiaire, Localisation localisation,
+	public Documents(String numDocument, String codeUniqueDocument, LocalDate dateDocument, String titreGlobal, String objetDocument,
+			String statutDocument, String typeBeneficiaire, String responsableDocument, String lot, String nicad,
+			Date dateApprobation, String superficie, Beneficiaire beneficiaire, Localisation localisation,
 			TypeDocument typeDocument) {
 		super();
 		this.numDocument = numDocument;
+		this.codeUniqueDocument = codeUniqueDocument;
 		this.dateDocument = dateDocument;
-		this.dateCreation = dateCreation;
 		this.titreGlobal = titreGlobal;
 		this.objetDocument = objetDocument;
 		this.statutDocument = statutDocument;
@@ -96,14 +94,13 @@ public class Documents {
 		this.localisation = localisation;
 		this.typeDocument = typeDocument;
 	}
-	public Documents(String numDocument, LocalDate dateDocument, LocalDate dateCreation, String titreGlobal,
-			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, int lot,
-			String nicad, LocalDate dateApprobation, int superficie, Beneficiaire beneficiaire,
+	public Documents(String numDocument, LocalDate dateDocument, String titreGlobal,
+			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, String lot,
+			String nicad, Date dateApprobation, String superficie, Beneficiaire beneficiaire,
 			Localisation localisation, TypeDocument typeDocument, Collection<PiecesJointes> piecesJointes) {
 		super();
 		this.numDocument = numDocument;
 		this.dateDocument = dateDocument;
-		this.dateCreation = dateCreation;
 		this.titreGlobal = titreGlobal;
 		this.objetDocument = objetDocument;
 		this.statutDocument = statutDocument;
@@ -118,7 +115,6 @@ public class Documents {
 		this.typeDocument = typeDocument;
 		this.piecesJointes = piecesJointes;
 	}
-
 	
 
 }

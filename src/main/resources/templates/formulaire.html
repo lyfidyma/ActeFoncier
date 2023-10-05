@@ -5,7 +5,22 @@
 <head>
 <meta charset="UTF-8"/>
 <title>Mes Documents</title>
+
 <style>
+h4{
+	color:orange;
+	font-family:Georgia;
+}
+label{
+	font-size:12px;
+	font-family:Arial;
+}
+input[type=text]:focus {
+  background-color: lightcyan;
+}
+textarea:focus {
+  background-color: lightcyan;
+}
 .error{
 	color:red;
 }
@@ -18,13 +33,16 @@ padding:3px;
 	<div layout:fragment="content">
 		<div class="container">
 			<div class="col-md">
-				<div class="panel panel-primary " >
-					<div class="panel-heading">Ajouter un document</div>
+				<div class="panel panel-primary">
+						   <h4>Nouveau document</h4>
+						   <hr/>
 					
 					<div class="panel-body">
-						<form th:action="@{/sauvegarderDocument}" method="post" th:object="${unDocument}">	
-						 
+						<form th:action="@{/sauvegarderDocument}" method="post" th:object="${unDocument}" onsubmit="return confirm('Voulez-vous enregistrer?')">	
+						<p th:if="${messageDoublon}" th:text="${messageDoublon}" style= color:red></p>
+						<div th:each="d:${unDocument}">
 							  <div class="col-md-3">
+							  <label>Type de document</label>
 							      <select id="typeDoc" name ="typeDoc" class="form-control">
 							      <option value="" hidden>Type de document</option>
 							      <option value="Bail">Bail</option>
@@ -37,42 +55,36 @@ padding:3px;
 							  </div>
 							  
 							  <div class="col-md-3">
+							   <label>Numéro du document</label>
 							    <input type="text" th:field="*{numDocument}" class="form-control" placeholder="Numéro du document" />
   						 		<p th:if="${#fields.hasErrors('numDocument')}" th:errors="*{numDocument}" th:errorclass="error"></p>
 							  </div>
 							  <div class="col-md-3">
-								<textarea style="resize:none" class="form-control" name="objetDocument" rows="4" placeholder="Objet" ></textarea>
-							  </div>
-							   
-						<br style="clear: both;"/>
-						
-						
-						 <div class="col-md-3">
-						     	<label for="dateDocument" style="font-size:12px" >Date du document</label>
+						     	<label for="dateDocument" >Date du document</label>
 							    <input type="date" name="dateDocument" class="form-control" />
 							    
 							    </div>
-							    <div class="col-md-3">
-                	
-						     	<label for="dateApprobation" style="font-size:12px">Date approbation</label>
-							    <input type="date" name="dateApprobation"  class="form-control" />
-                		</div>	
-						
-
-							  
-						  
-							
-						   <br style="clear: both;"/>
+							    <br style="clear: both;"/>
+							    
+							  <div class="col-md-3">
+							   <label>Objet</label>
+								<textarea style="resize:none" class="form-control" name="objetDocument" rows="4" placeholder="Objet" ></textarea>
+							  </div>
+						 
+						   
 						   <div class="col-md-6">
-							    <label for="responsable" class="form-label"></label>
+							    <label for="responsable" class="form-label">Responsable du document</label>
 							    <input type="text" name = "responsableDocument"  th:value="*{responsableDocument}" class="form-control" placeholder="Responsable" />
 							  </div>
 							  <br style="clear: both;"/>
-							  <br style="clear: both;"/>
+							  &ensp;
+						   <h4>Bénéficiare</h4>
+						   <hr/>
 						   <p></p>
-						   <fieldset style="border:1px solid #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
-						<legend style="font-size:14px; color:green"><b>Bénéficiaire</b></legend>
+						   <!-- <fieldset style="border:2px groove #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
+						<legend style="font-size:14px; background-color:ligthgreen"><b>Bénéficiaire</b></legend> -->
 							  <div class="col-md-3">
+							   <label>Type</label>
 							    <select id="typeBeneficiaire" name="typeBeneficiaire"  class="form-control" onchange="showDiv('forEntreprise', this)">
 							      <option value="" hidden>------------</option>
 							      <option value="Entreprise">Entreprise</option>
@@ -87,98 +99,101 @@ padding:3px;
   							  
   							  <div th:each="d:${unDocument}">
 							   <div class="col-md-3" >
+							    <label>Nom</label>
 							    <input type="text" name ="nomPersonne" class="form-control" placeholder="Nom" />
 							  <p></p>
+							   <label>Prénom</label>
 							    <input type="text" name ="prenom" class="form-control" placeholder="Prénom" />
 							  </div>
 							  
 							   <div class="col-md-6" id="forEntreprise" style="display: none;" >
+							    <label>Nom de l'entreprise</label>
 							   <input type="text"  name ="nomEntreprise"  class="form-control" style="background-color: #BCEAF8"
 							   			placeholder="Nom de l'Entreprise" />
 							  <p></p>
+							   <label>Ninea</label>
 							    <input type="text" name ="ninea" class="form-control" style="background-color: #BCEAF8" placeholder="Ninea" aria-label="ninea"/>
 							  </div>
 
 						   <br style="clear: both;"/>
-						   
-						   
-						   <div class="col-md-3">
-						 
-						     	<label for="cni" class="form-label"></label>
-							    <input type="text" name = "cni" class="form-control"  placeholder="Numéro de la pièce d'identité"/>
-						 
-						  <p th:if="${message}" th:text="${message}" style= color:red></p>
-						  
-						 	</div >
 						  					   
 						   <div class="col-md-3" >
-						     	<label for="nin" class="form-label"></label>
+						     	<label for="nin" class="form-label">Nin</label>
 							    <input type="text" name="nin" class="form-control" placeholder="Numéro CEDEAO"/>
 						  </div>
+						  <div class="col-md-3">
+						     	<label for="cni" class="form-label">Cni</label>
+							    <input type="text" name = "cni" class="form-control"  placeholder="Numéro de la pièce d'identité"/>
+						 		<p th:if="${message}" th:text="${message}" style= color:red></p>
+						 	</div >
 						   
 						   <div class="col-md-3" >
 						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
 							    <input type="date" name="dateDelivrance" class="form-control" />
 						  </div>	
 						 </div>
-						 </fieldset>
+						<!--  </fieldset> -->
 						 <br style="clear: both;"/>
-						 
-						  <div class="col-md-2">
-							    <label for="lot" class="form-label"></label>
+						 &ensp;
+						   <h4>Titre foncier</h4>
+						   <hr/>
+						  <div class="col-md-3">
+							    <label for="lot" class="form-label">Lot</label>
 							    <input type="text" th:field="*{lot}" class="form-control" placeholder="Lot" />
 							    <p th:if="${#fields.hasErrors('lot')}" th:errors="*{lot}" th:errorclass="error"></p>
 							  </div>
 							 
-							  <div class="col-md-2">
-							    <label for="titreGlobal" class="form-label"></label>
+							  <div class="col-md-3">
+							    <label for="titreGlobal" class="form-label">Titre global</label>
 							    <input type="text" th:field ="*{titreGlobal}"  class="form-control" placeholder="Titre global" />
 							     <p th:if="${#fields.hasErrors('titreGlobal')}" th:errors="*{titreGlobal}" th:errorclass="error"></p>
 							  </div>
 						 
-						  <div class="col-md-2">
-						     	<label for="superficie" class="form-label"></label>
+						  <div class="col-md-3">
+						     	<label for="superficie" class="form-label">Superficie</label>
 							    <input  type="text" th:field="*{superficie}" class="form-control" placeholder="Superficie" />
 							     <p th:if="${#fields.hasErrors('superficie')}" th:errors="*{superficie}" th:errorclass="error"></p>
 						  </div>
 						  
 						  <div class="col-md-3">
-						     	<label for="nicad" class="form-label"></label>
+						     	<label for="nicad" class="form-label">Nicad</label>
 							    <input type="text" th:field="*{nicad}" class="form-control"  placeholder="nicad" />
 							     <p th:if="${#fields.hasErrors('nicad')}" th:errors="*{nicad}" th:errorclass="error"></p>
 						  </div>
 						  <br style="clear: both;"/>
-						   
+						   <p></p>
 						   <div class="col-md-3">
-						     	<label for="commune" class="form-label"></label>
+						     	<label for="commune" class="form-label">Commune</label>
 							    <input type="text" name="commune" class="form-control" placeholder="Commune"/>
 						  </div>	
 						  <div class="col-md-3" >
-						     	<label for="communeArrond" class="form-label"></label>
+						     	<label for="communeArrond" class="form-label">Commune d'arrondissement</label>
 							    <input type="text" name="communeArrond" class="form-control" placeholder="Commune d'arrondissement"/>
 						  </div>
 						  <div class="col-md-3">
-						     	<label for="departement" class="form-label"></label>
+						     	<label for="departement" class="form-label">Département</label>
 							    <input type="text" name="departement" class="form-control" placeholder="Département"/>
 						  </div>
 						  <div class="col-md-3">
-						     	<label for="region" class="form-label"></label>
+						     	<label for="region" class="form-label">Région</label>
 							    <input type="text" name="region" class="form-control" placeholder="Région"/>
 						  </div>
 						  
 						  <br style="clear: both;"/>
-						   
-						   
+						  
+						   &ensp;
+						   <h4>Pièce(s) jointe(s)</h4>
+						   <hr/>
 						  <div class="col-md-3" >
-						     	<label for="numPj" class="form-label"></label>
+						     	<label for="numPj" class="form-label">Numéro</label>
 							    <input type="text" name="numPj" class="form-control" placeholder="Numéro de la pièce jointe"/>
 						  </div>	
 						  <div class="col-md-3">
-						     	<label for="datePieceJointe" class="form-label" style="font-size:12px">Date pièce jointe</label>
+						     	<label for="datePieceJointe" class="form-label" style="font-size:12px">Date</label>
 							    <input type="date" name="datePj" class="form-control" />
 						  </div>
 						  <div class="col-md-4" >
-						     	<label for="objetPj" class="form-label"></label>
+						     	<label for="objetPj" class="form-label">Objet</label>
 							    <input type="text" name="objetPj" class="form-control" placeholder="Objet pièce jointe"/>
 						  </div>
 						  
@@ -189,6 +204,7 @@ padding:3px;
 						
 						  <p><a><span id="spanPj" class="glyphicon glyphicon-plus"></span></a></p> 
 						  </div>
+						   
 						  <script>
 						  var b1 = document.getElementById("spanPj");
 						  b1.addEventListener("click", showPj);
@@ -201,15 +217,15 @@ padding:3px;
 						   
   						  <div id="forPj" style="display: none;">
 						  <div class="col-md-3" >
-						     	<label for="numPj1" class="form-label"></label>
+						     	<label for="numPj1" class="form-label">Numéro</label>
 							    <input type="text" name="numPj1" class="form-control" placeholder="Numéro de la pièce jointe"/>
 						  </div>	
 						  <div class="col-md-3" >
-						     	<label style="font-size:12px">Date pièce jointe</label>
+						     	<label style="font-size:12px">Date</label>
 							    <input type="date" name="datePj1" class="form-control" />
 						  </div>
 						  <div class="col-md-4" >
-						     	<label for="objetPj1" class="form-label"></label>
+						     	<label for="objetPj1" class="form-label">Objet</label>
 							    <input type="text" name="objetPj1" class="form-control" placeholder="Objet pièce jointe"/>
 						  </div>
 						   <div class="col-md-2">
@@ -225,22 +241,76 @@ padding:3px;
 						  function hidePj() {
 								
 								document.getElementById("forPj").style.display= "none";
-							  }
-				
-      							
+							  }	
   							  </script> 
 						 
 					  <div class="col-md-3">
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
 					  </div>
-					
+
+
+					</div>
 					</form>	
+	
+	<!-- Fenetre modal -->				
+	<div th:if="${flag} eq '1'" class="modal fade" role="dialog" id="myModal" th:each="d:${unDocument}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Récapitulatif</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" >
+     
+      <table>
+       <tr>
+			<th>Code du document : </th>
+			<td th:text="${d.codeUniqueDocument}"></td>
+		</tr>
+     	 <tr >
+			<th>Type de document :</th>
+			
+				<td th:text="${d.typeDocument.typeDoc}"></td>
+				</th:block>
+		</tr>
+        <tr>
+			<th>Numéro du document :</th>
+			<td th:text="${d.numDocument}"></td>
+		</tr>
+		<tr>
+			<th>Bénéficiaire : </th>
+			
+			<th:block th:if="${d.typeBeneficiaire} eq 'Particulier'">
+				<td th:text="${d.beneficiaire.nomPersonne}"></td>
+			</th:block>
+				
+			<th:block th:if="${d.typeBeneficiaire} eq 'Entreprise'">
+				<td th:text="${d.beneficiaire.nomEntreprise}"></td>
+			</th:block>
+			</th:block>
+		<tr>
+         </table>
+      
+       </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+        <a th:href="@{/pdfExport(id=${d.idDocument})}" class="btn btn-success">Imprimer 
+ 						<i class='fa fa-print' ></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+<script th:inline="javascript" th:if="${flag} eq '1'">
+		$('#myModal').modal('show');
+</script>
+
 					</div>
 				</div>
 			</div>
 		</div>	
 	 </div>
-	 
 	 
 </body>
 </html>

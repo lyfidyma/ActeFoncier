@@ -20,29 +20,40 @@ fieldset{
      
     <div class="row mt-3">
     <div class="col-md-7 offset-3">
-    <fieldset style="border:1px solid #999; padding:6px; ">
-     <legend style="font-size:14px"> Authentification </legend>
-    <div class="card-header"> </div>
-        <div th:if="${param.error}" class= text-danger>
-            Username ou password invalide.
+    <fieldset style="border:1px solid #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
+     <legend > </legend>
+     <div style="font-size:20px; text-align:center">
+            Authentification
         </div>
-        <div th:if="${param.logout}" class= text-danger>
-            Vous êtes déconnecté.
+        <p></p>
+    <div class="card-header"> </div>
+        <div th:if="${param.error}" class= "alert alert-danger"><i class="fa fa-info-circle"></i>
+            Identifiant ou mot de passe invalide
+        </div>
+        <div th:if="${param.logout}" class= "alert alert-success">
+            Vous êtes déconnecté
         </div>
         <form th:action="@{/login}" method="post">
 
-            <div class="mb-3 mt-3">
-            <label for="username" class="form-label"> User :</label>
-             <input type="text" name="username" class="form-control" id="username" placeholder="username"/> 
+            <div class="col-md-12">
+            <label for="username" class="form-label" style="font-size:12px"> Identifiant :</label>
+             <input type="text" name="username" class="form-control" id="username" placeholder="Identifiant"/> 
             </div>
              <p></p>
-           <div class="mb-3 mt-3">
-            <label for="password" class="form-label"> Password :</label>
-             <input type="password" name="password" class="form-control" id="password" placeholder="password"/> 
+             <br style="clear: both;"/>
+               <p></p>
+           <div class="col-md-12">
+            <label for="password" class="form-label" style="font-size:12px"> Mot de passe :</label>
+             <input type="password" name="password" class="form-control" id="password" placeholder="Mot de passe"/> 
             </div>
             <p></p>
+             <br style="clear: both;"/>
+            <p></p>
+             <div style=text-align:center>
             <button type="submit" class="btn btn-primary">Connexion </button>
-           
+            </div>
+             <br style="clear: both;"/>
+            <p></p>
         </form>
         </fieldset>
         </div>

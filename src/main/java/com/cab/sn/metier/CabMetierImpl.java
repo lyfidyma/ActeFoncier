@@ -3,12 +3,17 @@ package com.cab.sn.metier;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cab.sn.dao.BeneficiaireRepository;
@@ -51,10 +56,9 @@ public class CabMetierImpl implements ICabMetier{
 	 *
 	 */
 	@Override
-	public Documents sauvegarderDocuments(Long idDocument, String numDocument, LocalDate dateDocument, 
-			LocalDate dateCreation, String titreGlobal,
-			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, int lot,
-			String nicad, LocalDate dateApprobation, int superficie, String nomEntreprise, String ninea, Long cni, 
+	public Documents sauvegarderDocuments(Long idDocument, String numDocument, LocalDate dateDocument, String titreGlobal,
+			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, String lot,
+			String nicad, Date dateApprobation, String superficie, String nomEntreprise, String ninea, Long cni, 
 			String nomPersonne, String prenom, Long nin, LocalDate dateDelivrance, 
 			String commune, String communeArrond, String departement, String region,
 			String typeDoc, String numPj, LocalDate datePj, String objetPj, String numPj1, LocalDate datePj1, String objetPj1) {
@@ -63,8 +67,7 @@ public class CabMetierImpl implements ICabMetier{
 		Beneficiaire b1 = null ;
 		TypeDocument td1 = null;
 		Personne p1 = null;
-		
-		
+			
 		//Mise à jour
 		if(idDocument!=null){
 			
@@ -112,39 +115,38 @@ public class CabMetierImpl implements ICabMetier{
 				  doc.setTypeDocument(td2);
 				  docRepository.save(doc);
 				 
-				  //Mise à jour des pièces jointes
-				    Collection<PiecesJointes> pj1 = pjRepository.chercherPiecesJointes(idDocument);
-					for(int i =1; i<=pj1.size();i++) {
-						if(numPj!=null || objetPj!=null || datePj!=null) {
-							if(pj1.size()==1) {
-								PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
-								pj2.setDatePj(datePj);
-								pj2.setNumPj(numPj);
-								pj2.setObjetPj(objetPj);
-								pjRepository.save(pj2);
-						 	
-							}
+			  //Mise à jour des pièces jointes
+			    Collection<PiecesJointes> pj1 = pjRepository.chercherPiecesJointes(idDocument);
+			//	for(int i=1; i<=pj1.size(); i++) {
+					if(numPj!=null || objetPj!=null || datePj!=null) {
+						if(pj1.size()==1) {
+							PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
+							pj2.setDatePj(datePj);
+							pj2.setNumPj(numPj);
+							pj2.setObjetPj(objetPj);
+							pjRepository.save(pj2);		 	
 						}
-						 	if(numPj1!=null || objetPj1!=null || datePj1!=null) {
-						 		if(pj1.size()==1) {
-						 			PiecesJointes pj3 = new PiecesJointes(numPj1, objetPj1, datePj1, doc);
-						 			pjRepository.save(pj3);
-						 		} else if(pj1.size()==2) {
-						 			PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
-						 			pj2.setDatePj(datePj);
-								 	pj2.setNumPj(numPj);
-								 	pj2.setObjetPj(objetPj);
-								 	pjRepository.save(pj2);
-								 	
-								 	PiecesJointes pj3 = pjRepository.chercherPiecesJointes(idDocument).get(1);
-						 			pj3.setDatePj(datePj1);
-								 	pj3.setNumPj(numPj1);
-								 	pj3.setObjetPj(objetPj1);
-								 	pjRepository.save(pj3);			 
-						 		}
-						 	}	 	
 					}
-			
+					 	if(numPj1!=null || objetPj1!=null || datePj1!=null) {
+					 		if(pj1.size()==1) {
+					 			PiecesJointes pj3 = new PiecesJointes(numPj1, objetPj1, datePj1, doc);
+					 			pjRepository.save(pj3);
+					 		} else if(pj1.size()==2) {
+					 			PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
+					 			pj2.setDatePj(datePj);
+							 	pj2.setNumPj(numPj);
+							 	pj2.setObjetPj(objetPj);
+							 	pjRepository.save(pj2);
+							 	
+							 	PiecesJointes pj3 = pjRepository.chercherPiecesJointes(idDocument).get(1);
+					 			pj3.setDatePj(datePj1);
+							 	pj3.setNumPj(numPj1);
+							 	pj3.setObjetPj(objetPj1);
+							 	pjRepository.save(pj3);			 
+					 		}
+					 	}	 	
+		//		}
+		
 			
 			  //Mise à jour de la localisation
 			  Localisation localisation = new Localisation(commune, communeArrond, departement, region);
@@ -154,7 +156,6 @@ public class CabMetierImpl implements ICabMetier{
 			  //Mise à jour du document
 			  doc.setNumDocument(numDocument); 
 			  doc.setDateDocument(dateDocument); 
-			  doc.setDateCreation(dateCreation);
 			  doc.setTitreGlobal(titreGlobal);
 			  doc.setObjetDocument(objetDocument);
 			  doc.setTypeBeneficiaire(typeBeneficiaire);
@@ -165,8 +166,7 @@ public class CabMetierImpl implements ICabMetier{
 			  doc.setSuperficie(superficie);
 			  docRepository.save(doc);
 			 
-			return doc;
-			
+			return doc;			
 		}
 		
 		//Nouvel enregistrement d'un document, l'idDocument est null
@@ -177,8 +177,7 @@ public class CabMetierImpl implements ICabMetier{
 				  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, datePj));
 				  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 
 			  }
-			  else if((typeBeneficiaire.equals("Particulier"))== true) {
-				 
+			  else if((typeBeneficiaire.equals("Particulier"))== true) {		 
 				 // if(cni != (persRepository.chercherPersonne(cni).getCni()))
 					  	b1 = bRepository.save(new Personne(cni, nomPersonne, prenom, nin, datePj));
 					//b1 = persRepository.chercherPersonne(cni);
@@ -186,8 +185,8 @@ public class CabMetierImpl implements ICabMetier{
 			  
 			  Localisation l1 = lRepository.save(new Localisation(commune, communeArrond, departement, region)); 
 			  td1 = tdRepository.save(new TypeDocument(typeDoc)); 
-			  d1 = docRepository.save(new Documents(numDocument, dateDocument, dateCreation, titreGlobal,
-					  objetDocument, "non transmis", typeBeneficiaire, responsableDocument, lot,nicad, dateApprobation, 
+			  d1 = docRepository.save(new Documents(numDocument, CodeDocumentGenerateur.genererCodeDocument(new Date(), typeDoc, commune), dateDocument, titreGlobal,
+					  objetDocument, "saisi", typeBeneficiaire, responsableDocument, lot,nicad, dateApprobation, 
 					  superficie, b1, l1, td1)); 
 			  Collection<PiecesJointes> pj3= new ArrayList<PiecesJointes>();
 			  if(numPj!=""|| objetPj!="" || datePj!=null) {
@@ -198,17 +197,15 @@ public class CabMetierImpl implements ICabMetier{
 				  pj3.add(new PiecesJointes(numPj1, objetPj1, datePj1, d1));
 				  pjRepository.saveAll(pj3);
 			  }
-			 
-			  
 			  return d1;
 		}
 	}
 	
 	@Override
 	public Page<Documents> listDocuments(int page, int size) { 
-			 	return docRepository.findAll(PageRequest.of(page, size));		
-		
+			 	return docRepository.findAll(PageRequest.of(page, size, Sort.by("dateCreation").descending()));			
 	}	
+	
 	@Override
 	public Page<Documents> chercherDocuments(String motCle, int page, int size){
 		return docRepository.chercher(motCle, PageRequest.of(page, size));
@@ -234,11 +231,9 @@ public class CabMetierImpl implements ICabMetier{
 	
 	@Override
 	public void transmettreDocuments(Long idDocument) {
-		Documents doc = docRepository.findById(idDocument).get();
-		
+		Documents doc = docRepository.findById(idDocument).get();	
 		doc.setStatutDocument("transmis");
-		docRepository.save(doc);
-		
+		docRepository.save(doc);	
 	}
 	
 	@Override
@@ -262,6 +257,126 @@ public class CabMetierImpl implements ICabMetier{
 		return entRepository.findById(id).get();
 	}
 
+	@Override
+	public List<Documents> tousLesDocuments() {
+		return docRepository.findAll();
+	}
+
+	@Override
+	public int totalBailTransmis() {	
+		return docRepository.findByTypeDocBailTransmis().size();
+	}
+
+	@Override
+	public int totalArreteTransmis() {
+		return docRepository.findByTypeDocArreteTransmis().size();
+	}
+
+	@Override
+	public int totalDecisionTransmis() {
+		return docRepository.findByTypeDocDécisionTransmis().size();
+	}
+
+	@Override
+	public int totalDecretTransmis() {
+		return docRepository.findByTypeDocDecretTransmis().size();
+	}
+
+	@Override
+	public int totalAutresTransmis() {
+		return docRepository.findByTypeDocAutresTransmis().size();
+	}
+
+	@Override
+	public int totalTypeDoc(String typeDoc) {
+		return docRepository.findByTypeDoc(typeDoc).size();
+	}
+
 	
+	@Override
+	public int totalBailNonTransmis() {
+		return docRepository.findByTypeDocBailNonTransmis().size();
+	}
+
+	@Override
+	public int totalArreteNonTransmis() {
+		return docRepository.findByTypeDocArreteNonTransmis().size();
+	}
+
+	@Override
+	public int totalDecisionNonTransmis() {
+		return docRepository.findByTypeDocDécisionNonTransmis().size();
+	}
+
+	@Override
+	public int totalDecretNonTransmis() {
+		return docRepository.findByTypeDocDecretNonTransmis().size();
+	}
+
+	@Override
+	public int totalAutresNonTransmis() {
+		return docRepository.findByTypeDocAutresNonTransmis().size();
+	}
+
+	@Override
+	public HashMap<String, Object> getTotalTypeDocDashboard() {
+		HashMap<String, Object> typeDocMap = new HashMap<>();
+		
+		List<Documents> listDocuments = docRepository.findAll();
+		List<String> typeDocument = new ArrayList<>();
+		List<Long> percentValue = new ArrayList<>();
+		
+		for(Documents doc:listDocuments) {
+			typeDocument.add(doc.getTypeDocument().getTypeDoc());
+		}
+		
+		
+		Map <String, Long > map = typeDocument.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+		
+		Long totalPercent = map.values().stream().mapToLong(Long::longValue).sum();
+		float per=0;
+		for(Long value:map.values()) {
+			
+			
+			percentValue.add((value/totalPercent)*100);
+			per=(value/totalPercent)*100;
+			
+		}
+		
+		
+		typeDocMap.put("kTypeDocument", map.keySet());
+		typeDocMap.put("vTotalTypeDoc", map.values());
+		typeDocMap.put("kPercent", percentValue);
+
+		
+		return typeDocMap;
+	}
+	
+	@Override
+	public Documents afficherDonneesValidation(String codeUniqueDocument) {	
+		return docRepository.findByCodeUniqueDocument(codeUniqueDocument);
+	}
+	
+	@Override
+	public Documents validerDocuments(Long id, boolean casApprouve, boolean casRejet) {
+		Documents doc = docRepository.findById(id).get();
+		if(casApprouve) {	
+			doc.setStatutDocument("approuvé");
+			doc.setDateApprobation(new Date());
+			docRepository.save(doc);
+			
+		}else if (casRejet) {
+			doc.setStatutDocument("rejeté");
+			docRepository.save(doc);
+			
+		}
+		return doc;
+		
+	}
+	
+	@Override
+	public List <Documents> findByCni(Long cni) {
+		return docRepository.findByCni(cni);
+	}
 	
 }

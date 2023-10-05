@@ -57,7 +57,7 @@ body {
 }
 
 #sidebar .nav{
-  
+	 
 }
 
 #sidebar .nav a{
@@ -66,6 +66,7 @@ body {
   color: #CFD8DC;
   font-size: 14px;
   padding: 16px 24px;
+
 }
 
 #sidebar .nav a:hover{
@@ -76,3 +77,4 @@ body {
 #sidebar .nav a i{
   margin-right: 16px;
 }
+

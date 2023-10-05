@@ -5,15 +5,15 @@
 <head>
 <meta charset="UTF-8"/>
 <title>Mes Documents</title>
+
 <style>
 label{
-	vertical-align:top;
+	
 	width: 200px; 
-	margin-left:350px;
+	margin-left:60px;
+	padding:3px;
 }
-span{     
-	margin-left:10px;
-}
+
 
 </style>
 </head>
@@ -23,9 +23,10 @@ span{
 			<form th:action="@{/transmettre}" method="post" th:object="${unDocument}">	
 			<input type="hidden" th:field="*{idDocument}" name="idDocument"/>
 				<div class="panel panel-default"  th:if="${unDocument}">
-					<div class="panel-heading">Détails d'un document</div>
+					<div class="panel-heading" th:each="d:${unDocument}">Document
+					<span th:text="${d.codeUniqueDocument}"></span></div>
 					<div class="panel-body" th:each="d:${unDocument}">
-						
+						<div class="col-md-6">
 						<div th:each="td:${d.typeDocument}">
 						<label>Type de document : </label>
 						<span th:text="${td.typeDoc}"></span>
@@ -57,9 +58,14 @@ span{
 						<label>Objet du document : </label>
 						<span th:text="${d.objetDocument}"></span>
 						
+						<label>Responsable : </label>
+						<span th:text="${d.responsableDocument}"></span>
+						</div>
 						</div>
 						
-						<p></p>
+						<div class="col-md-6">
+						
+						
 						<div th:each="b:${d.beneficiaire}">
 						
 						<div th:if="${d.typeBeneficiaire} eq 'Particulier'">
@@ -95,7 +101,6 @@ span{
 						</div>
 						</div>
 						
-						<p></p>
 						
 						<div th:each="l:${d.localisation}">
 						<label>Commune :</label>
@@ -115,14 +120,25 @@ span{
 						<span th:text="${pj.objetPj}"></span>
 						<span th:text="${pj.datePj}"></span>
 						</div>
-							
-						<div class="col-md-12">
-					    <button type="submit" class="btn btn-primary">Transmettre</button>
-					  </div>
-								
 					</div>
-				</div>
-				
+					<p></p>
+					 <br style="clear: both;"/>
+					 <p></p>
+					<div class="col-md-4">
+					 </div>
+						<div class="col-md-2" th:if="${d.statutDocument}=='saisi'">
+					    <button type="submit" class="btn btn-primary">Transmettre</button>
+					    </div>
+					    <div class="col-md-3">
+					    <a th:href="@{/pdfExport(id=${d.idDocument})}" class="btn btn-success">Imprimer 
+ 						<i class='fa fa-print' ></i></a>
+ 						</div>
+					 
+					
+         	
+ 						<p></p>
+      					</div>
+      					</div>
 					</form>
 					
 			</div>

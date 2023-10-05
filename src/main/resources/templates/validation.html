@@ -26,15 +26,29 @@ padding:3px;
 </head>
 <body>
 	<div layout:fragment="content">
+	<div class="container">
+		<div class="panel panel-primary col-md-6">
+			<label>Entrer le code du document</label>
+				<form th:action="@{/afficherDonneesValidation}" method="post" th:object="${unDocument}">		
+					<div class="col-md-9">
+					    <input type="text" class="form-control" name = "codeUniqueDocument" th:value="${codeUniqueDocument}" placeholder="Code document" />
+						 </div>
+						<div class="input-group">
+						<button type="submit" class="btn btn-primary" style="border: 1px solid blue; background-color: white; color: blue;">Chercher</button>
+					  </div>
+							 
+				</form>
+			</div>
+			</div>
+			<p th:if="${messageValiderOuRejeter}" th:text="${messageValiderOuRejeter}" style= color:red></p>
 		<div class="container">
-			<div class="col-md">
-				<div class="panel panel-primary " >
-					<div class="panel-heading">Modifier un document</div>
+			
 					
 					<div class="panel-body">
-						<form th:action="@{/sauvegarderDocument}" method="post" th:object="${unDocument}" >	
+						<form th:action="@{/valider}" method="post" th:object="${unDocument}" >	
 						<div th:each="d:${unDocument}">
 						<div th:object="${unDocument.typeDocument}">
+						
 						<div th:each="td:${d.typeDocument}">
 							  <div class="col-md-3">
 							  <label>Type de document </label>
@@ -69,11 +83,7 @@ padding:3px;
 						     	<label for="dateDocument" style="font-size:12px" >Date du document</label>
 							    <input type="date" name="dateDocument"  class="form-control" th:value="${dateDocumentString}"/>
 							    </div>
-							    <div class="col-md-3">
-                	
-						     	<label for="dateApprobation" style="font-size:12px">Date approbation</label>
-							    <input type="date" th:name="dateApprobation"  class="form-control" th:value="${dateApprobationString}"/>
-                		</div>	
+							   
 							
 						   <br style="clear: both;"/>
 						   <div class="col-md-6">
@@ -220,7 +230,7 @@ padding:3px;
 						  
 						  <br style="clear: both;"/>
 						  <hr/>
-						   <p>Pièce(s) jointe(s)</p>
+						   <h3>Pièce(s) jointe(s)</h3>
 						   <hr/>
 						   
 						   <div th:each="pj:${piecesJointes}">
@@ -283,18 +293,52 @@ padding:3px;
 								document.getElementById("forPj").style.display= "none";
 							  }
     							
-  							  </script> 
-						 
-					 
-					  <div class="col-md-3">
+  							</script> 
+						 <br style="clear: both;"/>
+						  <hr/>
+						   <h3>Approbation</h3>
+						   <hr/>
+					 <div class="container">
+					 <div class="panel panel-success col-md-4">
+					   
 					  <input type="hidden" th:field="*{idDocument}" name="idDocument"/>
-					    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+					 
+					  <input type="checkbox" id="checkboxValider" name="checkboxValider" th:checked="false" onclick="showDate('dateApprobation', this)"/><span>Approbation</span>
+					   <p></p>
+					    <script>
+      							function showDate(divId, element) {
+      							   document.getElementById(divId).style.display = element.value == "checkboxValider" ? 'block' : 'none';
+    							  }
+  							  </script> 
+					  <label>Date :</label>
+					  <span id="dateApprobation" style="display: none;" th:text="${#calendars.format(#calendars.createNow(), 'dd MMM yyyy')}"></span>
+					  <p></p>
+					  
+					  <label>Par :</label>
+					  <span th:text="${#authentication.name}"></span>
+					  <p></p>
+					  
+					    <button type="submit" class="btn btn-success">Valider</button>
+					  </div>
+					  <div class="col-md-4">
+					 
+					  </div>
+					  <div class="panel panel-danger col-md-4">
+
+					  <input type="checkbox" id="checkboxRejeter" name="checkboxRejeter" th:checked="false"/><span>Rejet</span>
+					  <p></p>
+					  <textarea style="resize:none" class="form-control" name="objetRejetDocument" rows="2" placeholder="Motif" ></textarea>
+					  <input type="hidden" th:field="*{idDocument}" name="idDocument"/>
+					  <input type="hidden" th:field="*{codeUniqueDocument}" name="codeUniqueDocument"/>
+					 <p></p>
+					    <button type="submit" class="btn btn-danger">Rejeter</button>
+					  </div>
 					  </div>
 					  </div>
 					</form>	
 					</div>
-				</div>
-			</div>
+				
+			
 		</div>	
 	 </div>
 </body>

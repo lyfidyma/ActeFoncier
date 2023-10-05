@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8">
+<title>Tableau de bord</title>
+<!-- Bootstrap core JavaScript-->
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/diagramme.js}"></script>
+  
+</head>
+<body>
+ 
+ <div layout:fragment="content">
+		<div class="container">
+		
+		<!-- Diagramme Type de document -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-bar-chart"></i> 
+                </div>
+                <input type="hidden" th:id="kTypeDocument" th:value="${diagTypeDoc.kTypeDocument}"/>
+                <input type="hidden" th:id="vTotalTypeDoc" th:value="${diagTypeDoc.vTotalTypeDoc}"/>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-8 my-auto">
+                        <canvas id="myBarChart" style="width:100%; height:100"></canvas>
+<script>
+
+//-- Diagramme à barres
+var kTypeDocument = $("#kTypeDocument").val();
+kTypeDocument = kTypeDocument.replace("[","").replace("]","").split(",");
+
+var vTotalTypeDoc = $("#vTotalTypeDoc").val().trim();
+vTotalTypeDoc = vTotalTypeDoc.replace("[","").replace("]","").split(",");
+var ctx = document.getElementById("myBarChart");
+new Chart(ctx, {
+type: 'bar',
+data: {
+ labels: kTypeDocument,
+ datasets: [{
+   label: "Total",
+   backgroundColor: "rgba(2,117,216,1)",
+   borderColor: "rgba(2,117,216,1)",
+   data: vTotalTypeDoc,
+ }],
+},
+
+});
+
+</script>                 
+                        </div>
+                        
+                    </div>
+                    <!--  <div class="card-footer small text-muted">Dernière mise à jour le <span th:text="${#calendars.format(#calendars.createNow(), 'dd MMM yyyy HH:mm')}"></span></div>-->
+                </div>
+            </div>
+        </div>
+        
+<!--          Diagramme en cercle  -->
+        <div class="col-lg-4">
+           
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fa fa-pie-chart"></i> 
+                </div>
+                <div class="card-body">
+                    <input type="hidden" th:id="kTypeDocument" th:value="${diagTypeDoc.kTypeDocument}"/>
+                    <input type="hidden" th:id="vTotalTypeDoc" th:value="${diagTypeDoc.vTotalTypeDoc}"/>
+                    <input type="hidden" th:id="kPercent" th:value="${diagTypeDoc.kPercent}"/>
+                    <canvas id="myPieChart" width="100%" height="100"></canvas>
+           <script>
+
+//-- Diagramme en cercle
+var kTypeDocument = $("#kTypeDocument").val();
+kTypeDocument = kTypeDocument.replace("[","").replace("]","").split(",");
+
+var vTotalTypeDoc = $("#vTotalTypeDoc").val().trim();
+vTotalTypeDoc = vTotalTypeDoc.replace("[","").replace("]","").split(",");
+
+var ctx = document.getElementById("myPieChart");
+var myPieChart = new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: kTypeDocument,
+    datasets: [{
+      data: vTotalTypeDoc,
+      backgroundColor: ['#007bff', '#dc3545', '#ffc107', '#28a745'],
+    }],
+  },
+});
+
+</script>                 
+                </div>
+               <!--  <div class="card-footer small text-muted">Dernière mise à jour le <span th:text="${#calendars.format(#calendars.createNow(), 'dd MMM yyyy HH:mm')}"></span></div>-->
+            </div>
+        </div> 
+    </div>
+		<p></p>
+		<!-- Tableau statistiques des transmissions-->
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-table"></i> Statistiques transmission
+        </div>
+        <div class="card-body" >
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" style="width:80%" >
+                    <thead>
+                    <tr >
+                    	<th>Statut</th>
+                        <th style=text-align:center>Bail</th>
+                        <th style=text-align:center>Arrêté</th>
+                        <th style=text-align:center>Décision</th>
+                        <th style=text-align:center>Décret</th>
+                        <th style=text-align:center>Autres</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                    	<th>Statut</th>
+                        <th style=text-align:center>Bail</th>
+                        <th style=text-align:center>Arrêté</th>
+                        <th style=text-align:center>Décision</th>
+                        <th style=text-align:center>Décret</th>
+                        <th style=text-align:center>Autres</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    <tr>
+                        <td>Transmis</td>
+                        <td style=text-align:center th:text="${totalBailTransmis}"></td>
+                        <td style=text-align:center th:text="${totalArreteTransmis}"></td>
+                        <td style=text-align:center th:text="${totalDecisionTransmis}"></td>
+                        <td style=text-align:center th:text="${totalDecretTransmis}"></td>
+                        <td style=text-align:center th:text="${totalAutresTransmis}"></td>
+                    </tr>
+                    <tr>
+                        <td>Non transmis</td>
+                        <td style=text-align:center th:text="${totalBailNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalArreteNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalDecisionNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalDecretNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalAutresNonTransmis}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer small text-muted" >Dernière mise à jour le <span th:text="${#calendars.format(#calendars.createNow(), 'dd MMM yyyy HH:mm')}"></span> </div>
+    </div>
+    </div>
+  
+  
+  
+  </div>
+        
+
+</body>
+</html>
