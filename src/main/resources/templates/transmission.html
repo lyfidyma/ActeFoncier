@@ -31,16 +31,18 @@ label{
 						<label>Type de document : </label>
 						<span th:text="${td.typeDoc}"></span>
 						
-						<label>Numéro du document : </label>
+						<label>Numéro : </label>
 						<span th:text="${d.numDocument}"></span>
 						
 						<label>Date : </label>
 						<span th:text="${d.dateDocument}"></span>
 						
+						<div th:if="${d.dateApprobation}">
 						<label>Date d'approbation : </label>
 						<span th:text="${d.dateApprobation}"></span>
+						</div>
 						
-						<label>Statut du document : </label>
+						<label>Statut  : </label>
 						<span th:text="${d.statutDocument}"></span>
 						
 						<label>Lot : </label>
@@ -102,15 +104,15 @@ label{
 						</div>
 						
 						
-						<div th:each="l:${d.localisation}">
+						<div th:each="c:${d.commune}">
 						<label>Commune :</label>
-						<span th:text="${l.commune}"></span>
+						<span th:text="${c.libelleCommune}"></span>
 						<label>Commune Arrond. :</label>
-						<span th:text="${l.communeArrond}"></span>
+						<span th:text="${c.communeArrondissement.libelleCommuneArrond}"></span>
 						<label>Département:</label>
-						<span th:text="${l.departement}"></span>
+						<span th:text="${c.communeArrondissement.departement.libelleDepartement}"></span>
 						<label>Région:</label>
-						<span th:text="${l.region}"></span>
+						<span th:text="${c.communeArrondissement.departement.region.libelleRegion}"></span>
 						</div>
 						
 						
@@ -131,7 +133,7 @@ label{
 					    </div>
 					    <div class="col-md-3">
 					    <a th:href="@{/pdfExport(id=${d.idDocument})}" class="btn btn-success">Imprimer 
- 						<i class='fa fa-print' ></i></a>
+ 						<i class="glyphicon glyphicon-print" ></i></a>
  						</div>
 					 
 					

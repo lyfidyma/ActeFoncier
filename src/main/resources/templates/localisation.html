@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8"/>
+<title>Localisation</title>
+<style>
+label{
+	font-size:12px;
+	font-family:Arial;
+}
+input[type=text]:focus {
+  background-color: lightyellow;
+}
+textarea:focus {
+  background-color: lightyellow;
+}
+.error{
+	color:red;
+}
+
+</style>
+</head>
+<body>
+
+	<div layout:fragment="content">
+	<h3>Nouvelle localisation</h3>
+						   <hr/>
+	<div class="container">
+	
+		
+					<div class="panel-body">
+						<form th:action="@{/referentielLocalisation}" method="post">
+						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+							<p th:if="${messageChampsObligatoires}" th:text="${messageChampsObligatoires}" style= color:red></p>
+							 <div class="col-md-3">
+						     	<label for="commune" class="form-label">Commune</label>
+							    <input type="text" name="commune" th:value = "${commune}" class="form-control" placeholder="Commune"/>
+						  </div>	
+						  <div class="col-md-3" >
+						     	<label for="communeArrond" class="form-label">Commune d'arrondissement</label>
+							    <input type="text" name="communeArrond" th:value = "${communeArrond}" class="form-control" placeholder="Commune d'arrondissement"/>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="departement" class="form-label">Département</label>
+							    <input type="text" name="departement" th:value = "${departement}" class="form-control" placeholder="Département"/>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="region" class="form-label">Région</label>
+							    <input type="text" name="region" th:value = "${region}" class="form-control" placeholder="Région"/>
+						  </div>
+						  
+						  <br style="clear: both;"/>
+						  
+						  <p></p>
+						
+						  <div class="col-md-3">
+					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					  </div>
+					  
+						</form>
+</div>
+</div>
+</div>
+</body>
+</html>

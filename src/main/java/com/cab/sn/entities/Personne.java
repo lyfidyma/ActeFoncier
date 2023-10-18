@@ -5,9 +5,11 @@ import java.util.Collection;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,13 +24,19 @@ import lombok.Setter;
 //@PrimaryKeyJoinColumn(name = "idPersonne")
 public class Personne extends Beneficiaire{
 	
-	
-	//@Pattern(regexp="^[1-2]\\{12}$", message="Renseigner la cni au bon format")
+	@Column(nullable=false)
+	@NotNull(message="Renseigner la cni")
 	private Long cni;
+	@Column(nullable=false)
+	@NotBlank(message="Renseigner le nom")
 	private String nomPersonne;
+	@Column(nullable=false)
+	@NotBlank(message="Renseigner le prénom")
 	private String prenom;
-	//@Column(unique=true)
+	@Column(nullable=true)
+	
 	private Long nin;
+	
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	private LocalDate dateDelivrance ;
 	@OneToMany

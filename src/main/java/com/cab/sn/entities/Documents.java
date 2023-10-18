@@ -16,9 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,18 +63,24 @@ public class Documents {
 	@OneToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="idBeneficiaire")
 	private Beneficiaire beneficiaire;
+	@OneToOne
+	@JoinColumn(name="idCommune", updatable = true)
+	private Commune commune;
 	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name="idLocalisation", updatable = true)
 	private Localisation localisation;
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="idTypeDocument", updatable = true)
 	private TypeDocument typeDocument;
 	@OneToMany(mappedBy = "documents", cascade = CascadeType.ALL)
 	private Collection<PiecesJointes> piecesJointes;
-	public Documents(String numDocument, String codeUniqueDocument, LocalDate dateDocument, String titreGlobal, String objetDocument,
-			String statutDocument, String typeBeneficiaire, String responsableDocument, String lot, String nicad,
-			Date dateApprobation, String superficie, Beneficiaire beneficiaire, Localisation localisation,
-			TypeDocument typeDocument) {
+	public Documents(@NotEmpty(message = "Renseigner le numéro du document") String numDocument,
+			String codeUniqueDocument, LocalDate dateDocument,
+			@NotEmpty(message = "Renseigner le titre") String titreGlobal, String objetDocument, String statutDocument,
+			String typeBeneficiaire, String responsableDocument, @NotEmpty(message = "Renseigner le lot") String lot,
+			@NotEmpty(message = "Renseigner le nicad") String nicad,
+			@NotEmpty(message = "Renseigner la superficie") String superficie, Beneficiaire beneficiaire,
+			Commune commune, TypeDocument typeDocument) {
 		super();
 		this.numDocument = numDocument;
 		this.codeUniqueDocument = codeUniqueDocument;
@@ -88,18 +92,21 @@ public class Documents {
 		this.responsableDocument = responsableDocument;
 		this.lot = lot;
 		this.nicad = nicad;
-		this.dateApprobation = dateApprobation;
 		this.superficie = superficie;
 		this.beneficiaire = beneficiaire;
-		this.localisation = localisation;
+		this.commune = commune;
 		this.typeDocument = typeDocument;
 	}
-	public Documents(String numDocument, LocalDate dateDocument, String titreGlobal,
-			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, String lot,
-			String nicad, Date dateApprobation, String superficie, Beneficiaire beneficiaire,
-			Localisation localisation, TypeDocument typeDocument, Collection<PiecesJointes> piecesJointes) {
+	public Documents(@NotEmpty(message = "Renseigner le numéro du document") String numDocument,
+			String codeUniqueDocument, LocalDate dateDocument,
+			@NotEmpty(message = "Renseigner le titre") String titreGlobal, String objetDocument, String statutDocument,
+			String typeBeneficiaire, String responsableDocument, @NotEmpty(message = "Renseigner le lot") String lot,
+			@NotEmpty(message = "Renseigner le nicad") String nicad,
+			@NotEmpty(message = "Renseigner la superficie") String superficie, Beneficiaire beneficiaire,
+			Commune commune, TypeDocument typeDocument, Collection<PiecesJointes> piecesJointes) {
 		super();
 		this.numDocument = numDocument;
+		this.codeUniqueDocument = codeUniqueDocument;
 		this.dateDocument = dateDocument;
 		this.titreGlobal = titreGlobal;
 		this.objetDocument = objetDocument;
@@ -108,13 +115,40 @@ public class Documents {
 		this.responsableDocument = responsableDocument;
 		this.lot = lot;
 		this.nicad = nicad;
-		this.dateApprobation = dateApprobation;
 		this.superficie = superficie;
 		this.beneficiaire = beneficiaire;
-		this.localisation = localisation;
+		this.commune = commune;
 		this.typeDocument = typeDocument;
 		this.piecesJointes = piecesJointes;
 	}
+	
+	
+	/*
+	 * public Documents(String numDocument, String codeUniqueDocument, LocalDate
+	 * dateDocument, String titreGlobal, String objetDocument, String
+	 * statutDocument, String typeBeneficiaire, String responsableDocument, String
+	 * lot, String nicad, String superficie, Beneficiaire beneficiaire, Commune
+	 * commune, TypeDocument typeDocument) { super(); this.numDocument =
+	 * numDocument; this.codeUniqueDocument = codeUniqueDocument; this.dateDocument
+	 * = dateDocument; this.titreGlobal = titreGlobal; this.objetDocument =
+	 * objetDocument; this.statutDocument = statutDocument; this.typeBeneficiaire =
+	 * typeBeneficiaire; this.responsableDocument = responsableDocument; this.lot =
+	 * lot; this.nicad = nicad; this.superficie = superficie; this.beneficiaire =
+	 * beneficiaire; this.commune = commune; this.typeDocument = typeDocument; }
+	 * public Documents(String numDocument, LocalDate dateDocument, String
+	 * titreGlobal, String objetDocument, String statutDocument, String
+	 * typeBeneficiaire, String responsableDocument, String lot, String nicad, Date
+	 * dateApprobation, String superficie, Beneficiaire beneficiaire, Commune
+	 * commune, TypeDocument typeDocument, Collection<PiecesJointes> piecesJointes)
+	 * { super(); this.numDocument = numDocument; this.dateDocument = dateDocument;
+	 * this.titreGlobal = titreGlobal; this.objetDocument = objetDocument;
+	 * this.statutDocument = statutDocument; this.typeBeneficiaire =
+	 * typeBeneficiaire; this.responsableDocument = responsableDocument; this.lot =
+	 * lot; this.nicad = nicad; this.dateApprobation = dateApprobation;
+	 * this.superficie = superficie; this.beneficiaire = beneficiaire; this.commune
+	 * = commune; this.typeDocument = typeDocument; this.piecesJointes =
+	 * piecesJointes; }
+	 */
 	
 
 }

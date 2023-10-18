@@ -10,50 +10,54 @@
 fieldset{
 	vertical-align:center;
 	margin-left:600px;
-	margin-top:150px;
+	margin-top:100px;
 	
+}
+label, p{
+font-family:'Titillium';
 }
 
 </style>
     </head>
-    <body>
+    <body style="background:#D8EAF0">
      
     <div class="row mt-3">
-    <div class="col-md-7 offset-3">
-    <fieldset style="border:1px solid #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
+    <div class="col-md-8 offset-3">
+    <fieldset style="border:1px solid #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; background:#fff">
      <legend > </legend>
-     <div style="font-size:20px; text-align:center">
-            Authentification
+     <div style="font-size:26px; text-align:center">
+     <img src="../static/img/logo_minfinances.png}"  th:src="@{/img/logo_minfinances.png}" width="250" height="80" alt=" "/>
+     <p></p>
+           <p style="color:#7F30CD ; font-family:fantasy"><b>Gestion des actes fonciers</b></p>
         </div>
         <p></p>
     <div class="card-header"> </div>
         <div th:if="${param.error}" class= "alert alert-danger"><i class="fa fa-info-circle"></i>
-            Identifiant ou mot de passe invalide
+            <span ><i class="glyphicon glyphicon-info-sign"></i></span>&nbsp;Identifiant ou mot de passe invalide
         </div>
         <div th:if="${param.logout}" class= "alert alert-success">
-            Vous êtes déconnecté
+             <span ><i class="glyphicon glyphicon-info-sign"></i></span>&nbsp;Vous êtes déconnecté
         </div>
         <form th:action="@{/login}" method="post">
-
-            <div class="col-md-12">
-            <label for="username" class="form-label" style="font-size:12px"> Identifiant :</label>
-             <input type="text" name="username" class="form-control" id="username" placeholder="Identifiant"/> 
+<label for="username" class="form-label" style="font-size:12px"> Email</label>
+            <div class="input-group col-md-12" >
+             <span style="border-color:#7F30CD " class="input-group-addon"><i style="color:#7F30CD  " class="glyphicon glyphicon-envelope"></i></span>
+             <input style="border-color:#7F30CD "  type="text" name="username" class="form-control" id="username" placeholder="example@minfinances.com"/> 
             </div>
-             <p></p>
-             <br style="clear: both;"/>
-               <p></p>
-           <div class="col-md-12">
-            <label for="password" class="form-label" style="font-size:12px"> Mot de passe :</label>
-             <input type="password" name="password" class="form-control" id="password" placeholder="Mot de passe"/> 
+            
+            <p></p>
+              
+            <label for="password" class="form-label" style="font-size:12px"> Mot de passe</label>
+           <div class=" input-group col-md-12" > 
+             <span style="border-color:#7F30CD " class="input-group-addon"><i style="color:#7F30CD ; border-color:#7F30CD" class="glyphicon glyphicon-lock"></i></span>
+             <input style="border-color:#7F30CD " type="password" name="password" class="form-control" id="password" placeholder="Mot de passe"/> 
             </div>
-            <p></p>
              <br style="clear: both;"/>
-            <p></p>
              <div style=text-align:center>
-            <button type="submit" class="btn btn-primary">Connexion </button>
+            <button type="submit" class="btn" style="background:#14A8DC ">SE CONNECTER </button>
             </div>
              <br style="clear: both;"/>
-            <p></p>
+           
         </form>
         </fieldset>
         </div>

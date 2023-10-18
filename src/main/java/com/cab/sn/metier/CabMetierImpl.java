@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,18 +18,26 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.cab.sn.dao.BeneficiaireRepository;
+import com.cab.sn.dao.CommuneArrondissementRepository;
+import com.cab.sn.dao.CommuneRepository;
+import com.cab.sn.dao.DepartementRepository;
 import com.cab.sn.dao.DocumentsRepository;
 import com.cab.sn.dao.EntrepriseRepository;
 import com.cab.sn.dao.LocalisationRepository;
 import com.cab.sn.dao.PersonneRepository;
 import com.cab.sn.dao.PiecesJointesRepository;
+import com.cab.sn.dao.RegionRepository;
 import com.cab.sn.dao.TypeDocumentRepository;
 import com.cab.sn.entities.Beneficiaire;
+import com.cab.sn.entities.Commune;
+import com.cab.sn.entities.CommuneArrondissement;
+import com.cab.sn.entities.Departement;
 import com.cab.sn.entities.Documents;
 import com.cab.sn.entities.Entreprise;
 import com.cab.sn.entities.Localisation;
 import com.cab.sn.entities.Personne;
 import com.cab.sn.entities.PiecesJointes;
+import com.cab.sn.entities.Region;
 import com.cab.sn.entities.TypeDocument;
 
 import jakarta.transaction.Transactional;
@@ -51,6 +60,14 @@ public class CabMetierImpl implements ICabMetier{
 	private EntrepriseRepository entRepository;
 	@Autowired
 	private TypeDocumentRepository tdRepository;
+	@Autowired
+	private CommuneRepository communeRepository;
+	@Autowired
+	private CommuneArrondissementRepository communeArrondRepository;
+	@Autowired
+	private DepartementRepository departementRepository;
+	@Autowired
+	private RegionRepository regionRepository;
 	
 	/**
 	 *
@@ -58,19 +75,18 @@ public class CabMetierImpl implements ICabMetier{
 	@Override
 	public Documents sauvegarderDocuments(Long idDocument, String numDocument, LocalDate dateDocument, String titreGlobal,
 			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, String lot,
-			String nicad, Date dateApprobation, String superficie, String nomEntreprise, String ninea, Long cni, 
+			String nicad, Date dateAPprobation, String superficie, String nomEntreprise, String ninea, Long cni, 
 			String nomPersonne, String prenom, Long nin, LocalDate dateDelivrance, 
-			String commune, String communeArrond, String departement, String region,
-			String typeDoc, String numPj, LocalDate datePj, String objetPj, String numPj1, LocalDate datePj1, String objetPj1) {
+			String comm, String typeDoc, String numPj, LocalDate datePj, String objetPj, String numPj1, 
+			LocalDate datePj1, String objetPj1) {
 		
 		Documents d1 = null;
 		Beneficiaire b1 = null ;
 		TypeDocument td1 = null;
 		Personne p1 = null;
-			
+		Commune c1=null;
 		//Mise à jour
 		if(idDocument!=null){
-			
 			Documents doc = docRepository.findById(idDocument).get(); 
 			//  Long idBenefMaj=doc.getBeneficiaire().getIdBeneficiaire(); 
 			  
@@ -111,7 +127,7 @@ public class CabMetierImpl implements ICabMetier{
 			  
 			  //Mise à jour du type de document
 			 // Long idTypeDocMaj = doc.getTypeDocument().getIdTypeDocument();
-			  TypeDocument td2 = tdRepository.save(new TypeDocument(typeDoc)); 
+			  TypeDocument td2 = tdRepository.chercherTypeDocumentParTypeDoc(typeDoc); 
 				  doc.setTypeDocument(td2);
 				  docRepository.save(doc);
 				 
@@ -149,8 +165,10 @@ public class CabMetierImpl implements ICabMetier{
 		
 			
 			  //Mise à jour de la localisation
-			  Localisation localisation = new Localisation(commune, communeArrond, departement, region);
-			  doc.setLocalisation(localisation);
+			 // Localisation localisation = new Localisation(commune, communeArrond, departement, region);
+			  Commune commu= communeRepository.findByCommune(comm);
+			  doc.setCommune(commu);
+			  //doc.setLocalisation(localisation);
 			  docRepository.save(doc);
 			  
 			  //Mise à jour du document
@@ -162,7 +180,6 @@ public class CabMetierImpl implements ICabMetier{
 			  doc.setResponsableDocument(responsableDocument);
 			  doc.setLot(lot);
 			  doc.setNicad(nicad);
-			  doc.setDateApprobation(dateApprobation);
 			  doc.setSuperficie(superficie);
 			  docRepository.save(doc);
 			 
@@ -173,21 +190,37 @@ public class CabMetierImpl implements ICabMetier{
 		else {
 				
 			  if(typeBeneficiaire.equals("Entreprise")== true) {
+				  if(entRepository.chercherEntrepriseParNinea(ninea)!=null) {
+					  if(persRepository.chercherPersonne(cni)!=null) {
+						  b1 = entRepository.chercherEntrepriseParNinea(ninea);
+					  }else {
+						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+						  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 
+					  }
+						  
+				  }else {
+					  if(persRepository.chercherPersonne(cni)!=null) {
+						  p1 = persRepository.chercherPersonne(cni);
+						  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 	  
+					  }else {
+						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+						  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 
+					  	}
+					  }
 				  
-				  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, datePj));
-				  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 
 			  }
 			  else if((typeBeneficiaire.equals("Particulier"))== true) {		 
-				 // if(cni != (persRepository.chercherPersonne(cni).getCni()))
-					  	b1 = bRepository.save(new Personne(cni, nomPersonne, prenom, nin, datePj));
-					//b1 = persRepository.chercherPersonne(cni);
+				  if(persRepository.chercherPersonne(cni)!=null)
+					  		b1 = persRepository.chercherPersonne(cni);
+					  	b1 = bRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
 			  }
 			  
-			  Localisation l1 = lRepository.save(new Localisation(commune, communeArrond, departement, region)); 
-			  td1 = tdRepository.save(new TypeDocument(typeDoc)); 
-			  d1 = docRepository.save(new Documents(numDocument, CodeDocumentGenerateur.genererCodeDocument(new Date(), typeDoc, commune), dateDocument, titreGlobal,
-					  objetDocument, "saisi", typeBeneficiaire, responsableDocument, lot,nicad, dateApprobation, 
-					  superficie, b1, l1, td1)); 
+			  
+			  c1 = communeRepository.findByCommune(comm);
+			  td1 = tdRepository.chercherTypeDocumentParTypeDoc(typeDoc); 
+			  d1 = docRepository.save(new Documents(numDocument, CodeDocumentGenerateur.genererCodeDocument(new Date(), typeDoc, comm), 
+					  dateDocument, titreGlobal, objetDocument, "saisi", typeBeneficiaire, responsableDocument, lot,nicad,
+					  superficie, b1, c1, td1)); 
 			  Collection<PiecesJointes> pj3= new ArrayList<PiecesJointes>();
 			  if(numPj!=""|| objetPj!="" || datePj!=null) {
 				  pj3.add(new PiecesJointes(numPj, objetPj, datePj, d1));
@@ -243,7 +276,13 @@ public class CabMetierImpl implements ICabMetier{
 	
 	@Override
 	public Personne chercherPersonne(Long cniPersonne) {
-		return persRepository.chercherPersonne(cniPersonne);
+		Personne personne=null;
+		Optional <Personne> optional = Optional.ofNullable(persRepository.chercherPersonne(cniPersonne));
+		if(optional.isPresent())
+			return persRepository.chercherPersonne(cniPersonne);
+		else if(optional.isEmpty())
+			return personne;
+		return personne;
 	}
 
 	@Override
@@ -358,17 +397,17 @@ public class CabMetierImpl implements ICabMetier{
 	}
 	
 	@Override
-	public Documents validerDocuments(Long id, boolean casApprouve, boolean casRejet) {
+	public Documents validerDocuments(Long id, String casApprouve, String casRejet) {
 		Documents doc = docRepository.findById(id).get();
-		if(casApprouve) {	
+		
+		if(casApprouve.equals("true")) {	
 			doc.setStatutDocument("approuvé");
 			doc.setDateApprobation(new Date());
 			docRepository.save(doc);
 			
-		}else if (casRejet) {
+		}else if (casRejet.equals("true")) {
 			doc.setStatutDocument("rejeté");
-			docRepository.save(doc);
-			
+			docRepository.save(doc);			
 		}
 		return doc;
 		
@@ -377,6 +416,158 @@ public class CabMetierImpl implements ICabMetier{
 	@Override
 	public List <Documents> findByCni(Long cni) {
 		return docRepository.findByCni(cni);
+	}
+
+	@Override
+	public Page<Documents> listDocumentsAValider(int page, int size) {
+		return docRepository.findByStatutTransmis(PageRequest.of(page, size, Sort.by("dateCreation").descending()));	
+	}
+
+	@Override
+	public Page<Documents> chercherDocumentAValider(String motCle, int page, int size) {
+		return docRepository.chercherDocumentAValider(motCle, PageRequest.of(page, size));
+	}
+
+	@Override
+	public Beneficiaire ajoutBeneficiaire(String typeBeneficiaire, String nomPersonne, String prenom, Long cni,
+			Long nin, LocalDate dateDelivrance, String nomEntreprise, String ninea, boolean checkbox) {
+		Beneficiaire beneficiaire = null;
+		Personne personne = null;
+		if(typeBeneficiaire.equals("Particulier")) {
+			
+					  beneficiaire = bRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));	  		
+			
+		}
+		if(typeBeneficiaire.equals("Entreprise")) {
+			if(checkbox == false)
+				beneficiaire = bRepository.save(new Entreprise(nomEntreprise, ninea));
+			else if( checkbox == true) {
+				if(persRepository.chercherPersonne(cni) != null)
+						personne = persRepository.chercherPersonne(cni);
+					else
+						personne = new Personne(cni, nomPersonne, prenom, nin, dateDelivrance);
+				
+				beneficiaire = bRepository.save(new Entreprise(nomEntreprise, ninea, personne));
+			}
+		}
+		return beneficiaire;
+	}
+
+	@Override
+	public Entreprise chercherEntrepriseParNinea(String ninea) {
+		return entRepository.chercherEntrepriseParNinea(ninea);
+	}
+
+	@Override
+	public TypeDocument chercherTypeDocumentParTypeDocument(String typeDocument) {
+		return tdRepository.chercherTypeDocumentParTypeDoc(typeDocument);
+	}
+
+	@Override
+	public TypeDocument ajoutTypeDocument(String typeDoc) {
+		TypeDocument typeDocument = tdRepository.save(new TypeDocument(typeDoc));
+		return typeDocument;
+	}
+
+	@Override
+	public List<TypeDocument> listTypeDocument() {
+		return tdRepository.findAll();
+	}
+
+	@Override
+	public Commune findByCommune(String commune) {
+		
+		return communeRepository.findByCommune(commune);
+	}
+
+	@Override
+	public CommuneArrondissement findByCommuneArrondissement(String communeArrond) {
+		return communeArrondRepository.findByCommuneArrondissement(communeArrond);
+	}
+
+	@Override
+	public Departement findByDepartement(String departement) {
+		return departementRepository.findByDepartement(departement);
+	}
+
+	@Override
+	public Region findByRegion(String region) {
+		return regionRepository.findByRegion(region);
+	}
+
+	@Override
+	public Commune ajoutCommune(String commune, String communeArrond, String departement, String region) {
+		Commune com=null;
+		CommuneArrondissement commArr = null;
+		Departement dep = null;
+		Region reg = null;
+		if(communeArrondRepository.findByCommuneArrondissement(communeArrond)!=null) {
+			commArr= communeArrondRepository.findByCommuneArrondissement(communeArrond);
+			//dep = departementRepository.findByDepartement(commArr.getDepartement().getLibelleDepartement());
+			//reg = regionRepository.findByRegion(dep.getRegion().getLibelleRegion());
+		}else {
+			if(departementRepository.findByDepartement(departement)!=null) {
+				dep = departementRepository.findByDepartement(departement);
+				commArr = communeArrondRepository.save(new CommuneArrondissement(communeArrond, dep));
+			}else {
+				if(regionRepository.findByRegion(region)!=null) {
+					reg = regionRepository.findByRegion(region);
+					dep = departementRepository.save(new Departement(departement, reg));
+					commArr = communeArrondRepository.save(new CommuneArrondissement(communeArrond, dep));
+				}else {
+					reg = regionRepository.save(new Region(region));
+					dep = departementRepository.save(new Departement(departement, reg));
+					commArr = communeArrondRepository.save(new CommuneArrondissement(communeArrond, dep));
+				}
+			}
+		}
+		
+		com = communeRepository.save(new Commune(commune, commArr));
+		return com;
+	}
+
+	@Override
+	public CommuneArrondissement ajoutCommuneArrondissement(String communeArrond, String departement, String region) {
+		CommuneArrondissement commArr = null;
+		Departement dep = null;
+		Region reg = null;
+		if(departementRepository.findByDepartement(departement)!=null) {
+			dep = departementRepository.findByDepartement(departement);
+			//reg = regionRepository.findByRegion(dep.getRegion().getLibelleRegion());
+		}else {
+			if(regionRepository.findByRegion(region)!=null) {
+				reg = regionRepository.findByRegion(region);
+				dep = departementRepository.save(new Departement(departement, reg));
+			}else {
+				reg = regionRepository.save(new Region(region));
+				dep = departementRepository.save(new Departement(departement, reg));
+			}
+		}
+		commArr = communeArrondRepository.save(new CommuneArrondissement(communeArrond, dep));
+		return commArr;
+		
+	}
+
+	@Override
+	public Departement ajoutDepartement(String departement, String region) {
+		Departement dep = null;
+		Region reg= null;
+		if(regionRepository.findByRegion(region)!=null) {
+			reg = regionRepository.findByRegion(region);
+		}
+		else {
+			reg = regionRepository.save(new Region(region));			
+		}
+		dep = departementRepository.save(new Departement(departement, reg));
+		
+		return dep;
+	}
+
+	@Override
+	public Region ajoutRegion(String region) {
+		
+		return regionRepository.save(new Region(region));
+		
 	}
 	
 }

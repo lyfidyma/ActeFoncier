@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8"/>
+<title>Bénéficiaire</title>
+<style>
+label{
+	font-size:12px;
+	font-family:Arial;
+}
+input[type=text]:focus {
+  background-color: lightyellow;
+}
+textarea:focus {
+  background-color: lightyellow;
+}
+.error{
+	color:red;
+}
+
+</style>
+</head>
+<body>
+
+	<div layout:fragment="content">
+	<h3>Nouveau bénéficiaire</h3>
+						   <hr/>
+	<div class="container">
+	
+		
+					<div class="panel-body">
+						<form th:action="@{/referentielBeneficiaire}" method="post">
+						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+							<p th:if="${messageChampsObligatoires}" th:text="${messageChampsObligatoires}" style= color:red></p>
+							<div class="col-md-3">
+							   <label>Type</label>
+							    <select id="typeBeneficiaire" name="typeBeneficiaire"  th:value="${typeBeneficiaire}" class="form-control" onchange="showDiv('forEntreprise', this); showDivParticulier('forParticulier', this)">
+							      <option value="" hidden>------------</option>
+							      <option value="Entreprise">Entreprise</option>
+							       <option value="Particulier" selected>Particulier</option>						       
+							    </select>
+							  </div>
+							  <script>
+      							function showDiv(divId, element) {
+      							   document.getElementById(divId).style.display = element.value == "Entreprise" ? 'block' : 'none';
+      							 
+    							  }
+      							
+      							function showDivParticulier(divId, element) {
+       							   document.getElementById(divId).style.display = element.value == "Particulier" ? 'block' : 'none';
+       							 
+     							  }
+      							function showDivRepresentant(divId) {
+      								  
+        							   document.getElementById(divId).style.display = 'block';
+        							   
+        							 
+      							  }
+  							  </script> 
+  							  <div class="col-md-6" id="forEntreprise" style="display: none;" >
+							    <label for="nomEntreprise" class="form-label">Nom de l'entreprise</label>
+							   <input type="text"  name ="nomEntreprise"  th:value="${nomEntreprise}" class="form-control" 
+							   			placeholder="Nom de l'Entreprise" />
+							  <p></p>
+							   <label for="ninea" class="form-label">Ninea</label>
+							    <input type="text" name ="ninea" th:value="${ninea}" class="form-control" placeholder="Ninea" aria-label="ninea"/>
+							    <p></p>
+							    <input type="checkbox" name="checkbox" onclick="showDivRepresentant('forParticulier', this)"/><span>&nbsp;&nbsp;Lier un représentant</span>
+							  </div>
+  							  
+  							   <br style="clear: both;"/>
+  							    <div  id="forParticulier" style="display:block">
+  							    <div class="col-md-3" >
+  							     </div>
+							   <div class="col-md-3" >
+							    <label for="nom" class="form-label">Nom</label>
+							    <input type="text" name ="nomPersonne" th:value="${nomPersonne}" class="form-control" placeholder="Nom" />
+							  <p></p>
+							   <label for="prenom" class="form-label">Prénom</label>
+							    <input type="text" name ="prenom" th:value="${prenom}" class="form-control" placeholder="Prénom" />
+							  </div>							   
+
+						   <br style="clear: both;"/>
+						  			<div class="col-md-3" >
+  							     </div>		   
+						   <div class="col-md-3" >
+						     	<label for="nin" class="form-label">Numéro CEDEAO</label>
+							    <input type="text" name="nin" th:value="${nin}" class="form-control" placeholder="Numéro CEDEAO"/>
+							    <p th:if="${messageNin}" th:text="${messageNin}" style= color:red></p>
+						  </div>
+						  <div class="col-md-3">
+						     	<label for="cni" class="form-label">Cni</label>
+							    <input type="text" name = "cni" th:value="${cni}" class="form-control"  placeholder="Numéro de la pièce d'identité"/>
+						 		<p th:if="${messageCni}" th:text="${messageCni}" style= color:red></p>
+						 	</div >
+						   
+						   <div class="col-md-3" >
+						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
+							    <input type="date" name="dateDelivrance" th:value="${dateDelivrance}" class="form-control" />
+						  </div>	
+						  <br style="clear: both;"/>
+						  <p></p>
+						 </div>	
+						  <div class="col-md-6">
+					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					  </div>
+						</form>
+</div>
+</div>
+</div>
+</body>
+</html>

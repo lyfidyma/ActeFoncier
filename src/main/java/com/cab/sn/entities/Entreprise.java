@@ -1,5 +1,6 @@
 package com.cab.sn.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -15,9 +16,9 @@ import lombok.Setter;
 //@DiscriminatorValue("ENTREPRISE")
 //@PrimaryKeyJoinColumn(name = "idEntreprise")
 public class Entreprise extends Beneficiaire{
-	
+	@Column(nullable=false)
 	private String nomEntreprise;
-	//@Column(unique=true)
+	@Column(nullable=false)
 	private String ninea;
 	@OneToOne
 	private Personne personne;

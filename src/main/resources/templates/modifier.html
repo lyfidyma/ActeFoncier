@@ -19,9 +19,7 @@ textarea:focus {
 .error{
 	color:red;
 }
-div{
-padding:3px;
-}
+
 </style>
 </head>
 <body>
@@ -157,8 +155,7 @@ padding:3px;
 						     	<label for="cni" class="form-label">Cni</label>
 							    <input type="text"  th:name="cni" class="form-control" th:value="*{beneficiaire.Personne.cni}" placeholder="Numéro de la pièce d'identité" readonly/>
 						  </div>	
-						   <div class = "text-danger" th:if="${exception}" th:text="${exception.message}"> 	
-						  </div>	
+						  
 						  					   
 						   <div class="col-md-3">
 						     	<label for="nin" class="form-label">Nin</label>

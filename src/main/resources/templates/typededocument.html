@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8"/>
+<title>Type de document</title>
+<style>
+label{
+	font-size:12px;
+	font-family:Arial;
+}
+input[type=text]:focus {
+  background-color: lightyellow;
+}
+textarea:focus {
+  background-color: lightyellow;
+}
+.error{
+	color:red;
+}
+
+</style>
+</head>
+<body>
+
+	<div layout:fragment="content">
+	<h3>Nouveau type de document</h3>
+						   <hr/>
+	<div class="container">
+	
+		
+					<div class="panel-body">
+						<form th:action="@{/referentielTypeDocument}" method="post">
+						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+							<p th:if="${messageChampsObligatoires}" th:text="${messageChampsObligatoires}" style= color:red></p>
+							<div class="col-md-4">
+							   
+							  
+							   <label>Entrer un type :</label>
+							    <input type="text" name ="typeDoc" th:value="${typeDoc}" class="form-control" placeholder="Type document" />
+							   
+							   
+							  
+							   
+							<p></p>
+						  
+					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					  </div>
+					  
+						</form>
+</div>
+</div>
+</div>
+</body>
+</html>

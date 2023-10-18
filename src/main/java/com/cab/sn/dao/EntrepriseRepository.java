@@ -16,5 +16,8 @@ public interface EntrepriseRepository extends JpaRepository<Entreprise, Long>{
 	@Query("select e from Entreprise e where e.idBeneficiaire like :x")
 	public Entreprise chercherEntreprise(@Param("x")Long id);
 	
+	@Query("select e from Entreprise e where e.ninea like :x")
+	public Entreprise chercherEntrepriseParNinea(@Param("x")String ninea);
+	
 
 }

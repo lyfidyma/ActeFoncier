@@ -13,7 +13,7 @@ import com.cab.sn.entities.Documents;
 
 @Repository
 public interface DocumentsRepository extends JpaRepository<Documents, Long>{
-	@Query("select d from Documents d where d.numDocument like :x or d.typeDocument.typeDoc like :x")
+	@Query("select d from Documents d where d.numDocument like :x or d.typeDocument.typeDoc like :x or d.codeUniqueDocument like :x")
 	public Page<Documents> chercher(@Param("x")String motCle, Pageable pageable);
 	
 	@Query("select d from Documents d where d.typeDocument.typeDoc like '%Bail%' and d.statutDocument = 'transmis'")
@@ -54,4 +54,10 @@ public interface DocumentsRepository extends JpaRepository<Documents, Long>{
 	
 	@Query("select d from Documents d where d.beneficiaire.cni like :x")
 	public List <Documents> findByCni(@Param("x")Long cni);
+	
+	@Query("select d from Documents d where d.statutDocument = 'transmis'")
+	public Page<Documents> findByStatutTransmis(Pageable pageable);
+	
+	@Query("select d from Documents d where (d.numDocument like :x or d.typeDocument.typeDoc like :x or d.codeUniqueDocument like :x) and d.statutDocument = 'transmis'")
+	public Page<Documents> chercherDocumentAValider(@Param("x")String motCle, Pageable pageable);
 }

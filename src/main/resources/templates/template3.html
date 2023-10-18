@@ -30,28 +30,59 @@
     </header>
     <ul class="nav">
    	 <li> 	 
-	     <a th:href="@{/index}">Accueil</a>
+	     <a th:href="@{/index}"><span ><i class="glyphicon glyphicon-home"></i></span>Accueil</a>
      </li>
-     
-  	  <li>
-  	  	<a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" >Documents&nbsp;<span class="caret"></span></a>
+      <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+  	  	<a  class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" ><span ><i class="glyphicon glyphicon-wrench"></i></span>Référentiels&nbsp;<span class="caret"></span></a>
   	  	<ul class="dropdown-menu">
      	 
       	<li>
-	       <a style="color:black" th:href="@{/ajouter}">Nouveau document</a>
+	       <a style="color:black" th:href="@{/beneficiaire}">Bénéficiaire</a>
         </li>
       <li>
-        <a style="color:black" th:href="@{/cons}">Consultation</a>
+      	  <a style="color:black" th:href="@{/typededocument}">Type de document</a>
       </li>
  		<li>
-        <a style="color:black" th:href="@{/dashboard}">Tableau de bord</a>
+        <a style="color:black" th:href="@{/localisation}">Localisation</a>
       </li>
       <li>
-        <a style="color:black" th:href="@{/pageValidation}">Validation</a>
+        <a href="#">Responsable document</a>
+      </li>
+      <li>
+        <a href="#">Utilisateur</a>
+      </li>
+      <li>
+        <a href="#">Profil</a>
       </li>
       </ul>
       </li>
+     
+  	
+  	  	
+     	 
+      	<li>
+	       <a th:href="@{/ajouter}"><span ><i class="glyphicon glyphicon-edit"></i></span>Nouveau document</a>
+        </li>
+      <li>
+        <a th:href="@{/cons}"><span ><i class="glyphicon glyphicon-eye-open"></i></span>Consultation</a>
+      </li>
+       <li>
+        <a th:href="@{/pageValidation}"><span ><i class="glyphicon glyphicon-check"></i></span>Validation</a>
+      </li>
+      
+ 		<li>
+         <a th:href="@{/dashboard}"><span ><i class="glyphicon glyphicon-stats"></i></span>Tableau de bord</a>
+      </li>
+     
+    
     </ul>
+     <div class="sidebar-footer" style="text-align:center">
+   
+	          <form method = "post" th:action = "@{/logout}">
+	          <button class="btn btn-secondary" type="submit"><span ><i class="glyphicon glyphicon-log-out"></i></span>&nbsp;Déconnexion</button>
+	          </form>
+         
+          </div>
   </div>
   <!-- Content -->
   <div id="content">
@@ -60,14 +91,10 @@
           <div class="nav navbar-nav navbar-right">       
           <ul class="nav navbar-nav">
           <li class="dropdown">
-            <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" th:text="${#authentication.name}" style="color:red">
+            <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" th:text="${#authentication.name}" style="color:red" >
             </a>
           <ul class="dropdown-menu">
-          <li>
-	          <form method = "post" th:action = "@{/logout}">
-	          <button class="btn btn-secondary" type="submit">Déconnexion</button>
-	          </form>
-          </li>
+          
           <li>
 	          <a href="#" >Changer mot de passe</a>
           </li>
