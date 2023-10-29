@@ -62,7 +62,6 @@ body {
 
 #sidebar .nav a{
   background: none;
-  border-bottom: 1px solid #455A64;
   color: #CFD8DC;
   font-size: 14px;
   padding: 16px 24px;
@@ -76,6 +75,12 @@ body {
 
 #sidebar .nav a i{
   margin-right: 16px;
+}
+
+#sidebar .nav ul li{
+  background-color: #ffff;
+  padding:5px;
+  
 }
 
 .sidebar-footer{

@@ -29,11 +29,12 @@ textarea:focus {
 <body>
 
 	<div layout:fragment="content">
-	<h3>&nbsp;&nbsp;Approbation</h3>
+	<h4>&nbsp;&nbsp;Approbation</h4>
 						   <hr/>
-	<div class="container" >
+						   <h4 th:if="${listDocuments.isEmpty()}==true" style="color:red; text-align:center">Aucun document en attente de validation</h4>
+	<div class="container"  th:if="${listDocuments.isEmpty}==false">
 	
-		<div class="col-md-4">
+		<div class="col-md-4" >
 			<label></label>
 				<form th:action="@{/pageValidation}" method="post">		
 					<div class="col-md-9">
@@ -48,44 +49,45 @@ textarea:focus {
 			</div>
 			</div>
 			<p th:if="${messageValiderOuRejeter}" th:text="${messageValiderOuRejeter}" style= color:red></p>
-		<div class="container">
+		<div class="container" th:if="${listDocuments.isEmpty}==false">
 			
 					
 			<div class="col-md">
 				<div class="panel panel-success" >
 				
 					<!-- <div class="panel-heading">Consultation documents</div> -->
-					<div class="panel-body">
+					<div class="panel-body" >
 					
 						<table class="table table-striped" >
 							<tr>
-							<th></th><th>Numéro d'ordre</th><th>Type document</th><th>Bénéficiaire</th><th>Lot</th><th>Titre foncier</th>
-							<th>Superficie</th><th>Site</th><th>Code document</th><th>Responsable</th>
+							<th></th><th>Type document</th><th>Bénéficiaire</th><th>Lot</th><th>Titre foncier</th>
+							<!-- <th>Superficie</th> --><th>Site</th><th>Code document</th><!-- <th>Responsable</th> -->
 							</tr>			
 								<tr th:each="d, iteration:${listDocuments}">
 								
 									<td><input type="checkbox" class="checkboxId" id="checkbox" name="checkbox" th:value="${d.idDocument}"/></td>
-									<td th:text="${iteration.index+1}"></td>
+									<!-- <td th:text="${iteration.index+1}"></td> -->
 									<th:block th:each="td:${d.typeDocument}">
 									<td th:text="${td.typeDoc}"></td>
 									</th:block>
-									<th:block th:each="b:${d.beneficiaire}">
+									
 									<th:block th:if="${d.typeBeneficiaire} eq 'Particulier'">
-									<td th:text="${b.nomPersonne}"></td>
+									<th:block th:each="c:${d.personne}">
+									<td th:text="${c.nomPersonne}"></td>
+									</th:block>
 									</th:block>
 									
 									<th:block th:if="${d.typeBeneficiaire} eq 'Entreprise'">
-									<td th:text="${b.nomEntreprise}"></td>
+									<th:block th:each="e:${d.entreprise}">
+									<td th:text="${e.nomEntreprise}"></td>
 									</th:block>
 									</th:block>
 									<td th:text="${d.lot}"></td>
 									<td th:text="${d.titreGlobal}"></td>	
-									<td th:text="${d.superficie}"></td>
-									<th:block th:each="l:${d.localisation}">
-									<td th:text="${l.commune}"></td>
-									</th:block>
+									<!-- <td th:text="${d.superficie}"></td> -->	
+									<td th:text="${d.commune.libelleCommune}"></td>	
 									<td th:text="${d.codeUniqueDocument}"></td>
-									<td th:text="${d.responsableDocument}"></td>
+									<!-- <td th:text="${d.responsableDocument}"></td> -->
 									<!-- <td th:text="${d.statutDocument}"></td> -->				
 								
 								<td><a th:href="@{visualiser(id=${d.idDocument})}"><i class="fas fa-phone"></i> <span class="glyphicon glyphicon-eye-open"></span></a></td>
@@ -135,16 +137,16 @@ textarea:focus {
 					 
 					  <div class="col-md-2" >
 					 
-					    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalValider" >Approuver</button>					 
+					    <button type="button" id="boutonValider" class="btn btn-success" onclick="validationDocument()" disabled>Approuver</button>					 
 					  </div>
 					 
  					  <div class="col-md-2">
-					    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalRejeter" >Rejeter</button>
+					    <button type="button" id="boutonRejeter" class="btn btn-danger" onclick="rejetDocument()" disabled>Rejeter</button>
 					  </div>
 					 
 					  </div>
 					 <!--  Modal Valider--> 
-<form th:action="@{/valider}" method="post" enctype="multipart/form-data" onsubmit="return confirm('Voulez-vous approuver?')">
+<form th:action="@{/valider}" id="formulaireValidation" method="post" enctype="multipart/form-data" onsubmit="return confirm('Voulez-vous approuver?')">
 <div class="modal fade" id="modalValider" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -166,7 +168,7 @@ textarea:focus {
           </div>
           <div class="form-group">
             <label for="dateApprobation" class="Date">Date:</label>
-            <input type="date" class="form-control" id="fichier" name="fichier"/>
+            <input type="date" class="form-control" id="dateApprobation" name="dateApprobation"/>
             <label for="fichier" class="Date">Joindre un fichier</label>
             <input type="file" class="form-control"  name="file"/>
           </div>
@@ -176,7 +178,7 @@ textarea:focus {
       <input type="hidden" name="checkboxValider" value="true"/>
       <input type="hidden" name="checkboxRejeter" value="false"/>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="submit" class="btn btn-success">Confirmer</button>
+        <button type="submit" class="btn btn-success" style="border: 1px solid green; background-color: white; color: green;">Confirmer</button>
       </div>
      
     </div>
@@ -184,6 +186,59 @@ textarea:focus {
 </div>
  </form>
 <script type="text/javascript">
+function controleDonneesValidation(){
+	var nom = $("#nomApprobateur").val();
+	var prenom=$("#prenomApprobateur").val();
+	var dat=$("#dateApprobation").val();
+	if(nom && prenom && dat){
+		document.getElementById("formulaireValidation").submit();
+	}else{
+		alert('Renseigner les champs');
+	}
+}
+function controleDonneesRejet(){
+	if($("#motifRejet").val()== null || $("#dateRejet").val()== null){
+		alert('Renseigner les champs');
+	}else{
+		document.getElementById("formulaireRejet").submit();
+	}
+}
+
+function validationDocument(){
+	let id;
+	let checkbox = document.getElementsByName("checkbox");
+	var modal =$('#modalValider')
+	for (let i = 0; i < checkbox.length; i++) {
+		if ( checkbox[i].checked == true)
+		{
+			
+			id = $(checkbox[i]).val();
+			modal.find('.modal-title').text('Document n° ' + id)
+			modal.find('.modal-body').append("<input name='idDoc' value='"+id+"'  type='hidden' />")
+			$(modal).modal('show');
+		}
+	}
+}
+
+function rejetDocument(){
+	
+	let id;
+	let checkbox = document.getElementsByName("checkbox");
+	var modal =$('#modalRejeter')
+		for (let i = 0; i < checkbox.length; i++) {
+			if ( checkbox[i].checked == true)
+			{
+				
+				id = $(checkbox[i]).val();
+				modal.find('.modal-title').text('Document n° ' + id)
+				modal.find('.modal-body').append("<input name='idDoc' value='"+id+"'  type='hidden' />")
+				$(modal).modal('show');
+			}
+		}
+		
+	
+}
+	
 $(document).ready(function () {
 	let id;
 	var modal = $(this)
@@ -193,12 +248,16 @@ $(document).ready(function () {
         checkbox[i].addEventListener( "change", () => {
         	
         		if ( checkbox[i].checked == true)
-        			{
-					 	id = $(checkbox[i]).val();
-        				modal.find('.modal-title').text('Document n° ' + id)
-        				modal.find('.modal-body').append("<input name='idDoc' value='"+id+"'  type='hidden' />")
-        				 
+        			{ 	
+        				document.getElementById("boutonValider").disabled=false;
+        				document.getElementById("boutonRejeter").disabled=false;
         			}
+        		if ( checkbox[i].checked == false)
+    			{
+				 	
+    				document.getElementById("boutonValider").disabled=true;
+    				document.getElementById("boutonRejeter").disabled=true;
+    			}
         		
         	
         });
@@ -210,7 +269,7 @@ $(document).ready(function () {
 	   </script>
 	   
 <!--  Modal Rejeter-->
-<form th:action="@{/valider}" method="post" onsubmit="return confirm('Voulez-vous continuer?')">
+<form th:action="@{/valider}" id="formulaireRejet" method="post" onsubmit="return confirm('Voulez-vous continuer?')">
 <div class="modal fade" id="modalRejeter" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -229,7 +288,8 @@ $(document).ready(function () {
           </div>
           <div class="form-group">
             <label for="dateRejet" class="Date">Date:</label>
-            <input type="date" class="form-control" id="dateRejet" name="dateRejet">
+            <input type="date" class="form-control" id="dateRejet" name="dateRejet"
+            />
           </div>
        
       </div>
@@ -237,13 +297,25 @@ $(document).ready(function () {
        <input type="hidden" name="checkboxRejeter" value="true"/>
         <input type="hidden" name="checkboxValider" value="false"/>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="submit" class="btn btn-danger">Rejeter</button>
+        <button type="submit" class="btn btn-danger" style="border: 1px solid red; background-color: white; color: red;">Rejeter</button>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+$(document).ready(function(){
+	
+	document.getElementById("dateApprobation").valueAsDate = new Date();
+});
+$(document).ready(function(){
+	
+	document.getElementById("dateRejet").valueAsDate = new Date();
+});
+</script>
  </form>
 
 </div>
+
 </body>
 </html>

@@ -11,8 +11,8 @@ import com.cab.sn.entities.Personne;
 public interface PersonneRepository extends JpaRepository<Personne, Long>{
 
 	@Query("select p from Personne p where p.cni like :x")
-	public Personne chercherPersonne(@Param("x")Long cniPersonne);
+	public Personne chercherPersonne(@Param("x")String cniPersonne);
 	
-	@Query("select p from Personne p where p.idBeneficiaire like :x")
+	@Query("select p from Personne p where p.idPersonne like :x")
 	public Personne chercherPersonneParId(@Param("x")Long id);
 }

@@ -62,12 +62,15 @@ public class DocumentsExcelExport extends AbstractXlsxView {
 			Cell cell1 = row.createCell(5);
 			cell1.setCellValue(documents.getDateApprobation());
 			cell1.setCellStyle(cellStyle);
-			row.createCell(6).setCellValue(documents.getLocalisation().getCommune());
+			row.createCell(6).setCellValue(documents.getCommune().getLibelleCommune());
 			row.createCell(7).setCellValue(documents.getLot());
 			row.createCell(8).setCellValue(documents.getTitreGlobal());
 			row.createCell(9).setCellValue(documents.getSuperficie());
 			row.createCell(10).setCellValue(documents.getNicad());
-			row.createCell(11).setCellValue(documents.getBeneficiaire().getIdBeneficiaire());
+			if(documents.getPersonne()!=null && documents.getEntreprise()== null)
+				row.createCell(11).setCellValue(documents.getPersonne().getCni());
+			if(documents.getEntreprise()!=null)
+				row.createCell(11).setCellValue(documents.getEntreprise().getNomEntreprise() );
 			row.createCell(12).setCellValue(documents.getStatutDocument());
 		}
 		

@@ -4,19 +4,21 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,32 +46,37 @@ public class Documents {
 	private Date dateCreation = new Date() ;
 	@NotEmpty(message="Renseigner le titre")
 	private String titreGlobal;
-	
+	@Size(max=255, message="Texte trop long")
 	private String objetDocument;
 	private String statutDocument;
-	
+	@NotBlank(message="Choisir un type")
 	private String typeBeneficiaire;
 	private String responsableDocument;
 	@NotEmpty(message="Renseigner le lot")
 	private String lot;
 	@NotEmpty(message="Renseigner le nicad")
 	private String nicad;
-	//@DateTimeFormat(pattern="dd/mm/yyyy")
+	@DateTimeFormat(pattern="dd/mm/yyyy")
 	@Column(nullable=true)
 	private Date dateApprobation;
 	@NotEmpty(message="Renseigner la superficie")
 	private String superficie;
-	
-	@OneToOne(cascade=CascadeType.ALL)
-	@JoinColumn(name="idBeneficiaire")
-	private Beneficiaire beneficiaire;
+	private String nomApprobateur;
+	private String prenomApprobateur;
+	private String motifRejet;
+	@DateTimeFormat(pattern="dd/mm/yyyy")
+	private Date dateRejet;
+	@OneToOne
+	@JoinColumn(name="idPersonne", updatable=true)
+	private Personne personne;
+	@OneToOne
+	@JoinColumn(name="idEntreprise", updatable=true)
+	private Entreprise entreprise;
 	@OneToOne
 	@JoinColumn(name="idCommune", updatable = true)
 	private Commune commune;
-	@OneToOne(cascade=CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-	@JoinColumn(name="idLocalisation", updatable = true)
-	private Localisation localisation;
-	@OneToOne(fetch = FetchType.LAZY)
+	
+	@OneToOne
 	@JoinColumn(name="idTypeDocument", updatable = true)
 	private TypeDocument typeDocument;
 	@OneToMany(mappedBy = "documents", cascade = CascadeType.ALL)
@@ -79,7 +86,7 @@ public class Documents {
 			@NotEmpty(message = "Renseigner le titre") String titreGlobal, String objetDocument, String statutDocument,
 			String typeBeneficiaire, String responsableDocument, @NotEmpty(message = "Renseigner le lot") String lot,
 			@NotEmpty(message = "Renseigner le nicad") String nicad,
-			@NotEmpty(message = "Renseigner la superficie") String superficie, Beneficiaire beneficiaire,
+			@NotEmpty(message = "Renseigner la superficie") String superficie, Personne personne, Entreprise entreprise,
 			Commune commune, TypeDocument typeDocument) {
 		super();
 		this.numDocument = numDocument;
@@ -93,7 +100,8 @@ public class Documents {
 		this.lot = lot;
 		this.nicad = nicad;
 		this.superficie = superficie;
-		this.beneficiaire = beneficiaire;
+		this.personne = personne;
+		this.entreprise = entreprise;
 		this.commune = commune;
 		this.typeDocument = typeDocument;
 	}
@@ -102,7 +110,7 @@ public class Documents {
 			@NotEmpty(message = "Renseigner le titre") String titreGlobal, String objetDocument, String statutDocument,
 			String typeBeneficiaire, String responsableDocument, @NotEmpty(message = "Renseigner le lot") String lot,
 			@NotEmpty(message = "Renseigner le nicad") String nicad,
-			@NotEmpty(message = "Renseigner la superficie") String superficie, Beneficiaire beneficiaire,
+			@NotEmpty(message = "Renseigner la superficie") String superficie, Personne personne, Entreprise entreprise,
 			Commune commune, TypeDocument typeDocument, Collection<PiecesJointes> piecesJointes) {
 		super();
 		this.numDocument = numDocument;
@@ -116,7 +124,8 @@ public class Documents {
 		this.lot = lot;
 		this.nicad = nicad;
 		this.superficie = superficie;
-		this.beneficiaire = beneficiaire;
+		this.personne = personne;
+		this.entreprise = entreprise;
 		this.commune = commune;
 		this.typeDocument = typeDocument;
 		this.piecesJointes = piecesJointes;

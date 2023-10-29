@@ -20,11 +20,29 @@
 </head>
 <body>
 	<div layout:fragment="content">
-		<div class="container">
-		 <div class="col-md-8">
-     		 <a th:href="@{/excelExport}" class="btn btn-success">Exporter vers Excel 
+	<div>
+	<h4>&nbsp;&nbsp;Consultation</h4>
+						   <hr/>
+	<h4 th:if="${listDocuments.isEmpty()}==true" style="color:red; text-align:center">Aucun document </h4>
+	</div>
+		<div class="container"  th:if="${listDocuments.isEmpty()}==false">
+		 <div class="col-md-4">
+     		 <a th:href="@{/excelExport}" class="btn btn-success" style="border: 1px solid green; background-color: white; color: green;">Export vers Excel 
  			<i class="fa fa-file-excel-o" aria-hidden="true"></i></a>
  			 </div>
+ 			 <div class="dropdown col-md-4" >
+  <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Filtre  &nbsp;&nbsp;<span class="caret"></span></button>
+  <div class="dropdown-menu">
+  <ul>
+    <li ><a class="dropdown-item" th:href="@{cons(motCle='Bail',page=${currentPage},size=${size})}">Bail</a></li>
+   <li><a class="dropdown-item" th:href="@{cons(motCle='Arrêté',page=${currentPage},size=${size})}">Arrêté</a></li>
+   <li><a class="dropdown-item" th:href="@{cons(motCle='Décision',page=${currentPage},size=${size})}">Décision</a></li>
+    <li><a class="dropdown-item" th:href="@{cons(motCle='Décret',page=${currentPage},size=${size})}">Décret</a></li>
+     <li><a class="dropdown-item" th:href="@{cons(motCle='Autres',page=${currentPage},size=${size})}">Autres</a></li>
+    </ul>
+  </div>
+</div>
      		 	<form th:action="@{cons}" id="searchForm" method="get">   		 	
      				<div class="input-group col-md-4">
         	  		    <input id="motCle" type="text" class="form-control" name="motCle" th:value=${motCle}
@@ -41,29 +59,32 @@
  			
    
          
-		<div class="container">
+		<div class="container" th:if="${listDocuments.isEmpty()}==false">
 			<div class="col-md">
-				<div class="panel panel-success" th:if="${listDocuments}">
+				<div class="panel panel-success">
 				
 					<!-- <div class="panel-heading">Consultation documents</div> -->
 					<div class="panel-body">
 						<table class="table table-striped">
 							<tr>
-							<th>Numéro d'ordre</th><th>Type document</th><th>Bénéficiaire</th><th>Lot</th><th>Titre foncier</th>
+							<th>Type document</th><th>Bénéficiaire</th><th>Lot</th><th>Titre foncier</th>
 							<th>Superficie</th><th>Site</th><th>Code document</th><th>Responsable</th><th>Statut</th>
 							</tr>				
 								<tr th:each="d, iteration:${listDocuments}">
-									<td th:text="${iteration.index+1}"></td>
+									<!-- <td th:text="${iteration.index+1}"></td> -->
 									<th:block th:each="td:${d.typeDocument}">
 									<td th:text="${td.typeDoc}"></td>
 									</th:block>
-									<th:block th:each="b:${d.beneficiaire}">
+									
 									<th:block th:if="${d.typeBeneficiaire} eq 'Particulier'">
-									<td th:text="${b.nomPersonne}"></td>
+									<th:block th:each="p:${d.personne}">
+									<td th:text="${p.cni}"></td>
+									</th:block>
 									</th:block>
 									
 									<th:block th:if="${d.typeBeneficiaire} eq 'Entreprise'">
-									<td th:text="${b.nomEntreprise}"></td>
+									<th:block th:each="e:${d.entreprise}">
+									<td th:text="${e.nomEntreprise}"></td>
 									</th:block>
 									</th:block>
 									<td th:text="${d.lot}"></td>
@@ -74,8 +95,12 @@
 									</th:block>
 									<td th:text="${d.codeUniqueDocument}"></td>
 									<td th:text="${d.responsableDocument}"></td>
-									<td th:text="${d.statutDocument}"></td>				
-								
+									
+									<td th:if="${d.statutDocument} eq 'saisi'" style=" text-align:center" th:text="${d.statutDocument}"></td>
+									<td th:if="${d.statutDocument} eq 'transmis'" style="background-color:#849FE5; text-align:center" th:text="${d.statutDocument}"></td>				
+									<td th:if="${d.statutDocument} eq 'rejeté'" style="background-color:#F3767E; text-align:center" th:text="${d.statutDocument}"></td>
+									<td th:if="${d.statutDocument} eq 'approuvé'" style="background-color:#90EE90; text-align:center" th:text="${d.statutDocument}"></td>
+									
 								<td><a th:href="@{visualiser(id=${d.idDocument})}"><i class="fas fa-phone"></i> <span class="glyphicon glyphicon-eye-open"></span></a></td>
 								<td th:if="${d.statutDocument} eq 'saisi' or ${d.statutDocument} eq 'rejeté' "><a th:href="@{modifier(id=${d.idDocument})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
 								<td th:if="${d.statutDocument} eq 'transmis' or ${d.statutDocument} eq 'approuvé'"><span class="glyphicon glyphicon-pencil"></span></td>
@@ -115,7 +140,9 @@
       </div>
    </div>
    </nav>
-  
+  <div>
+  <span>Total documents :</span><span th:text="${totalItems}"></span>
+  </div>
 						</div>
 					</div>
 				</div>

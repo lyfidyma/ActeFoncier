@@ -1,7 +1,7 @@
 package com.cab.sn.entities;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -32,6 +32,7 @@ public class PiecesJointes {
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	@Column(nullable=true)
 	private LocalDate datePj;
+	private String cheminFichier;
 	@ManyToOne(cascade=CascadeType.ALL)
 	@JoinColumn(name="idDocument")
 	private Documents documents;
@@ -42,15 +43,18 @@ public class PiecesJointes {
 		this.datePj = datePj;
 		this.documents = documents;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	public PiecesJointes(String numPj, String objetPj, LocalDate datePj, String cheminFichier, Documents documents) {
+		super();
+		this.numPj = numPj;
+		this.objetPj = objetPj;
+		this.datePj = datePj;
+		this.cheminFichier = cheminFichier;
+		this.documents = documents;
+	}
+	public PiecesJointes(String cheminFichier, Documents documents) {
+		super();
+		this.cheminFichier = cheminFichier;
+		this.documents = documents;
+	}	
 
 }

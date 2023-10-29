@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.cab.sn.entities.Documents;
-import com.cab.sn.metier.CabMetierImpl;
+import com.cab.sn.metier.ICabMetier;
 import com.cab.sn.view.DocumentsExcelExport;
 import com.cab.sn.view.DocumentsPdfExport;
 import com.lowagie.text.DocumentException;
@@ -23,13 +23,13 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ViewController {
 	
 	@Autowired
-	private CabMetierImpl cabMetierImpl;
+	private ICabMetier cabMetier;
 	
 	@GetMapping("/excelExport")
 	public ModelAndView exportVersExcel() {
 		ModelAndView mav = new ModelAndView();
 		mav.setView(new DocumentsExcelExport());
-		List<Documents> list = cabMetierImpl.tousLesDocuments();
+		List<Documents> list = cabMetier.tousLesDocuments();
 		mav.addObject("list", list);
 		return mav;
 		
@@ -45,7 +45,7 @@ public class ViewController {
 	        String headerValue = "attachment; filename=documents_" + currentDateTime + ".pdf";
 	        response.setHeader(headerKey, headerValue);
 	         
-	        Documents doc = cabMetierImpl.visualiserDocuments(id);
+	        Documents doc = cabMetier.visualiserDocuments(id);
 	         
 	        DocumentsPdfExport exporter = new DocumentsPdfExport(doc);
 	        exporter.export(response);

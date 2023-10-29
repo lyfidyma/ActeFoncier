@@ -21,6 +21,7 @@ textarea:focus {
 }
 
 </style>
+ 
 </head>
 <body>
 
@@ -28,9 +29,19 @@ textarea:focus {
 	<h3>Nouveau bénéficiaire</h3>
 						   <hr/>
 	<div class="container">
-	
-		
+
 					<div class="panel-body">
+					 <p th:if="${messagePersonneDocument}" th:text="${messagePersonneDocument}" style= color:red></p>
+					  <p th:if="${messageEntrepriseDocument}" th:text="${messageEntrepriseDocument}" style= color:red></p>
+					<ul class="nav nav-pills" id="monTab">
+  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Particulier</a></li>
+  <li><a class="nav-item nav-link" href="#p3" data-toggle="tab">Entreprise</a></li>
+  
+</ul>
+<div class="tab-content">
+ <div class="tab-pane active" id="p1">
+ <br></br>
 						<form th:action="@{/referentielBeneficiaire}" method="post">
 						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
 							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
@@ -53,63 +64,130 @@ textarea:focus {
        							   document.getElementById(divId).style.display = element.value == "Particulier" ? 'block' : 'none';
        							 
      							  }
-      							function showDivRepresentant(divId) {
-      								  
-        							   document.getElementById(divId).style.display = 'block';
-        							   
-        							 
-      							  }
+      							
   							  </script> 
-  							  <div class="col-md-6" id="forEntreprise" style="display: none;" >
+  							  
+  							  <div class="col-md-6" id="forEntreprise" style="display: none;" th:object="${uneEntreprise}">
 							    <label for="nomEntreprise" class="form-label">Nom de l'entreprise</label>
-							   <input type="text"  name ="nomEntreprise"  th:value="${nomEntreprise}" class="form-control" 
+							   <input type="text"  th:field="*{nomEntreprise}" class="form-control" 
 							   			placeholder="Nom de l'Entreprise" />
 							  <p></p>
 							   <label for="ninea" class="form-label">Ninea</label>
-							    <input type="text" name ="ninea" th:value="${ninea}" class="form-control" placeholder="Ninea" aria-label="ninea"/>
-							    <p></p>
-							    <input type="checkbox" name="checkbox" onclick="showDivRepresentant('forParticulier', this)"/><span>&nbsp;&nbsp;Lier un représentant</span>
+							    <input type="text" th:field="*{ninea}" class="form-control" placeholder="Ninea" aria-label="ninea"/>
+								 <input type="hidden" th:field="*{idEntreprise}" />
+								 
 							  </div>
   							  
   							   <br style="clear: both;"/>
-  							    <div  id="forParticulier" style="display:block">
+  							    <div  id="forParticulier">
   							    <div class="col-md-3" >
   							     </div>
+  							     <div th:object="${unePersonne}">
 							   <div class="col-md-3" >
 							    <label for="nom" class="form-label">Nom</label>
-							    <input type="text" name ="nomPersonne" th:value="${nomPersonne}" class="form-control" placeholder="Nom" />
+							    <input type="text" th:field="*{nomPersonne}" class="form-control" placeholder="Nom" />
 							  <p></p>
 							   <label for="prenom" class="form-label">Prénom</label>
-							    <input type="text" name ="prenom" th:value="${prenom}" class="form-control" placeholder="Prénom" />
+							    <input type="text" th:field="*{prenom}" class="form-control" placeholder="Prénom" />
 							  </div>							   
 
 						   <br style="clear: both;"/>
 						  			<div class="col-md-3" >
   							     </div>		   
+						  
 						   <div class="col-md-3" >
 						     	<label for="nin" class="form-label">Numéro CEDEAO</label>
-							    <input type="text" name="nin" th:value="${nin}" class="form-control" placeholder="Numéro CEDEAO"/>
+							    <input type="text" th:field="*{nin}" class="form-control" placeholder="Numéro CEDEAO"/>
 							    <p th:if="${messageNin}" th:text="${messageNin}" style= color:red></p>
 						  </div>
 						  <div class="col-md-3">
 						     	<label for="cni" class="form-label">Cni</label>
-							    <input type="text" name = "cni" th:value="${cni}" class="form-control"  placeholder="Numéro de la pièce d'identité"/>
+							    <input type="text" th:field="*{cni}" class="form-control"  placeholder="Numéro de la pièce d'identité"/>
 						 		<p th:if="${messageCni}" th:text="${messageCni}" style= color:red></p>
 						 	</div >
-						   
+						 	 <input type="hidden" th:field="*{idPersonne}" />
+						   </div>
 						   <div class="col-md-3" >
 						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
-							    <input type="date" name="dateDelivrance" th:value="${dateDelivrance}" class="form-control" />
+							    <input type="date" name="dateDelivrance" th:value="${dateDelivranceString}" class="form-control" />
 						  </div>	
 						  <br style="clear: both;"/>
 						  <p></p>
 						 </div>	
+					
 						  <div class="col-md-6">
+						  
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    
 					  </div>
+					 
 						</form>
+						</div>
+						<div class="tab-pane" id="p2">
+						<br></br>
+						<h4 th:if="${listPersonne.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée personne</h4>
+						<div class="table-responsive" th:if="${listPersonne.isEmpty}==false">
+						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
+							<tr style="background-color:#DEF69A; ">
+							<th></th><th>Nom</th><th>Prénom</th><th style="text-align:center">Cni</th><th style="text-align:center">Numéro CEDEAO</th><th style="text-align:center">Date délivrance</th></tr>				
+								<tr th:each="d, iteration:${listPersonne}">
+									<td th:text="${iteration.index+1}"></td>
+									<td th:text="${d.nomPersonne}"></td>
+									<td th:text="${d.prenom}"></td>
+									<td style="text-align:center" th:text="${d.cni}"></td>
+									<td style="text-align:center" th:text="${d.nin}"></td>
+									<td style="text-align:center" th:text="${d.dateDelivrance}"></td>
+				
+								<td style="text-align:center"><a th:href="@{modifierPersonne(id=${d.idPersonne})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
+								<td style="text-align:center"><a th:href="@{supprimerPersonne(id=${d.idPersonne})}"  onclick="return confirm('Voulez-vous supprimer cette personne?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>
+																		
+								</tr>	
+						</table>
+						
+						</div>
+						
+						</div>
+							<div class="tab-pane" id="p3">
+							<br></br>
+							<h4 th:if="${listEntreprise.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée entreprise</h4>
+							<div class="table-responsive" th:if="${listEntreprise.isEmpty}==false">
+						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
+							<tr style="background-color:#F6AC9A">
+							<th></th><th style="text-align:center">Entreprise</th><th style="text-align:center">Ninea</th></tr>				
+								<tr th:each="d, iteration:${listEntreprise}">
+									<td th:text="${iteration.index+1}"></td>
+									<td th:text="${d.nomEntreprise}"></td>
+									<td style="text-align:center" th:text="${d.ninea}"></td>
+				
+								<td style="text-align:center"><a th:href="@{modifierEntreprise(id=${d.idEntreprise})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
+								<td style="text-align:center"><a th:href="@{supprimerEntreprise(id=${d.idEntreprise})}"  onclick="return confirm('Voulez-vous supprimer cette entreprise?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>
+																												
+								</tr>	
+						</table>
+						
+							</div>
+							
+							</div>
+						<script type="text/javascript" th:if="${flagSuppression}">
+
+$(document).ready(function(){
+	
+	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    var activeTab = localStorage.getItem('activeTab');
+    if(activeTab){
+        $('#monTab a[href="' + activeTab + '"]').tab('show');
+    }
+});
+	
+
+</script>
+						</div>
+						 
 </div>
 </div>
 </div>
+
 </body>
 </html>

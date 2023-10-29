@@ -4,7 +4,7 @@
       layout:decorate="~{template3}">
 <head>
 <meta charset="UTF-8"/>
-<title>Mes Documents</title>
+<title>Détails</title>
 
 <style>
 label{
@@ -38,8 +38,19 @@ label{
 						<span th:text="${d.dateDocument}"></span>
 						
 						<div th:if="${d.dateApprobation}">
+						<label>Nom approbateur : </label>
+						<span th:text="${d.nomApprobateur}"></span>
+						<label>Prénom approbateur : </label>
+						<span th:text="${d.prenomApprobateur}"></span>
 						<label>Date d'approbation : </label>
 						<span th:text="${d.dateApprobation}"></span>
+						</div>
+						
+						<div th:if="${d.dateRejet}">
+						<label>Motif du rejet : </label>
+						<span th:text="${d.motifRejet}"></span>
+						<label>Date du rejet : </label>
+						<span th:text="${d.dateRejet}"></span>
 						</div>
 						
 						<label>Statut  : </label>
@@ -68,38 +79,40 @@ label{
 						<div class="col-md-6">
 						
 						
-						<div th:each="b:${d.beneficiaire}">
+						
 						
 						<div th:if="${d.typeBeneficiaire} eq 'Particulier'">
-						
+						<div th:each="p:${d.personne}">
 						<label>Nom :</label>
-						<span th:text="${b.nomPersonne}"></span>
+						<span th:text="${p.nomPersonne}"></span>
 						<label>Prénom :</label>
-						<span th:text="${b.prenom}"></span>
+						<span th:text="${p.prenom}"></span>
 						<label>Cni:</label>
-						<span th:text="${b.cni}"></span>
+						<span th:text="${p.cni}"></span>
 						<label>Nin:</label>
-						<span th:text="${b.nin}"></span>
+						<span th:text="${p.nin}"></span>
 						<label>Date délivrance :</label>
-						<span th:text="${b.dateDelivrance}"></span>
+						<span th:text="${p.dateDelivrance}"></span>
+						</div>
 						</div>
 						
 						<div th:if="${d.typeBeneficiaire} eq 'Entreprise'">
+						<div th:each="e:${d.entreprise}">
 						<label>Nom de l'entreprise :</label>
-						<span th:text="${b.nomEntreprise}"></span>
+						<span th:text="${e.nomEntreprise}"></span>
 						<label>Ninea :</label>
-						<span th:text="${b.ninea}"></span>
+						<span th:text="${e.ninea}"></span>
 						
 						<label>Nom :</label>
-						<span th:text="${b.Personne.nomPersonne}"></span>
+						<span th:text="${d.Personne.nomPersonne}"></span>
 						<label>Prénom :</label>
-						<span th:text="${b.Personne.prenom}"></span>
+						<span th:text="${d.Personne.prenom}"></span>
 						<label>Cni:</label>
-						<span th:text="${b.Personne.cni}"></span>
+						<span th:text="${d.Personne.cni}"></span>
 						<label>Nin:</label>
-						<span th:text="${b.Personne.nin}"></span>
+						<span th:text="${d.Personne.nin}"></span>
 						<label>Date délivrance :</label>
-						<span th:text="${b.Personne.dateDelivrance}"></span>
+						<span th:text="${d.Personne.dateDelivrance}"></span>
 						</div>
 						</div>
 						
@@ -121,6 +134,8 @@ label{
 						<span th:text="${pj.numPj}"></span>
 						<span th:text="${pj.objetPj}"></span>
 						<span th:text="${pj.datePj}"></span>
+						<a th:href="@{${pj.cheminFichier}}" ><span th:text="${pj.cheminFichier}"></span></a>
+						  
 						</div>
 					</div>
 					<p></p>
@@ -128,11 +143,11 @@ label{
 					 <p></p>
 					<div class="col-md-4">
 					 </div>
-						<div class="col-md-2" th:if="${d.statutDocument}=='saisi'">
-					    <button type="submit" class="btn btn-primary">Transmettre</button>
+						<div class="col-md-2" th:if="${d.statutDocument}=='saisi' or ${d.statutDocument}=='rejeté'">
+					    <button type="submit" onclick="return confirm('Voulez-vous transmettre le document');" class="btn btn-primary" style="border: 1px solid blue; background-color: white; color: blue;">Transmettre</button>
 					    </div>
 					    <div class="col-md-3">
-					    <a th:href="@{/pdfExport(id=${d.idDocument})}" class="btn btn-success">Imprimer 
+					    <a th:href="@{/pdfExport(id=${d.idDocument})}" class="btn btn-success" >Imprimer 
  						<i class="glyphicon glyphicon-print" ></i></a>
  						</div>
 					 

@@ -1,11 +1,10 @@
 package com.cab.sn.view;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.Date;
 
 import com.cab.sn.entities.Documents;
-import com.lowagie.text.Cell;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
@@ -124,7 +123,10 @@ public class DocumentsPdfExport {
 		  cell9.setPadding(9);
 		  table.addCell(cell9);
 		  PdfPCell cell10= new PdfPCell();
-		  cell10.setPhrase(new Phrase(String.valueOf(documents.getBeneficiaire().getIdBeneficiaire()), font1));
+		  if(documents.getPersonne()!=null && documents.getEntreprise() == null)
+			  cell10.setPhrase(new Phrase(String.valueOf(documents.getPersonne().getCni()), font1));
+		  if(documents.getEntreprise()!=null)
+			  cell10.setPhrase(new Phrase(String.valueOf(documents.getEntreprise().getNomEntreprise()), font1));
 		  cell10.setBorder(0);
 		  cell10.setPadding(9);
 		  table.addCell(cell10);
@@ -135,7 +137,7 @@ public class DocumentsPdfExport {
 		  cell11.setPadding(9);
 		  table.addCell(cell11);
 		  PdfPCell cell12 = new PdfPCell();
-		  cell12.setPhrase(new Phrase(documents.getLocalisation().getCommune(), font1));
+		  cell12.setPhrase(new Phrase(documents.getCommune().getLibelleCommune(), font1));
 		  cell12.setBorder(0);
 		  cell12.setPadding(9);
 		  table.addCell(cell12);

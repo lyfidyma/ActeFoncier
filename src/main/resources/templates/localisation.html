@@ -21,6 +21,109 @@ textarea:focus {
 }
 
 </style>
+<script type="text/javascript">
+
+$(document).ready(function(){
+	
+	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    var activeTab = localStorage.getItem('activeTab');
+    if(activeTab){
+        $('#monTab a[href="' + activeTab + '"]').tab('show');
+    }
+});
+	
+
+</script>
+<script type="text/javascript">
+function modificationLocalisation(){	
+	var modal =$('#modalModifierLocalisation')
+	$(modal).modal('show');
+}
+</script>
+<script type="text/javascript">
+	$(document).ready(function () {
+		
+		var modal = $(this)
+		
+		let checkboxCommune = document.getElementById("checkboxCommune");
+		let checkboxCommuneArrond = document.getElementById("checkboxCommuneArrond");
+		let checkboxDepartement = document.getElementById("checkboxDepartement");
+		let checkboxRegion = document.getElementById("checkboxRegion");
+		let inputCommuneModifier = document.getElementById("commune");
+		let inputCommuneArrondModifier = document.getElementById("communeArrond");
+		let inputDepartementModifier = document.getElementById("departement");
+		let inputRegionModifier = document.getElementById("region");
+		
+	        checkboxCommune.addEventListener( "change", () => {
+	        		if ( checkboxCommune.checked == true)
+	        			{ 	
+	        				document.getElementById("nouvelleCommune").style.display='block';	
+	        				
+	        			}
+	        		if ( checkboxCommune.checked == false)
+        			{ 	
+        				document.getElementById("nouvelleCommune").style.display='none';	
+        			}
+	        });
+	        
+	        inputCommuneModifier.addEventListener( "change", () => {
+	        	document.getElementById("communeModifier").value=$("#commune").val();
+        });
+	        
+	        
+	        		
+	        		checkboxCommuneArrond.addEventListener( "change", () => {
+		        		if ( checkboxCommuneArrond.checked == true)
+		        			{ 	
+		        				document.getElementById("nouvelleCommuneArrond").style.display='block';	
+		        			}
+		        		if ( checkboxCommuneArrond.checked == false)
+	        			{ 	
+	        				document.getElementById("nouvelleCommuneArrond").style.display='none';	
+	        			}
+	        });
+	        		
+	        		 inputCommuneArrondModifier.addEventListener( "change", () => {
+	     	        	document.getElementById("communeArrondModifier").value=$("#communeArrond").val();
+	             });
+	        		
+	        		checkboxDepartement.addEventListener( "change", () => {
+		        		if ( checkboxDepartement.checked == true)
+		        			{ 	
+		        				document.getElementById("nouveauDepartement").style.display='block';	
+		        			}
+		        		if ( checkboxDepartement.checked == false)
+	        			{ 	
+	        				document.getElementById("nouveauDepartement").style.display='none';	
+	        			}
+		        });
+	        		
+	        		 inputDepartementModifier.addEventListener( "change", () => {
+	     	        	document.getElementById("departementModifier").value=$("#departement").val();
+	             });
+	        		
+	        		checkboxRegion.addEventListener( "change", () => {
+		        		if ( checkboxRegion.checked == true)
+		        			{ 	
+		        				document.getElementById("nouvelleRegion").style.display='block';	
+		        			}
+		        		if ( checkboxRegion.checked == false)
+	        			{ 	
+	        				document.getElementById("nouvelleRegion").style.display='none';	
+	        			}
+		        });
+	        		
+	        		 inputRegionModifier.addEventListener( "change", () => {
+	     	        	document.getElementById("regionModifier").value=$("#region").val();
+	             });
+	        		 	
+	   });
+	       
+
+
+</script>
 </head>
 <body>
 
@@ -31,7 +134,18 @@ textarea:focus {
 	
 		
 					<div class="panel-body">
-						<form th:action="@{/referentielLocalisation}" method="post">
+					<ul class="nav nav-pills" id="monTab">
+  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste </a></li>
+
+  
+</ul>
+<div class="tab-content">
+						
+ <div class="tab-pane active" id="p1">
+ <br></br>
+						<form th:action="@{/referentielLocalisation}" method="post" >
+						<p th:if="${messageCommune}" th:text="${messageCommune}" style= color:red></p>
 						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
 							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
 							<p th:if="${messageChampsObligatoires}" th:text="${messageChampsObligatoires}" style= color:red></p>
@@ -61,8 +175,128 @@ textarea:focus {
 					  </div>
 					  
 						</form>
+						
+ 
+						
+						 </div>
+						 
+						 <div class="tab-pane" id="p2">
+						<br></br>
+						<p th:if="${messageCommuneModif}" th:text="${messageCommuneModif}" style= color:red></p>
+						<p th:if="${messageSuccesModif}" th:text="${messageSuccesModif}" class= "alert alert-success"></p>
+						<div class="table-responsive">
+						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
+							<tr style="background-color:#BE9AF6">
+							<th></th><th style="text-align:center">Commune</th><th style="text-align:center">Commune d'arrondissement</th>
+							<th style="text-align:center">Département</th><th style="text-align:center">Région</th></tr>				
+								<tr th:each="d, iteration:${listCommune}">
+									<td th:text="${iteration.index+1}"></td>
+									<td th:text="${d.libelleCommune}"></td>
+									<td th:text="${d.communeArrondissement.libelleCommuneArrond}"></td>
+									<td th:text="${d.communeArrondissement.departement.libelleDepartement}"></td>
+									<td th:text="${d.communeArrondissement.departement.region.libelleRegion}"></td>
+				
+								<td style="text-align:center"><a onclick="modificationLocalisation()" ><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
+								<td style="text-align:center"><a th:href="@{supprimerLocalisation(id=${d.idCommune})}"  onclick="return confirm('Voulez-vous supprimer cette commune?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>																			
+								</tr>	
+						</table>
+
+						</div>
+						
+
+						<!--  Modal modifier Localisation--> 
+<form th:action="@{/modifierLocalisation}" id="formulaireModifLocalisation" method="post" enctype="multipart/form-data" th:object="${uneCommune}" onsubmit="return confirm('Voulez-vous continuer?')">
+<div class="modal fade" id="modalModifierLocalisation" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="modalModifier">Que voulez-vous modifier ?</h4>
+        <span th:text="${checkbox}"></span>
+      </div>
+       
+      <div class="modal-body">
+       
+          <div class="form-group">
+          <input type="checkbox" id="checkboxCommune" name="checkboxCommune"/>
+            <label for="commune" class="col-form-label">Commune:</label>
+            
+            <input type="checkbox" id="checkboxCommuneArrond" name="checkboxCommuneArrond"/>
+            <label for="communeArrond" class="col-form-label">Commune d'arrondissement:</label>
+            
+            <input type="checkbox" id="checkboxDepartement" name="checkboxDepartement"/>
+            <label for="departement" class="col-form-label">Département:</label>
+            
+             <input type="checkbox" id="checkboxRegion" name="checkboxRegion"/>
+            <label for="region" class="col-form-label">Région:</label>
+            
+             <div id="nouvelleCommune" style="display:none">
+              <input type="text" list="list-commune" id= "commune" th:field="*{libelleCommune}" class="form-control" placeholder="Commune"
+							   />
+							   <datalist id="list-commune">
+							   <option th:each="c:${listCommune}" th:value="${c.libelleCommune}" th:text="${c.libelleCommune}"></option>
+							   </datalist>
+              <label for="communeModifier" style="color:red" class="col-form-label">Nouvelle commune:</label>
+              <input type="text" class="form-control" id="communeModifier" name="communeModifier"/>
+             </div>
+             
+             
+             <div id="nouvelleCommuneArrond" style="display:none">
+            <input type="text" list="list-communeArrond" class="form-control" id="communeArrond" name="communeArrond" placeholder="Commune d'arrond"/>
+							   <datalist id="list-communeArrond">
+							   <option th:each="c:${listCommune}" th:value="${c.communeArrondissement.libelleCommuneArrond}" th:text="${c.communeArrondissement.libelleCommuneArrond}"></option>
+							   </datalist>
+              <label for="communeModifierArrond" style="color:red" class="col-form-label">Nouvelle commune arrond:</label>
+              <input type="text" class="form-control" id="communeArrondModifier" name="communeArrondModifier"/>
+             </div>
+            
+             
+             <div id="nouveauDepartement" style="display:none">
+             <input type="text" list="list-departement" class="form-control" id="departement" name="departement" placeholder="Département"/>
+							   <datalist id="list-departement">
+							   <option th:each="c:${listCommune}" th:value="${c.communeArrondissement.departement.libelleDepartement}" th:text="${c.communeArrondissement.departement.libelleDepartement}"></option>
+							   </datalist>
+							   <label for="departementModifier" style="color:red" class="col-form-label">Nouveau département:</label>
+            <input type="text" class="form-control" id="departementModifier" name="departementModifier" />
+              
+              
+             </div>
+            
+            
+            <div id="nouvelleRegion" style="display:none">
+             <input type="text" list="list-region" class="form-control" id="region" name="region" placeholder="Région"/>
+            <datalist id="list-region">
+							   <option th:each="c:${listCommune}" th:value="${c.communeArrondissement.departement.region.libelleRegion}" th:text="${c.communeArrondissement.departement.region.libelleRegion}"></option>
+							   </datalist>
+              <label for="regionModifier" style="color:red" class="col-form-label">Nouvelle région:</label>
+             <input type="text" class="form-control" id="regionModifier" name="regionModifier" />
+              
+             </div>
+          </div>
+          
+        
+      </div>
+      <div class="modal-footer">
+      <input type="hidden" name="checkboxValider" value="true"/>
+      <input type="hidden" name="checkboxRejeter" value="false"/>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-success" style="border: 1px solid green; background-color: white; color: green;">Modifier</button>
+      </div>
+     
+    </div>
+  </div>
+</div>
+ </form>
+ 				
+						</div>
+						 
+						  </div>
 </div>
 </div>
 </div>
+
+		
 </body>
 </html>

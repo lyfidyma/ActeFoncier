@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8"/>
+<title>Profil</title>
+<style>
+label{
+	font-size:12px;
+	font-family:Arial;
+}
+input[type=text]:focus {
+  background-color: lightyellow;
+}
+textarea:focus {
+  background-color: lightyellow;
+}
+.error{
+	color:red;
+}
+
+</style>
+<script type="text/javascript" th:if="${flag}">
+
+$(document).ready(function(){
+	
+	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    var activeTab = localStorage.getItem('activeTab');
+    if(activeTab){
+        $('#monTab a[href="' + activeTab + '"]').tab('show');
+    }
+});
+	
+
+</script>
+ 
+</head>
+<body>
+
+	<div layout:fragment="content">
+	<h4>Profil utilisateur</h4>
+						   <hr/>
+	<div class="container">
+
+					<div class="panel-body">
+					 
+					<ul class="nav nav-pills" id="monTab">
+  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste</a></li>
+  
+  
+</ul>
+<div class="tab-content">
+ <div class="tab-pane active" id="p1">
+ <br></br>
+						<form th:action="@{/referentielProfil}" method="post">
+					<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+  							     <div th:object="${unProfil}">
+							  
+							    
+							     <p></p>
+							     <label for="profil" class="form-label">Profil</label>
+							    <select id="profil" name="profil" class="form-control" >
+							      <option value="" hidden>------------</option>
+							      <option value="ROLE_ADMIN">ADMIN</option>
+							       <option value="ROLE_USER">USER</option>						       
+							    </select>
+							  
+							  </div>							   
+						  <br style="clear: both;"/>
+						  <p></p>
+						  
+					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					 
+						</form>
+						</div>
+						<div class="tab-pane" id="p2">
+						<br></br>
+						<p th:if="${messageSucces2}" th:text="${messageSucces2}" class= "alert alert-success"></p>
+						<p th:if="${messageUtilisateur}" th:text="${messageUtilisateur}" class= "alert alert-success"></p>
+						<h4 th:if="${listProfil.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée profil</h4>
+						<div class="table-responsive" th:if="${listProfil.isEmpty}==false">
+						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
+							<tr style="background-color:#DEF69A; ">
+							<th></th><th style="text-align:center">Profil</th></tr>				
+								<tr th:each="d, iteration:${listProfil}">
+									<td th:text="${iteration.index+1}"></td>
+									<td th:text="${d.nomProfil}"></td>
+							
+								<td style="text-align:center"><a th:href="@{supprimerProfil(id=${d.idProfil})}"  onclick="return confirm('Voulez-vous supprimer ce profil?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>
+																		
+								</tr>	
+						</table>
+						
+						</div>
+						
+						</div>
+							
+						
+						</div>
+						 
+</div>
+</div>
+</div>
+
+</body>
+</html>

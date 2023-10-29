@@ -1,44 +1,55 @@
 package com.cab.sn.metier;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import com.cab.sn.dao.BeneficiaireRepository;
+import com.cab.sn.controller.FileUploadController;
 import com.cab.sn.dao.CommuneArrondissementRepository;
 import com.cab.sn.dao.CommuneRepository;
 import com.cab.sn.dao.DepartementRepository;
 import com.cab.sn.dao.DocumentsRepository;
 import com.cab.sn.dao.EntrepriseRepository;
-import com.cab.sn.dao.LocalisationRepository;
 import com.cab.sn.dao.PersonneRepository;
 import com.cab.sn.dao.PiecesJointesRepository;
+import com.cab.sn.dao.ProfilRepository;
 import com.cab.sn.dao.RegionRepository;
+import com.cab.sn.dao.ResponsableRepository;
 import com.cab.sn.dao.TypeDocumentRepository;
-import com.cab.sn.entities.Beneficiaire;
+import com.cab.sn.dao.UtilisateurRepository;
 import com.cab.sn.entities.Commune;
 import com.cab.sn.entities.CommuneArrondissement;
 import com.cab.sn.entities.Departement;
 import com.cab.sn.entities.Documents;
 import com.cab.sn.entities.Entreprise;
-import com.cab.sn.entities.Localisation;
 import com.cab.sn.entities.Personne;
 import com.cab.sn.entities.PiecesJointes;
+import com.cab.sn.entities.Profil;
 import com.cab.sn.entities.Region;
+import com.cab.sn.entities.Responsable;
 import com.cab.sn.entities.TypeDocument;
+import com.cab.sn.entities.Utilisateur;
 
 import jakarta.transaction.Transactional;
 
@@ -49,11 +60,7 @@ public class CabMetierImpl implements ICabMetier{
 	@Autowired
 	private DocumentsRepository docRepository;
 	@Autowired
-	private BeneficiaireRepository bRepository;
-	@Autowired
 	private PiecesJointesRepository pjRepository;
-	@Autowired
-	private LocalisationRepository lRepository;
 	@Autowired
 	private PersonneRepository persRepository;
 	@Autowired
@@ -68,6 +75,14 @@ public class CabMetierImpl implements ICabMetier{
 	private DepartementRepository departementRepository;
 	@Autowired
 	private RegionRepository regionRepository;
+	@Autowired
+	private StorageService storageService;
+	@Autowired
+	private ResponsableRepository responsableReposistory;
+	@Autowired
+	public UtilisateurRepository utilisateurRepository;
+	@Autowired
+	public ProfilRepository profilRepository;
 	
 	/**
 	 *
@@ -75,55 +90,52 @@ public class CabMetierImpl implements ICabMetier{
 	@Override
 	public Documents sauvegarderDocuments(Long idDocument, String numDocument, LocalDate dateDocument, String titreGlobal,
 			String objetDocument, String statutDocument, String typeBeneficiaire, String responsableDocument, String lot,
-			String nicad, Date dateAPprobation, String superficie, String nomEntreprise, String ninea, Long cni, 
-			String nomPersonne, String prenom, Long nin, LocalDate dateDelivrance, 
-			String comm, String typeDoc, String numPj, LocalDate datePj, String objetPj, String numPj1, 
-			LocalDate datePj1, String objetPj1) {
+			String nicad, Date dateAPprobation, String superficie, String nomEntreprise, String ninea, String cni, 
+			String nomPersonne, String prenom, String nin, LocalDate dateDelivrance, 
+			String libelleCommune, String typeDoc, String numPj, LocalDate datePj, String objetPj, MultipartFile file, String numPj1, 
+			LocalDate datePj1, String objetPj1, MultipartFile file1) {
 		
 		Documents d1 = null;
-		Beneficiaire b1 = null ;
+		Entreprise e1 = null ;
 		TypeDocument td1 = null;
 		Personne p1 = null;
 		Commune c1=null;
 		//Mise à jour
 		if(idDocument!=null){
 			Documents doc = docRepository.findById(idDocument).get(); 
-			//  Long idBenefMaj=doc.getBeneficiaire().getIdBeneficiaire(); 
+			
+			//Mise à jour Bénéficiaire
+			if(typeBeneficiaire.equals("Entreprise")==true) {
+				  if(entRepository.chercherEntrepriseParNinea(ninea)!=null) {
+					  if(persRepository.chercherPersonne(cni)!=null) {
+						  p1 = persRepository.chercherPersonne(cni);  
+					  }else {
+						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+					  }
+					  e1 = entRepository.chercherEntrepriseParNinea(ninea); 
+					  doc.setEntreprise(e1);
+					  doc.setPersonne(p1);
+				  }else {
+					  if(persRepository.chercherPersonne(cni)!=null) {
+						  p1 = persRepository.chercherPersonne(cni);
+						   	  
+					  }else {
+						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+					  	}
+					  e1 = entRepository.save(new Entreprise(nomEntreprise, ninea));
+					  }
+				  doc.setEntreprise(e1);
+				  doc.setPersonne(p1);
+			  }
+			  else if((typeBeneficiaire.equals("Particulier"))== true) {		 
+				  if(persRepository.chercherPersonne(cni)!=null) {
+					  		p1 = persRepository.chercherPersonne(cni);
+				  }else {
+					  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+				  }
+					  	doc.setPersonne(p1);
+			  }
 			  
-				/*
-				 * if(typeBeneficiaire.equals("Entreprise")) {
-				 * 
-				 * if(entRepository.chercherEntreprise(idBenefMaj).getNinea().equals(ninea)) {
-				 * b1 = bRepository.findById(idBenefMaj).get();
-				 * if(entRepository.chercherEntreprise(idBenefMaj).getPersonne().getCni().equals
-				 * (cni)) { b1 = bRepository.findById(idBenefMaj).get(); }else {
-				 * if(persRepository.chercherPersonneParId(idBenefMaj).getCni().equals(cni)) {
-				 * p1 = persRepository.chercherPersonneParId(idBenefMaj); b1 =
-				 * bRepository.save(new Entreprise(nomEntreprise, ninea, p1));
-				 * 
-				 * }else { p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin,
-				 * dateDelivrance)); b1 = bRepository.save(new Entreprise(nomEntreprise, ninea,
-				 * p1)); }
-				 * 
-				 * }
-				 * 
-				 * }else {
-				 * if(entRepository.chercherEntreprise(idBenefMaj).getPersonne().getCni().equals
-				 * (cni)) p1 = persRepository.chercherPersonneParId(idBenefMaj); else p1 =
-				 * persRepository.save(new Personne(cni, nomPersonne, prenom, nin,
-				 * dateDelivrance));
-				 * 
-				 * b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); }
-				 * 
-				 * 
-				 * }
-				 */
-		
-				/*
-				 * else if(typeBeneficiaire.equals("Particulier")) { b1 = bRepository.save(new
-				 * Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
-				 * doc.setBeneficiaire(b1); docRepository.save(doc); }
-				 */
 			  
 			  //Mise à jour du type de document
 			 // Long idTypeDocMaj = doc.getTypeDocument().getIdTypeDocument();
@@ -132,41 +144,87 @@ public class CabMetierImpl implements ICabMetier{
 				  docRepository.save(doc);
 				 
 			  //Mise à jour des pièces jointes
-			    Collection<PiecesJointes> pj1 = pjRepository.chercherPiecesJointes(idDocument);
-			//	for(int i=1; i<=pj1.size(); i++) {
-					if(numPj!=null || objetPj!=null || datePj!=null) {
+				  
+			    
+			    if(pjRepository.chercherPiecesJointes(idDocument)!=null) {
+			    	Collection<PiecesJointes> pj1 = pjRepository.chercherPiecesJointes(idDocument);
+			    	
+					
 						if(pj1.size()==1) {
 							PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
 							pj2.setDatePj(datePj);
 							pj2.setNumPj(numPj);
 							pj2.setObjetPj(objetPj);
-							pjRepository.save(pj2);		 	
-						}
-					}
-					 	if(numPj1!=null || objetPj1!=null || datePj1!=null) {
-					 		if(pj1.size()==1) {
-					 			PiecesJointes pj3 = new PiecesJointes(numPj1, objetPj1, datePj1, doc);
-					 			pjRepository.save(pj3);
-					 		} else if(pj1.size()==2) {
-					 			PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
-					 			pj2.setDatePj(datePj);
-							 	pj2.setNumPj(numPj);
-							 	pj2.setObjetPj(objetPj);
-							 	pjRepository.save(pj2);
-							 	
-							 	PiecesJointes pj3 = pjRepository.chercherPiecesJointes(idDocument).get(1);
-					 			pj3.setDatePj(datePj1);
-							 	pj3.setNumPj(numPj1);
-							 	pj3.setObjetPj(objetPj1);
-							 	pjRepository.save(pj3);			 
-					 		}
-					 	}	 	
-		//		}
+							if(file.isEmpty()==false) {
+								storageService.init();
+								storageService.store(file);
+								pj2.setCheminFichier(file.getOriginalFilename().toString());
+							}
+							pjRepository.save(pj2);
+						}		 	
+						
+					
+						if(pj1.size()==2) {
+							PiecesJointes pj2 = pjRepository.chercherPiecesJointes(idDocument).get(0);
+							pj2.setDatePj(datePj);
+							pj2.setNumPj(numPj);
+							pj2.setObjetPj(objetPj);
+							if(file.isEmpty()==false) {
+								storageService.init();
+								storageService.store(file);
+								pj2.setCheminFichier(file.getOriginalFilename().toString());
+							}
+							pjRepository.save(pj2);	
+								
+				 			PiecesJointes pj3 = pjRepository.chercherPiecesJointes(idDocument).get(1);
+				 			pj3.setDatePj(datePj1);
+						 	pj3.setNumPj(numPj1);
+						 	pj3.setObjetPj(objetPj1);
+						 	if(file1.isEmpty()==false) {
+						 		storageService.init();
+								storageService.store(file1);
+								pj3.setCheminFichier(file1.getOriginalFilename().toString());
+						 	}
+						 		
+						 	pjRepository.save(pj3);		 
+					 	}
+					 	}else if(pjRepository.chercherPiecesJointes(idDocument)==null) {
+					 		  String cheminFichier = null;
+							  String cheminFichier1 = null;
+							  Collection<PiecesJointes> pj4= new ArrayList<PiecesJointes>();
+							  if(numPj.isBlank()== false || objetPj.isBlank()== false || datePj!=null) {
+								  if(file.isEmpty()==false) {
+								  	storageService.init();
+									storageService.store(file);
+									Path path = storageService.load(file.getOriginalFilename());
+									cheminFichier = MvcUriComponentsBuilder
+									          .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString()).build().toString();  
+									  
+								  }
+								  pj4.add(new PiecesJointes(numPj, objetPj, datePj, cheminFichier, d1));
+									
+							  	  pjRepository.saveAll(pj4);
+							  }
+							  if(numPj1.isBlank()== false || objetPj1.isBlank() == false || datePj1!=null) {
+								  if(file1.isEmpty()==false) {
+									  storageService.init();
+									  storageService.store(file1);
+									  Path path = storageService.load(file1.getOriginalFilename());
+									  cheminFichier1 = MvcUriComponentsBuilder
+										          .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString()).build().toString();  
+								  }
+									
+								  pj4.add(new PiecesJointes(numPj1, objetPj1, datePj1, cheminFichier1, d1));
+								  pjRepository.saveAll(pj4);
+							  }
+					 	}
+			    
+		
 		
 			
 			  //Mise à jour de la localisation
 			 // Localisation localisation = new Localisation(commune, communeArrond, departement, region);
-			  Commune commu= communeRepository.findByCommune(comm);
+			  Commune commu= communeRepository.findByCommune(libelleCommune);
 			  doc.setCommune(commu);
 			  //doc.setLocalisation(localisation);
 			  docRepository.save(doc);
@@ -192,44 +250,66 @@ public class CabMetierImpl implements ICabMetier{
 			  if(typeBeneficiaire.equals("Entreprise")== true) {
 				  if(entRepository.chercherEntrepriseParNinea(ninea)!=null) {
 					  if(persRepository.chercherPersonne(cni)!=null) {
-						  b1 = entRepository.chercherEntrepriseParNinea(ninea);
+						  p1 = persRepository.chercherPersonne(cni);  
 					  }else {
 						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
-						  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 
 					  }
-						  
+					  e1 = entRepository.chercherEntrepriseParNinea(ninea); 
 				  }else {
 					  if(persRepository.chercherPersonne(cni)!=null) {
 						  p1 = persRepository.chercherPersonne(cni);
-						  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 	  
+						   	  
 					  }else {
 						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
-						  b1 = bRepository.save(new Entreprise(nomEntreprise, ninea, p1)); 
 					  	}
+					  e1 = entRepository.save(new Entreprise(nomEntreprise, ninea));
 					  }
 				  
 			  }
 			  else if((typeBeneficiaire.equals("Particulier"))== true) {		 
-				  if(persRepository.chercherPersonne(cni)!=null)
-					  		b1 = persRepository.chercherPersonne(cni);
-					  	b1 = bRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+				  if(persRepository.chercherPersonne(cni)!=null) {
+					  		p1 = persRepository.chercherPersonne(cni);
+				  }else {
+					  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
+				  }
+					  	
 			  }
 			  
 			  
-			  c1 = communeRepository.findByCommune(comm);
+			  c1 = communeRepository.findByCommune(libelleCommune);
 			  td1 = tdRepository.chercherTypeDocumentParTypeDoc(typeDoc); 
-			  d1 = docRepository.save(new Documents(numDocument, CodeDocumentGenerateur.genererCodeDocument(new Date(), typeDoc, comm), 
+			  d1 = docRepository.save(new Documents(numDocument, CodeDocumentGenerateur.genererCodeDocument(new Date(), typeDoc, libelleCommune), 
 					  dateDocument, titreGlobal, objetDocument, "saisi", typeBeneficiaire, responsableDocument, lot,nicad,
-					  superficie, b1, c1, td1)); 
+					  superficie, p1, e1, c1, td1)); 
+			 
+			  String cheminFichier = null;
+			  String cheminFichier1 = null;
 			  Collection<PiecesJointes> pj3= new ArrayList<PiecesJointes>();
-			  if(numPj!=""|| objetPj!="" || datePj!=null) {
-				  pj3.add(new PiecesJointes(numPj, objetPj, datePj, d1));
+			  if(numPj.isBlank()== false || objetPj.isBlank()== false || datePj!=null) {
+				  if(file.isEmpty()==false) {
+				  	storageService.init();
+					storageService.store(file);
+					Path path = storageService.load(file.getOriginalFilename());
+					cheminFichier = MvcUriComponentsBuilder
+					          .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString()).build().toString();  
+				  }
+				  pj3.add(new PiecesJointes(numPj, objetPj, datePj, cheminFichier, d1));
+					
 			  	  pjRepository.saveAll(pj3);
 			  }
-			  if(numPj1!="" || objetPj1!="" || datePj1!=null) {
-				  pj3.add(new PiecesJointes(numPj1, objetPj1, datePj1, d1));
+			  if(numPj1.isBlank()== false || objetPj1.isBlank() == false || datePj1!=null) {
+				  if(file1.isEmpty()==false) {
+					  storageService.init();
+					  storageService.store(file1);
+					  Path path = storageService.load(file1.getOriginalFilename());
+					  cheminFichier1 = MvcUriComponentsBuilder
+					          .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString()).build().toString();
+				  }
+					
+				  pj3.add(new PiecesJointes(numPj1, objetPj1, datePj1, cheminFichier1, d1));
 				  pjRepository.saveAll(pj3);
 			  }
+			  
 			  return d1;
 		}
 	}
@@ -275,7 +355,7 @@ public class CabMetierImpl implements ICabMetier{
 	}
 	
 	@Override
-	public Personne chercherPersonne(Long cniPersonne) {
+	public Personne chercherPersonne(String cniPersonne) {
 		Personne personne=null;
 		Optional <Personne> optional = Optional.ofNullable(persRepository.chercherPersonne(cniPersonne));
 		if(optional.isPresent())
@@ -397,16 +477,30 @@ public class CabMetierImpl implements ICabMetier{
 	}
 	
 	@Override
-	public Documents validerDocuments(Long id, String casApprouve, String casRejet) {
+	public Documents validerDocuments(Long id, String casApprouve, String casRejet, String nomApprobateur, 
+			String prenomApprobateur, String motifRejet, MultipartFile file) {
 		Documents doc = docRepository.findById(id).get();
-		
+		String cheminFichier= null;
 		if(casApprouve.equals("true")) {	
 			doc.setStatutDocument("approuvé");
+			doc.setNomApprobateur(nomApprobateur);
+			doc.setPrenomApprobateur(prenomApprobateur);
 			doc.setDateApprobation(new Date());
+			if(file.isEmpty()==false) {
+				storageService.init();
+				storageService.store(file);
+				Path path = storageService.load(file.getOriginalFilename());
+				cheminFichier = MvcUriComponentsBuilder
+				          .fromMethodName(FileUploadController.class, "serveFile", path.getFileName().toString()).build().toString();  
+				pjRepository.save(new PiecesJointes(cheminFichier, doc));
+				}
+			
 			docRepository.save(doc);
 			
 		}else if (casRejet.equals("true")) {
 			doc.setStatutDocument("rejeté");
+			doc.setDateRejet(new Date());
+			doc.setMotifRejet(motifRejet);
 			docRepository.save(doc);			
 		}
 		return doc;
@@ -414,7 +508,7 @@ public class CabMetierImpl implements ICabMetier{
 	}
 	
 	@Override
-	public List <Documents> findByCni(Long cni) {
+	public List <Documents> findByCni(String cni) {
 		return docRepository.findByCni(cni);
 	}
 
@@ -429,28 +523,39 @@ public class CabMetierImpl implements ICabMetier{
 	}
 
 	@Override
-	public Beneficiaire ajoutBeneficiaire(String typeBeneficiaire, String nomPersonne, String prenom, Long cni,
-			Long nin, LocalDate dateDelivrance, String nomEntreprise, String ninea, boolean checkbox) {
-		Beneficiaire beneficiaire = null;
+	public Personne ajoutPersonne(Long idPersonne, String nomPersonne, String prenom, String cni,
+			String nin, LocalDate dateDelivrance) {
 		Personne personne = null;
-		if(typeBeneficiaire.equals("Particulier")) {
-			
-					  beneficiaire = bRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));	  		
+		if(idPersonne== null) {
+			personne = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));	  		
+		
+		}
+		else if(idPersonne!=null) {
+			personne = persRepository.chercherPersonneParId(idPersonne);
+			personne.setCni(cni);
+			personne.setDateDelivrance(dateDelivrance);
+			personne.setNin(nin);
+			personne.setNomPersonne(nomPersonne);
+			personne.setPrenom(prenom);
+			persRepository.save(personne);
 			
 		}
-		if(typeBeneficiaire.equals("Entreprise")) {
-			if(checkbox == false)
-				beneficiaire = bRepository.save(new Entreprise(nomEntreprise, ninea));
-			else if( checkbox == true) {
-				if(persRepository.chercherPersonne(cni) != null)
-						personne = persRepository.chercherPersonne(cni);
-					else
-						personne = new Personne(cni, nomPersonne, prenom, nin, dateDelivrance);
-				
-				beneficiaire = bRepository.save(new Entreprise(nomEntreprise, ninea, personne));
-			}
+		return personne;
+	}
+	@Override
+	public Entreprise ajoutEntreprise(Long idEntreprise, String nomEntreprise, String ninea) {
+
+		Entreprise entreprise = null;
+		if(idEntreprise==null) {
+			entreprise = entRepository.save(new Entreprise(nomEntreprise, ninea));
+		}else if(idEntreprise!=null) {
+			entreprise = entRepository.chercherEntreprise(idEntreprise);
+			entreprise.setNinea(ninea);
+			entreprise.setNomEntreprise(nomEntreprise);
+			entRepository.save(entreprise);
+			
 		}
-		return beneficiaire;
+		return entreprise;
 	}
 
 	@Override
@@ -464,8 +569,15 @@ public class CabMetierImpl implements ICabMetier{
 	}
 
 	@Override
-	public TypeDocument ajoutTypeDocument(String typeDoc) {
-		TypeDocument typeDocument = tdRepository.save(new TypeDocument(typeDoc));
+	public TypeDocument ajoutTypeDocument(Long idTypeDocument, String typeDoc) {
+		TypeDocument typeDocument= null;
+		if(idTypeDocument==null) {
+			 typeDocument = tdRepository.save(new TypeDocument(typeDoc));
+		}else if(idTypeDocument!=null) {
+			 typeDocument = tdRepository.findById(idTypeDocument).get();
+			 typeDocument.setTypeDoc(typeDoc);
+			 tdRepository.save(typeDocument);
+		}
 		return typeDocument;
 	}
 
@@ -569,5 +681,229 @@ public class CabMetierImpl implements ICabMetier{
 		return regionRepository.save(new Region(region));
 		
 	}
+	
+	public List <Commune> findAllCommune() {
+		return communeRepository.findAll();
+	}
+
+
+	@Override
+	public TypeDocument findByIdTypeDocument(Long id) {
+		return tdRepository.findById(id).get();
+	}
+
+	@Override
+	public Commune findByIdCommune(Long id) {
+		return communeRepository.findById(id).get();
+	}
+
+	@Override
+	public CommuneArrondissement findByIdCommuneArrondissement(Long id) {
+		
+		return communeArrondRepository.findById(id).get();
+	}
+
+	@Override
+	public Departement findByIdDepartement(Long id) {
+		return departementRepository.findById(id).get();
+	}
+
+	@Override
+	public Region findByIdRegion(Long id) {
+		
+		return regionRepository.findById(id).get();
+	}
+
+	@Override
+	public List<Personne> findAllPersonne() {
+		return persRepository.findAll();
+	}
+
+	@Override
+	public List<Entreprise> findAllEntreprise() {
+		return entRepository.findAll();
+	}
+
+	@Override
+	public void supprimerPersonne(Long idPersonne) {		
+		persRepository.deleteById(idPersonne);
+		
+	}
+
+	@Override
+	public void supprimerEntreprise(Long idEntreprise) {
+		entRepository.deleteById(idEntreprise);
+		
+	}
+
+
+
+	
+
+	@Override
+	public void supprimerTypeDocument(Long idTypeDocument) {
+		tdRepository.deleteById(idTypeDocument);
+		
+	}
+
+	@Override
+	public List<Documents> findByNinea(String ninea) {
+		return docRepository.findByNinea(ninea);
+	}
+
+	@Override
+	public List<Documents> findByTypeDocument(String typeDocument) {
+		return docRepository.findByTypeDoc(typeDocument);
+	}
+
+	@Override
+	public void supprimerCommune(Long idCommune) {
+		communeRepository.deleteById(idCommune);	
+	}
+
+	@Override
+	public List<Documents> findDocumentsByCommune(String libelleCommune) {
+		return docRepository.findDocumentsByCommune(libelleCommune);
+	}
+
+	@Override
+	public Commune modifierCommune(String libelleCommune, String nouvelleCommune) {
+		
+			Commune comm=null;
+			comm = communeRepository.findByCommune(libelleCommune);
+			comm.setLibelleCommune(nouvelleCommune);
+			communeRepository.save(comm);	
+			return comm;
+	}
+
+	@Override
+	public CommuneArrondissement modifierCommuneArrondissement(String libelleCommuneArrond,
+			String nouvelleCommuneArrond) {
+		
+			CommuneArrondissement cArrond=null;
+			cArrond = communeArrondRepository.findByCommuneArrondissement(libelleCommuneArrond);
+			cArrond.setLibelleCommuneArrond(nouvelleCommuneArrond);
+			communeArrondRepository.save(cArrond);
+			return cArrond;
+	}
+
+	@Override
+	public Departement modifierDepartement(String libelleDepartement, String nouveauDepartement) {
+		
+		Departement dep = null;
+		
+			dep = departementRepository.findByDepartement(libelleDepartement);
+			dep.setLibelleDepartement(nouveauDepartement);
+			departementRepository.save(dep);
+			return dep;
+	}
+
+	@Override
+	public Region modifierRegion(String libelleRegion, String nouvelleRegion) {
+		
+		Region reg = null;
+
+			reg = regionRepository.findByRegion(libelleRegion);
+			reg.setLibelleRegion(nouvelleRegion);
+			regionRepository.save(reg);
+		return reg;
+
+	}
+
+	@Override
+	public List<Responsable> findAllResponsable() {
+		return responsableReposistory.findAll();
+	}
+
+	@Override
+	public Responsable ajoutResponsable(Long id, String nom, String prenom, String fonction) {
+		Responsable responsable = null;
+		if(id==null) {
+			responsableReposistory.save(new Responsable(nom, prenom, fonction));
+		}else if(id!=null) {
+			responsable = responsableReposistory.findById(id).get();
+			responsable.setNomResponsable(nom);
+			responsable.setPrenomResponsable(prenom);
+			responsable.setFonction(fonction);
+			responsableReposistory.save(responsable);
+			
+		}
+		return responsable;
+	}
+
+	@Override
+	public void supprimerResponsable(Long id) {
+		responsableReposistory.deleteById(id);
+		
+	}
+
+	@Override
+	public Responsable findByIdResponsable(Long idResponsable) {
+		return responsableReposistory.findById(idResponsable).get();
+	}
+
+	@Override
+	public List<Utilisateur> findAllUtilisateur() {
+		return utilisateurRepository.findAll();
+	}
+
+	@Override
+	public Utilisateur ajoutUtilisateur(Long id, String nom, String prenom, String email, String password, String profil) {
+		Utilisateur utilisateur = null;
+		Profil profilRole = profilRepository.findByNomProfil(profil);
+		Set<Profil> roles = Stream.of(profilRole)
+                .collect(Collectors.toCollection(HashSet::new));
+		if(id==null) {
+			utilisateur = utilisateurRepository.save(new Utilisateur(nom, prenom, email, password));
+			utilisateur.setProfil(roles);
+		}
+		else if(id!=null) {
+			utilisateur = utilisateurRepository.findById(id).get();
+			utilisateur.setNomUtilisateur(nom);
+			utilisateur.setPrenomUtilisateur(prenom);
+			utilisateur.setEmail(email);
+			utilisateur.setProfil(roles);
+			
+			if(password.isBlank()==false)
+				utilisateur.setPassword(password);
+			utilisateurRepository.save(utilisateur);
+		}
+		
+		return utilisateur;
+			
+	}
+
+	@Override
+	public void supprimerUtilisateur(Long id) {
+		utilisateurRepository.deleteById(id);
+	}
+
+	@Override
+	public Utilisateur findByIdUtilisateur(Long id) {
+		return utilisateurRepository.findById(id).get();
+	}
+
+	@Override
+	public List<Profil> findAllProfil() {
+		return profilRepository.findAll();
+	}
+
+	@Override
+	public Profil ajoutProfil(String nomProfil) {
+		return profilRepository.save(new Profil(nomProfil));
+	}
+
+	@Override
+	public void supprimerProfil(Long id) {
+		profilRepository.deleteById(id);
+		
+	}
+
+	@Override
+	public Optional<Profil> findByIdProfil(Long id) {
+		return profilRepository.findById(id);
+	}
+
+	
 	
 }

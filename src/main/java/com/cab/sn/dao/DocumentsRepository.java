@@ -52,8 +52,14 @@ public interface DocumentsRepository extends JpaRepository<Documents, Long>{
 	@Query("select d from Documents d where d.codeUniqueDocument like :x and d.statutDocument = 'transmis'")
 	public Documents findByCodeUniqueDocument(@Param("x")String CodeUniqueDocument);
 	
-	@Query("select d from Documents d where d.beneficiaire.cni like :x")
-	public List <Documents> findByCni(@Param("x")Long cni);
+	@Query("select d from Documents d where d.personne.cni like :x")
+	public List <Documents> findByCni(@Param("x")String cni);
+	
+	@Query("select d from Documents d where d.commune.libelleCommune like :x")
+	public List <Documents> findDocumentsByCommune(@Param("x")String libelleCommune);
+	
+	@Query("select d from Documents d where d.entreprise.ninea like :x")
+	public List <Documents> findByNinea(@Param("x")String ninea);
 	
 	@Query("select d from Documents d where d.statutDocument = 'transmis'")
 	public Page<Documents> findByStatutTransmis(Pageable pageable);

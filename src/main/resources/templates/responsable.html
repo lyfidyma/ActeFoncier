@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+       xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+      layout:decorate="~{template3}">
+<head>
+<meta charset="UTF-8"/>
+<title>Responsable</title>
+<style>
+label{
+	font-size:12px;
+	font-family:Arial;
+}
+input[type=text]:focus {
+  background-color: lightyellow;
+}
+textarea:focus {
+  background-color: lightyellow;
+}
+.error{
+	color:red;
+}
+
+</style>
+<script type="text/javascript" th:if="${flag}">
+
+$(document).ready(function(){
+	
+	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    var activeTab = localStorage.getItem('activeTab');
+    if(activeTab){
+        $('#monTab a[href="' + activeTab + '"]').tab('show');
+    }
+});
+	
+
+</script>
+ 
+</head>
+<body>
+
+	<div layout:fragment="content">
+	<h4>Nouveau responsable</h4>
+						   <hr/>
+	<div class="container">
+
+					<div class="panel-body">
+					 <p th:if="${messagePersonneDocument}" th:text="${messagePersonneDocument}" style= color:red></p>
+					  <p th:if="${messageEntrepriseDocument}" th:text="${messageEntrepriseDocument}" style= color:red></p>
+					<ul class="nav nav-pills" id="monTab">
+  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste</a></li>
+  
+  
+</ul>
+<div class="tab-content">
+ <div class="tab-pane active" id="p1">
+ <br></br>
+						<form th:action="@{/referentielResponsable}" method="post">
+						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+							
+  							     <div th:object="${unResponsable}">
+							  
+							    <label for="nom" class="form-label">Nom</label>
+							    <input type="text" th:field="*{nomResponsable}" class="form-control" placeholder="Nom" />
+							     <p th:if="${#fields.hasErrors('nomResponsable')}" th:errors="*{nomResponsable}" th:errorclass="error"></p>
+							  <p></p>
+							   <label for="prenom" class="form-label">Prénom</label>
+							    <input type="text" th:field="*{prenomResponsable}" class="form-control" placeholder="Prénom" />
+							  <p th:if="${#fields.hasErrors('prenomResponsable')}" th:errors="*{prenomResponsable}" th:errorclass="error"></p>
+							  <p></p>
+							   <label for="prenom" class="form-label">Fonction</label>
+							    <input type="text" th:field="*{fonction}" class="form-control" placeholder="Fonction" />
+							     <p th:if="${#fields.hasErrors('fonction')}" th:errors="*{fonction}" th:errorclass="error"></p>
+							   <input type="hidden" th:field="*{idResponsable}"/>
+							  </div>							   
+						  <br style="clear: both;"/>
+						  <p></p>
+						  
+					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					 
+						</form>
+						</div>
+						<div class="tab-pane" id="p2">
+						<br></br>
+						<p th:if="${messageResponsable}" th:text="${messageResponsable}" class= "alert alert-success"></p>
+						<h4 th:if="${listResponsable.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée responsable</h4>
+						<div class="table-responsive" th:if="${listResponsable.isEmpty}==false">
+						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
+							<tr style="background-color:#DEF69A; ">
+							<th></th><th style="text-align:center">Nom</th><th style="text-align:center">Prénom</th><th style="text-align:center">Fonction</th></tr>				
+								<tr th:each="d, iteration:${listResponsable}">
+									<td th:text="${iteration.index+1}"></td>
+									<td th:text="${d.nomResponsable}"></td>
+									<td th:text="${d.prenomResponsable}"></td>
+									<td th:text="${d.fonction}"></td>
+								<td style="text-align:center"><a th:href="@{modifierResponsable(id=${d.idResponsable})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
+								<td style="text-align:center"><a th:href="@{supprimerResponsable(id=${d.idResponsable})}"  onclick="return confirm('Voulez-vous supprimer ce responsable?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>
+																		
+								</tr>	
+						</table>
+						
+						</div>
+						
+						</div>
+							
+						
+						</div>
+						 
+</div>
+</div>
+</div>
+
+</body>
+</html>

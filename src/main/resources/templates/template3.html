@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8"/>
 <title>template3</title>
-	
+
 	<link rel="stylesheet" type="text/css"
 	href="../static/css/myStyle.css"
 	th:href="@{/css/myStyle.css}"/>
@@ -32,29 +32,36 @@
    	 <li> 	 
 	     <a th:href="@{/index}"><span ><i class="glyphicon glyphicon-home"></i></span>Accueil</a>
      </li>
+     
       <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-  	  	<a  class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" ><span ><i class="glyphicon glyphicon-wrench"></i></span>Référentiels&nbsp;<span class="caret"></span></a>
-  	  	<ul class="dropdown-menu">
+      	
+      <a  data-toggle="collapse" role="button" href="#collapse2" aria-expanded="false" aria-controls="collapse2"><span ><i class="glyphicon glyphicon-wrench"></i></span>Référentiels</a>
+      
+     
+      <div id="collapse2" class="collapse">
+      
+  	  	<!-- <a  class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" ><span ><i class="glyphicon glyphicon-wrench"></i></span>Référentiels&nbsp;<span class="caret"></span></a> -->
+  	  	
      	 
-      	<li>
-	       <a style="color:black" th:href="@{/beneficiaire}">Bénéficiaire</a>
-        </li>
-      <li>
-      	  <a style="color:black" th:href="@{/typededocument}">Type de document</a>
-      </li>
- 		<li>
-        <a style="color:black" th:href="@{/localisation}">Localisation</a>
-      </li>
-      <li>
-        <a href="#">Responsable document</a>
-      </li>
-      <li>
-        <a href="#">Utilisateur</a>
-      </li>
-      <li>
-        <a href="#">Profil</a>
-      </li>
-      </ul>
+      	 <ul class=list-group>
+	      <li> <a style="color:black" th:href="@{/beneficiaire}">Bénéficiaire</a></li>
+       
+     
+      	  <li><a style="color:black" th:href="@{/typededocument}">Type de document</a></li>
+      
+ 		
+       <li> <a style="color:black" th:href="@{/localisation}">Localisation</a></li>
+     
+      
+       <li> <a style="color:black" th:href="@{/responsable}">Responsable document</a></li>
+      
+       <li> <a style="color:black" th:href="@{/utilisateur}">Utilisateur</a></li>
+      
+       <li> <a style="color:black" th:href="@{/profil}">Profil</a></li>
+       </ul>
+      </div>
+    
+    
       </li>
      
   	

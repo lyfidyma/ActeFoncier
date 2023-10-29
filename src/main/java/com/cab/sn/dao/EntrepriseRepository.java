@@ -13,7 +13,7 @@ import com.cab.sn.entities.Entreprise;
 
 public interface EntrepriseRepository extends JpaRepository<Entreprise, Long>{
 	
-	@Query("select e from Entreprise e where e.idBeneficiaire like :x")
+	@Query("select e from Entreprise e where e.idEntreprise like :x")
 	public Entreprise chercherEntreprise(@Param("x")Long id);
 	
 	@Query("select e from Entreprise e where e.ninea like :x")

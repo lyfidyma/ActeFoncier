@@ -2,6 +2,9 @@ package com.cab.sn.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,15 +16,17 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//@DiscriminatorValue("ENTREPRISE")
-//@PrimaryKeyJoinColumn(name = "idEntreprise")
-public class Entreprise extends Beneficiaire{
+
+public class Entreprise{
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long idEntreprise;
 	@Column(nullable=false)
 	private String nomEntreprise;
 	@Column(nullable=false)
 	private String ninea;
-	@OneToOne
-	private Personne personne;
+	
 	public Entreprise(String nomEntreprise, String ninea) {
 		super();
 		this.nomEntreprise = nomEntreprise;
