@@ -33,6 +33,7 @@ public interface ICabMetier {
 			String numPj1, LocalDate datePj1, String objetPj1, MultipartFile file1);
 	public Page<Documents> listDocuments(int page, int size);
 	public Page<Documents> chercherDocuments(String motCle, int page, int size);
+	public Page<Documents> filtreTypeDocuments(String keySearch, int page, int size);
 	public void supprimerDocuments(Long idDocument);
 	public Documents modifierDocuments(Long idDocument);
 	public Documents visualiserDocuments(Long idDocument);
@@ -99,14 +100,19 @@ public interface ICabMetier {
 	public Responsable ajoutResponsable(Long id, String nom, String prenom, String fonction);
 	public void supprimerResponsable(Long id);
 	public Responsable findByIdResponsable(Long idResponsable);
+	public Optional <Responsable> findByNomResponsable(String nom);
+	public Optional <Responsable> findByPrenomResponsable(String prenom);
+	public Optional <Responsable> findByFonction(String fonction);
 	public List<Utilisateur> findAllUtilisateur();
 	public Utilisateur ajoutUtilisateur(Long id, String nom, String prenom, String email, String password, String profil);
 	public void supprimerUtilisateur(Long id);
 	public Utilisateur findByIdUtilisateur(Long id);
+	public Optional <Utilisateur> findByEmail(String email);
 	public List<Profil> findAllProfil();
 	public Profil ajoutProfil(String nomProfil);
 	public void supprimerProfil(Long id);
 	public Optional<Profil> findByIdProfil(Long id);
+	public Profil findByProfil(String profil);
 
 
 }

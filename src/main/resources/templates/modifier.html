@@ -25,11 +25,39 @@ textarea:focus {
 .error{
 	color:red;
 }
+input[type=file]::file-selector-button {
+  margin-right: 10px;
+  border: none;
+  background: #696D70  ;
+  padding: 4px 12px;
+  color: #fff;
+  cursor: pointer;
+  
+}
+
+input[type=file]::file-selector-button:hover {
+  background: #0d45a5;
+}
 
 
 
 </style>
 
+ <script type="text/javascript" th:if="${flag}"> 
+ $(document).ready(function(){	
+	 if($('#flag').val()== "unFichier"){
+		 const sel = document.querySelector("a[href='#collapse1']");
+		 sel.dispatchEvent(new Event('click', {'view': window,'bubbles': true}));
+	 }
+	 
+	 if($('#flag').val()== "deuxFichiers"){
+		 const sel = document.querySelector("a[href='#collapse1']");
+		 const sel2 = document.querySelector("span[id='spanPj']");
+		 sel.dispatchEvent(new Event('click', {'view': window,'bubbles': true}));
+		 sel2.dispatchEvent(new Event('click', {'view': window,'bubbles': true}));
+	 }
+ })		
+</script>
 </head>
 <body>
 	<div layout:fragment="content">
@@ -43,6 +71,7 @@ textarea:focus {
 						<p th:if="${messageDoublon}" th:text="${messageDoublon}" style= color:red></p>
 						<div th:each="d:${unDocument}">
 						 <input type="hidden" th:field="*{idDocument}" />
+						  <input type="hidden" id="flag" th:value="${flag}"/>
 							  <div class="col-md-3" th:object="${unTypeDocument}">
 							  <label>Type de document</label>
 							      <select id="typeDoc" th:field="*{typeDoc}" class="form-control">
@@ -275,11 +304,12 @@ textarea:focus {
     <div class="panel panel-info">
       <div class="panel-heading">
         <h4 class="panel-title">
-          <a data-toggle="collapse" href="#collapse1">Ajouter une pièce</a>
+          <a href="#collapse1" data-toggle="collapse" >Pièce(s) jointe(s)</a>
         </h4>
       </div>
       <div id="collapse1" class="panel-collapse collapse">
        <div class="panel-body">
+       <p th:if="${messageFile}" th:text="${messageFile}" style= color:red></p>
         <fieldset style="border:1px groove; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
 						<legend style="font-size:14px;"><b></b></legend> 
 						  <div class="col-md-3" th:object="${unePieceJointe}">
@@ -299,9 +329,15 @@ textarea:focus {
 							    <input type="text" th:field="*{objetPj}" class="form-control" placeholder="Objet pièce jointe"/>
 						  </div>
 						   <br style="clear: both;"/>
-						   <div class="col-md-12" th:object="${unePieceJointe}">
+						   <div class="col-md-12">
+						   <br style="clear: both;"/>
 						    &ensp;
-							<input type="file" name ="file" th:value="*{cheminFichier}"  class="form-control" />
+						    <label>Fichier joint:</label>
+						    <p th:text="${fichierJoint}"></p>
+						   
+						     &ensp;
+						    <label>Modifier fichier:</label>
+							<input type="file" name ="file" class="form-control" />
 						
 					
 					 </div>
@@ -337,9 +373,15 @@ textarea:focus {
 						     	<label for="objetPj1" class="form-label">Objet</label>
 							    <input type="text" name="objetPj1" th:value="*{objetPj}" class="form-control" placeholder="Objet pièce jointe"/>
 						  </div>
-						  <div class="col-md-12" th:object="${unePieceJointe2}">
-						   <label></label>
-						 <input type="file" class="form-control" name="file1" th:value="*{cheminFichier}" />
+						  <div class="col-md-12" >
+						   <br style="clear: both;"/>
+						    &ensp;
+						    <label>Fichier joint:</label>
+						    <p th:text="${fichierJoint1}"></p>
+						   
+						     &ensp;
+						    <label>Modifier fichier:</label>
+						 <input type="file" class="form-control" name="file1" />
 					 </div>
 					   <p> </p>
 						   </fieldset>
@@ -366,7 +408,8 @@ textarea:focus {
 						 <br style="clear: both;"/>
 					  <div class="col-md-3">
 					  
-					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+					    <a class="btn btn-warning" th:href="@{/cons}">Annuler</a>
 					  </div>
 	
 	<!-- Fenetre modal -->				

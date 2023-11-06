@@ -35,7 +35,7 @@
      
       <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
       	
-      <a  data-toggle="collapse" role="button" href="#collapse2" aria-expanded="false" aria-controls="collapse2"><span ><i class="glyphicon glyphicon-wrench"></i></span>Référentiels</a>
+      <a  data-toggle="collapse" role="button" href="#collapse2" aria-expanded="false" aria-controls="collapse2"><span ><i class="glyphicon glyphicon-wrench"></i></span>Référentiels&nbsp;&nbsp;&nbsp;<span class="caret"></span></a>
       
      
       <div id="collapse2" class="collapse">
@@ -83,6 +83,17 @@
      
     
     </ul>
+    <div class="sidebar-search" style="text-align:center">
+    <form th:action="@{cons}" id="searchForm" method="get" >   		 	
+     				<div class="input-group">
+        	  		    <input id="motCle" type="text" class="form-control" name="motCle" th:value=${motCle}
+                	placeholder="chercher"/>   
+                	<div class="input-group-btn">                	 
+                 <button type="submit" class="btn btn-info"><span class="glyphicon glyphicon-search"></span></button>
+            	</div>
+            	</div>
+          		</form>
+          		</div>
      <div class="sidebar-footer" style="text-align:center">
    
 	          <form method = "post" th:action = "@{/logout}">

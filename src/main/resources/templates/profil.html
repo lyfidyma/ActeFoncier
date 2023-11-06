@@ -21,46 +21,54 @@ textarea:focus {
 }
 
 </style>
-<script type="text/javascript" th:if="${flag}">
+<script type="text/javascript" >
 
 $(document).ready(function(){
-	
-	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-        localStorage.setItem('activeTab', $(e.target).attr('href'));
-    });
-    var activeTab = localStorage.getItem('activeTab');
-    if(activeTab){
-        $('#monTab a[href="' + activeTab + '"]').tab('show');
+	if($("#flag").val()){
+        $('#tabTwo').tab('show');
     }
 });
 	
 
 </script>
+
  
 </head>
 <body>
 
 	<div layout:fragment="content">
-	<h4>Profil utilisateur</h4>
+	<h4>Profil</h4>
 						   <hr/>
 	<div class="container">
 
 					<div class="panel-body">
 					 
 					<ul class="nav nav-pills" id="monTab">
-  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
-  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste</a></li>
+  <li><a class="nav-item nav-link active" href="#p1" id="tabOne" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" id="tabTwo" data-toggle="tab">Liste</a></li>
   
   
 </ul>
 <div class="tab-content">
+<br></br>
+<script type="text/javascript" > 
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageDoublon').fadeOut('fast');},5000);
+})
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageSucces').fadeOut('fast');},5000);
+})
+</script>
+					<p id="messageDoublon" th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+					<p id="messageSucces" th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+ 					<input type="hidden" id="flag" th:value="${flag}" />
  <div class="tab-pane active" id="p1">
- <br></br>
+ 
 						<form th:action="@{/referentielProfil}" method="post">
-					<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
   							     <div th:object="${unProfil}">
-							  
-							    
 							     <p></p>
 							     <label for="profil" class="form-label">Profil</label>
 							    <select id="profil" name="profil" class="form-control" >
@@ -74,13 +82,12 @@ $(document).ready(function(){
 						  <p></p>
 						  
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <a class="btn btn-warning" th:href="@{/profil}">Annuler</a>
 					 
 						</form>
 						</div>
 						<div class="tab-pane" id="p2">
-						<br></br>
-						<p th:if="${messageSucces2}" th:text="${messageSucces2}" class= "alert alert-success"></p>
-						<p th:if="${messageUtilisateur}" th:text="${messageUtilisateur}" class= "alert alert-success"></p>
+						
 						<h4 th:if="${listProfil.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée profil</h4>
 						<div class="table-responsive" th:if="${listProfil.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">

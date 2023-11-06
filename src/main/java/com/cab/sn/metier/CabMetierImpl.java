@@ -19,9 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
@@ -106,18 +105,18 @@ public class CabMetierImpl implements ICabMetier{
 			
 			//Mise à jour Bénéficiaire
 			if(typeBeneficiaire.equals("Entreprise")==true) {
-				  if(entRepository.chercherEntrepriseParNinea(ninea)!=null) {
-					  if(persRepository.chercherPersonne(cni)!=null) {
-						  p1 = persRepository.chercherPersonne(cni);  
+				  if(entRepository.chercherEntrepriseParNinea(ninea).isPresent()) {
+					  if(persRepository.chercherPersonne(cni).isPresent()) {
+						  p1 = persRepository.chercherPersonne(cni).get();  
 					  }else {
 						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
 					  }
-					  e1 = entRepository.chercherEntrepriseParNinea(ninea); 
-					  doc.setEntreprise(e1);
-					  doc.setPersonne(p1);
+						  e1 = entRepository.chercherEntrepriseParNinea(ninea).get(); 
+						  doc.setEntreprise(e1);
+						  doc.setPersonne(p1);
 				  }else {
-					  if(persRepository.chercherPersonne(cni)!=null) {
-						  p1 = persRepository.chercherPersonne(cni);
+					  if(persRepository.chercherPersonne(cni).isPresent()) {
+						  p1 = persRepository.chercherPersonne(cni).get();
 						   	  
 					  }else {
 						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
@@ -128,8 +127,8 @@ public class CabMetierImpl implements ICabMetier{
 				  doc.setPersonne(p1);
 			  }
 			  else if((typeBeneficiaire.equals("Particulier"))== true) {		 
-				  if(persRepository.chercherPersonne(cni)!=null) {
-					  		p1 = persRepository.chercherPersonne(cni);
+				  if(persRepository.chercherPersonne(cni).isPresent()) {
+					  		p1 = persRepository.chercherPersonne(cni).get();
 				  }else {
 					  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
 				  }
@@ -174,6 +173,7 @@ public class CabMetierImpl implements ICabMetier{
 								storageService.store(file);
 								pj2.setCheminFichier(file.getOriginalFilename().toString());
 							}
+							
 							pjRepository.save(pj2);	
 								
 				 			PiecesJointes pj3 = pjRepository.chercherPiecesJointes(idDocument).get(1);
@@ -246,18 +246,18 @@ public class CabMetierImpl implements ICabMetier{
 		
 		//Nouvel enregistrement d'un document, l'idDocument est null
 		else {
-				
+			
 			  if(typeBeneficiaire.equals("Entreprise")== true) {
-				  if(entRepository.chercherEntrepriseParNinea(ninea)!=null) {
-					  if(persRepository.chercherPersonne(cni)!=null) {
-						  p1 = persRepository.chercherPersonne(cni);  
+				  if(entRepository.chercherEntrepriseParNinea(ninea).isPresent()) {
+					  if(persRepository.chercherPersonne(cni).isPresent()) {
+						  p1 = persRepository.chercherPersonne(cni).get();  
 					  }else {
 						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
 					  }
-					  e1 = entRepository.chercherEntrepriseParNinea(ninea); 
+					  e1 = entRepository.chercherEntrepriseParNinea(ninea).get(); 
 				  }else {
-					  if(persRepository.chercherPersonne(cni)!=null) {
-						  p1 = persRepository.chercherPersonne(cni);
+					  if(persRepository.chercherPersonne(cni).isPresent()) {
+						  p1 = persRepository.chercherPersonne(cni).get();
 						   	  
 					  }else {
 						  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
@@ -267,8 +267,8 @@ public class CabMetierImpl implements ICabMetier{
 				  
 			  }
 			  else if((typeBeneficiaire.equals("Particulier"))== true) {		 
-				  if(persRepository.chercherPersonne(cni)!=null) {
-					  		p1 = persRepository.chercherPersonne(cni);
+				  if(persRepository.chercherPersonne(cni).isPresent()) {
+					  		p1 = persRepository.chercherPersonne(cni).get();
 				  }else {
 					  p1 = persRepository.save(new Personne(cni, nomPersonne, prenom, nin, dateDelivrance));
 				  }
@@ -281,7 +281,7 @@ public class CabMetierImpl implements ICabMetier{
 			  d1 = docRepository.save(new Documents(numDocument, CodeDocumentGenerateur.genererCodeDocument(new Date(), typeDoc, libelleCommune), 
 					  dateDocument, titreGlobal, objetDocument, "saisi", typeBeneficiaire, responsableDocument, lot,nicad,
 					  superficie, p1, e1, c1, td1)); 
-			 
+			  
 			  String cheminFichier = null;
 			  String cheminFichier1 = null;
 			  Collection<PiecesJointes> pj3= new ArrayList<PiecesJointes>();
@@ -325,6 +325,11 @@ public class CabMetierImpl implements ICabMetier{
 	}
 	
 	@Override
+	public Page<Documents> filtreTypeDocuments(String keySearch, int page, int size){
+		return docRepository.filtreTypeDocument(keySearch, PageRequest.of(page, size));
+	}
+	
+	@Override
 	public void supprimerDocuments(Long idDocument) {
 		 docRepository.deleteById(idDocument);
 	}
@@ -356,13 +361,17 @@ public class CabMetierImpl implements ICabMetier{
 	
 	@Override
 	public Personne chercherPersonne(String cniPersonne) {
-		Personne personne=null;
-		Optional <Personne> optional = Optional.ofNullable(persRepository.chercherPersonne(cniPersonne));
-		if(optional.isPresent())
-			return persRepository.chercherPersonne(cniPersonne);
-		else if(optional.isEmpty())
-			return personne;
-		return personne;
+		/*
+		 * Personne personne=null; Optional <Personne> optional =
+		 * Optional.ofNullable(persRepository.chercherPersonne(cniPersonne).get());
+		 * if(optional.isPresent()) return
+		 * persRepository.chercherPersonne(cniPersonne).get(); else
+		 * if(optional.isEmpty()) return personne; return personne;
+		 */
+		if(persRepository.chercherPersonne(cniPersonne).isPresent())
+			return persRepository.chercherPersonne(cniPersonne).get();
+		else
+			return null;
 	}
 
 	@Override
@@ -531,7 +540,7 @@ public class CabMetierImpl implements ICabMetier{
 		
 		}
 		else if(idPersonne!=null) {
-			personne = persRepository.chercherPersonneParId(idPersonne);
+			personne = persRepository.chercherPersonneParId(idPersonne).get();
 			personne.setCni(cni);
 			personne.setDateDelivrance(dateDelivrance);
 			personne.setNin(nin);
@@ -549,7 +558,7 @@ public class CabMetierImpl implements ICabMetier{
 		if(idEntreprise==null) {
 			entreprise = entRepository.save(new Entreprise(nomEntreprise, ninea));
 		}else if(idEntreprise!=null) {
-			entreprise = entRepository.chercherEntreprise(idEntreprise);
+			entreprise = entRepository.chercherEntreprise(idEntreprise).get();
 			entreprise.setNinea(ninea);
 			entreprise.setNomEntreprise(nomEntreprise);
 			entRepository.save(entreprise);
@@ -560,7 +569,10 @@ public class CabMetierImpl implements ICabMetier{
 
 	@Override
 	public Entreprise chercherEntrepriseParNinea(String ninea) {
-		return entRepository.chercherEntrepriseParNinea(ninea);
+		if(entRepository.chercherEntrepriseParNinea(ninea).isPresent())
+			return entRepository.chercherEntrepriseParNinea(ninea).get();
+		else
+			return null;
 	}
 
 	@Override
@@ -882,6 +894,11 @@ public class CabMetierImpl implements ICabMetier{
 	public Utilisateur findByIdUtilisateur(Long id) {
 		return utilisateurRepository.findById(id).get();
 	}
+	
+	@Override
+	public Optional <Utilisateur> findByEmail(String email) {
+		return utilisateurRepository.findByEmail(email);
+	}
 
 	@Override
 	public List<Profil> findAllProfil() {
@@ -903,7 +920,27 @@ public class CabMetierImpl implements ICabMetier{
 	public Optional<Profil> findByIdProfil(Long id) {
 		return profilRepository.findById(id);
 	}
+	
+	@Override
+	public Profil findByProfil(String profil) {
+		return profilRepository.findByNomProfil(profil);
+		
+	}
 
+	@Override
+	public Optional <Responsable> findByNomResponsable(String nom) {
+		return responsableReposistory.findByNomResponsable(nom);
+	}
+
+	@Override
+	public Optional <Responsable> findByPrenomResponsable(String prenom) {
+		return responsableReposistory.findByPrenomResponsable(prenom);
+	}
+
+	@Override
+	public Optional <Responsable> findByFonction(String fonction) {
+		return responsableReposistory.findByFonction(fonction);
+	}
 	
 	
 }

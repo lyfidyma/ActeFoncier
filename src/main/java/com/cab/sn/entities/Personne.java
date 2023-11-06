@@ -29,7 +29,7 @@ public class Personne{
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long idPersonne;
 	@Column(nullable=false)
-	@Pattern(regexp= "^[1-2]\\d{12}$", message="Le CNI doit comporter 13 chiffres")
+	@Pattern(regexp= "^[1-2]\\d{12}$", message="La CNI doit comporter 13 chiffres")
 	private String cni;
 	@Column(nullable=false)
 	@NotBlank(message="Renseigner le nom")

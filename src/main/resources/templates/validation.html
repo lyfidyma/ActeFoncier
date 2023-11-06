@@ -25,12 +25,24 @@ textarea:focus {
 }
 
 </style>
+
 </head>
 <body>
 
 	<div layout:fragment="content">
 	<h4>&nbsp;&nbsp;Approbation</h4>
 						   <hr/>
+						   <input type="hidden" th:id="flag" th:value="${flag}"/>
+<script type="text/javascript" th:if="${flag}">
+var flagValider = $("#flag").val();
+if(flagValider == "Valider"){
+alert("Document approuvé");
+}
+if(flagValider == "Rejeter"){
+	alert("Document rejeté");
+}
+
+</script>
 						   <h4 th:if="${listDocuments.isEmpty()}==true" style="color:red; text-align:center">Aucun document en attente de validation</h4>
 	<div class="container"  th:if="${listDocuments.isEmpty}==false">
 	
@@ -48,7 +60,7 @@ textarea:focus {
 				</form>
 			</div>
 			</div>
-			<p th:if="${messageValiderOuRejeter}" th:text="${messageValiderOuRejeter}" style= color:red></p>
+			
 		<div class="container" th:if="${listDocuments.isEmpty}==false">
 			
 					
@@ -186,7 +198,7 @@ textarea:focus {
 </div>
  </form>
 <script type="text/javascript">
-function controleDonneesValidation(){
+/* function controleDonneesValidation(){
 	var nom = $("#nomApprobateur").val();
 	var prenom=$("#prenomApprobateur").val();
 	var dat=$("#dateApprobation").val();
@@ -202,7 +214,7 @@ function controleDonneesRejet(){
 	}else{
 		document.getElementById("formulaireRejet").submit();
 	}
-}
+} */
 
 function validationDocument(){
 	let id;

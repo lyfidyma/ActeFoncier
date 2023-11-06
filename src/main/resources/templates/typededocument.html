@@ -10,30 +10,38 @@ label{
 	font-size:12px;
 	font-family:Arial;
 }
-input[type=text]:focus {
-  background-color: lightyellow;
-}
-textarea:focus {
-  background-color: lightyellow;
-}
+
 .error{
 	color:red;
 }
 
 </style>
 
-<script type="text/javascript">
+<script type="text/javascript" >
 
 $(document).ready(function(){
-	
-	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-        localStorage.setItem('activeTab', $(e.target).attr('href'));
-    });
-    var activeTab = localStorage.getItem('activeTab');
-    if(activeTab){
-        $('#monTab a[href="' + activeTab + '"]').tab('show');
+	if($("#flag").val()){
+        $('#tabTwo').tab('show');
     }
 });
+	
+
+</script>
+<script type="text/javascript" > 
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageErreur').fadeOut('fast');},5000);
+})
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageDoublon').fadeOut('fast');},5000);
+})
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageSucces').fadeOut('fast');},5000);
+})
 </script>
 </head>
 <body>
@@ -45,20 +53,23 @@ $(document).ready(function(){
 	
 		
 					<div class="panel-body">
-					<p th:if="${messageTypeDocument}" th:text="${messageTypeDocument}" style= color:red></p>
-					<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+					
 					<ul class="nav nav-pills" id="monTab">
-  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
-  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste </a></li>
+  <li><a class="nav-item nav-link active" href="#p1" id="tabOne" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" id="tabTwo" data-toggle="tab">Liste </a></li>
 
   
 </ul>
 <div class="tab-content">
+<br></br>
+					<p id="messageErreur" th:if="${messageErreur}" th:text="${messageErreur}" style= color:red></p>
+					<p id="messageSucces" th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+					<p id="messageDoublon" th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+					<input type="hidden" id="flag" th:value="${flag}" />
  <div class="tab-pane active" id="p1">
- <br></br>
+ 
 						<form th:action="@{/referentielTypeDocument}" method="post" th:object="${unTypeDocument}">
-						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
-							<p th:if="${messageChampsObligatoires}" th:text="${messageChampsObligatoires}" style= color:red></p>
+						
 							<div class="col-md-4">
 							   
 							  
@@ -67,6 +78,7 @@ $(document).ready(function(){
 							<p></p>
 						   <input type="hidden" th:field="*{idTypeDocument}" />
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <a class="btn btn-warning" th:href="@{/typededocument}">Annuler</a>
 					  </div>
 					  
 						</form>
@@ -74,7 +86,7 @@ $(document).ready(function(){
 						
 						
 						<div class="tab-pane" id="p2">
-						<br></br>
+						
 						<div class="table-responsive">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
 							<tr style="background-color:#9AF6F6">

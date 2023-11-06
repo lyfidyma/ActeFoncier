@@ -1,6 +1,7 @@
 package com.cab.sn.controller;
 
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.cab.sn.entities.Commune;
 import com.cab.sn.entities.CommuneArrondissement;
@@ -37,6 +42,7 @@ import com.cab.sn.entities.Responsable;
 import com.cab.sn.entities.TypeDocument;
 import com.cab.sn.entities.Utilisateur;
 import com.cab.sn.metier.ICabMetier;
+import com.cab.sn.metier.StorageService;
 
 import jakarta.validation.Valid;
 
@@ -44,8 +50,18 @@ import jakarta.validation.Valid;
 @Controller
 public class CabController {
 	
+	
 	@Autowired
 	private ICabMetier cabMetier;
+	String messageDoublon = null;
+	String messageSucces = null;
+	String messageErreur = null;
+	String flag = null;
+	String flagEntreprise = null;
+	@Autowired
+	private StorageService storageService;
+	@Autowired
+	ResourceLoader resourceLoader;
 	
 	@RequestMapping(value={"/", "/index"})
 	public String index() {		
@@ -78,20 +94,29 @@ public class CabController {
 	}
 	
 	@RequestMapping("/cons")
-	public String consulterTousDoc(Model model,
+	public String consulterTousDoc(@ModelAttribute("unTypeDocument") TypeDocument typeDocument, Model model,
 			@RequestParam(name="page",defaultValue="0")int page,
 			@RequestParam(name="size",defaultValue="10")int size,
-			String motCle) {
-		Page<Documents> pageDocuments ;
+			String motCle, String keySearch) {
+		List<TypeDocument> type = cabMetier.listTypeDocument();
+		Page<Documents> pageDocuments=null ;
 			if(motCle!=null) {
 				pageDocuments = cabMetier.chercherDocuments(motCle, page, size);
 				model.addAttribute("listDocuments", pageDocuments);
 				model.addAttribute("motCle", motCle);
+				model.addAttribute("type",type);
+			}
+			else if(keySearch!=null) {
+				pageDocuments = cabMetier.filtreTypeDocuments(keySearch, page, size);
+				model.addAttribute("listDocuments", pageDocuments);
+				model.addAttribute("keySearch", keySearch);
+				model.addAttribute("type",type);
 			}
 			else {
 				pageDocuments = cabMetier.listDocuments(page, size);
 				model.addAttribute("listDocuments", pageDocuments);
 				model.addAttribute("motCle", motCle);
+				model.addAttribute("type",type);
 			}
 			
 			model.addAttribute("currentPage", page);
@@ -134,6 +159,10 @@ public class CabController {
 				model.addAttribute("dateDocumentString", dateDocument.toString());
 				if(datePj!=null)
 				model.addAttribute("datePjString", datePj.toString());
+				if(datePj1!=null)
+					model.addAttribute("datePjString1", datePj1.toString());
+				if(typeBeneficiaire.equals("Entreprise"))
+					model.addAttribute("flagEntreprise", "entreprise");
 			  if(idDocument==null)
 				  	return "formulaire"; 
 			  return "modifier";
@@ -150,6 +179,10 @@ public class CabController {
 						model.addAttribute("dateDocumentString", dateDocument.toString());
 						if(datePj!=null)
 						model.addAttribute("datePjString", datePj.toString());
+						if(datePj1!=null)
+							model.addAttribute("datePjString1", datePj1.toString());
+						if(typeBeneficiaire.equals("Entreprise"))
+							model.addAttribute("flagEntreprise", "entreprise");
 			  if(idDocument==null)
 				  	return "formulaire"; 
 			  return "modifier";
@@ -165,6 +198,10 @@ public class CabController {
 						model.addAttribute("dateDocumentString", dateDocument.toString());
 						if(datePj!=null)
 						model.addAttribute("datePjString", datePj.toString());
+						if(datePj1!=null)
+							model.addAttribute("datePjString1", datePj1.toString());
+						if(typeBeneficiaire.equals("Entreprise"))
+							model.addAttribute("flagEntreprise", "entreprise");
 			  if(idDocument==null)
 				  	return "formulaire"; 
 			  return "modifier";
@@ -192,6 +229,8 @@ public class CabController {
 											model.addAttribute("dateDocumentString", dateDocument.toString());
 											if(datePj!=null)
 											model.addAttribute("datePjString", datePj.toString());
+											if(datePj1!=null)
+												model.addAttribute("datePjString1", datePj1.toString());
 								  return "formulaire"; 
 			  }
 			  
@@ -210,6 +249,9 @@ public class CabController {
 									model.addAttribute("dateDocumentString", dateDocument.toString());
 									if(datePj!=null)
 									model.addAttribute("datePjString", datePj.toString());
+									if(datePj1!=null)
+										model.addAttribute("datePjString1", datePj1.toString());
+								model.addAttribute("flagEntreprise", "entreprise");
 								return "formulaire"; 
 								} 
 					  } 
@@ -219,7 +261,9 @@ public class CabController {
 					  } 
 				  }
 			}
-			 
+			
+			
+			
 			doc = cabMetier.sauvegarderDocuments(idDocument, numDocument, dateDocument, titreGlobal, 
 					objetDocument, statutDocument, typeBeneficiaire, responsableDocument, lot, nicad, 
 					dateApprobation, superficie, nomEntreprise, ninea, cni, nomPersonne, prenom, nin, dateDelivrance, libelleCommune, typeDoc, 
@@ -232,7 +276,7 @@ public class CabController {
 			if(idDocument== null) {
 			  	return "formulaire"; 
 			}
-		  return "modifier";
+		  return "redirect:/visualiser?id="+idDocument;
 		
 	}
 	
@@ -250,7 +294,7 @@ public class CabController {
 	@ModelAttribute("uneCommune") Commune commune, @ModelAttribute("uneCommuneArrondissement") CommuneArrondissement communeArrondissement, 
 	@ModelAttribute("unDepartement") Departement departement, @ModelAttribute("uneRegion") Region region, Model model, Long id, String typeBeneficiaire  ) {
 		
-		 List<Commune> listCommune = cabMetier.findAllCommune();
+		List<Commune> listCommune = cabMetier.findAllCommune();
 		List<TypeDocument> type = cabMetier.listTypeDocument();
 		String dateDelivranceString = "jj/mm/yyyy";
 		String dateDocumentString = "jj/mm/yyyy";
@@ -286,14 +330,32 @@ public class CabController {
 			if(cabMetier.chercherPiecesJointes(id).size()==1) {
 				piecesJointes= cabMetier.chercherPiecesJointes(id).get(0);
 				String datePieceJointeString = cabMetier.chercherPiecesJointes(id).get(0).getDatePj().toString();
+				String fichier = cabMetier.chercherPiecesJointes(id).get(0).getCheminFichier();
+				String nomFichier = resourceLoader.getResource(fichier).getFilename();
+				Resource resource = storageService.loadAsResource(nomFichier);
+				model.addAttribute("fichierJoint", resource.getFilename());
 				model.addAttribute("datePjString", datePieceJointeString);
+				model.addAttribute("flag", "unFichier");
+				
 			}else if(cabMetier.chercherPiecesJointes(id).size()==2) {
 				piecesJointes = cabMetier.chercherPiecesJointes(id).get(0);
 				piecesJointes2 = cabMetier.chercherPiecesJointes(id).get(1);
 				String datePieceJointeString = cabMetier.chercherPiecesJointes(id).get(0).getDatePj().toString();
-				String datePieceJointeString1 = cabMetier.chercherPiecesJointes(id).get(0).getDatePj().toString();
+				String datePieceJointeString1 = cabMetier.chercherPiecesJointes(id).get(1).getDatePj().toString();
+				String fichier = cabMetier.chercherPiecesJointes(id).get(0).getCheminFichier();
+				String fichier1 = cabMetier.chercherPiecesJointes(id).get(1).getCheminFichier();
+				String nomFichier = resourceLoader.getResource(fichier).getFilename();
+				String nomFichier1 = resourceLoader.getResource(fichier1).getFilename();
+				
+				Resource resource = storageService.loadAsResource(nomFichier);
+				Resource resource1 = storageService.loadAsResource(nomFichier1);
+				
+				model.addAttribute("fichierJoint", resource.getFilename());
+				model.addAttribute("fichierJoint1", resource1.getFilename());
 				model.addAttribute("datePjString", datePieceJointeString);
 				model.addAttribute("datePjString1", datePieceJointeString1);
+				model.addAttribute("flag", "deuxFichiers");
+				
 			}
 		}
 			model.addAttribute("unDocument",doc);
@@ -429,7 +491,7 @@ public class CabController {
 	public String pageValidation(Model model,
 			@RequestParam(name="page",defaultValue="0")int page,
 			@RequestParam(name="size",defaultValue="5")int size,
-			String motCle) {
+			String motCle, @RequestParam(name="flag", defaultValue="") String flag) {
 		
 			Page<Documents> pageDocuments ;
 				if(motCle!=null) {
@@ -442,6 +504,8 @@ public class CabController {
 					model.addAttribute("listDocuments", pageDocuments);
 					model.addAttribute("motCle", motCle);
 				}
+				if(flag.isEmpty()==false)
+					model.addAttribute("flag", flag);
 				
 				model.addAttribute("currentPage", page);
 				model.addAttribute("size", size);
@@ -453,27 +517,38 @@ public class CabController {
 	@RequestMapping(value="/valider", method=RequestMethod.POST)
 	public String valider(Model model, Long idDoc, String checkboxValider, String checkboxRejeter, String nomApprobateur,
 			String prenomApprobateur, String motifRejet, MultipartFile file) {
-		/*
-		 * String messageValiderOuRejeter=""; if((checkboxValider && checkboxRejeter) ||
-		 * (checkboxValider==false && checkboxRejeter==false)) { messageValiderOuRejeter
-		 * = "Approuvez ou rejetez le document";
-		 * //model.addAttribute("messageValiderOuRejeter", messageValiderOuRejeter);
-		 * return
-		 * "redirect:/afficherDonneesValidation?codeUniqueDocument="+codeUniqueDocument+
-		 * "&messageValiderOuRejeter="+messageValiderOuRejeter+""; }
-		 */
+		
 			cabMetier.validerDocuments(idDoc, checkboxValider, checkboxRejeter, nomApprobateur, prenomApprobateur,
 					motifRejet, file);
+				if(checkboxValider.equals("true"))
+					flag = "Valider";
+				if(checkboxRejeter.equals("true"))
+					flag = "Rejeter";
 				
-		return "redirect:/pageValidation";
+		return "redirect:/pageValidation?flag="+flag;
 	}
 	@RequestMapping(value={"/beneficiaire"})
-	public String beneficiaire(@ModelAttribute("unePersonne") Personne unePersonne, @ModelAttribute("uneEntreprise") Entreprise uneEntreprise,
-			Model model) {	
+	public String beneficiaire(@ModelAttribute("unePersonne") Personne unePersonne, 
+			@ModelAttribute("uneEntreprise") Entreprise uneEntreprise,
+			Model model, @RequestParam(name="messageSucces", defaultValue="") String messageSucces,
+			@RequestParam(name="messageErreur", defaultValue="") String messageErreur,
+			@RequestParam(name="messageDoublon", defaultValue="") String messageDoublon,
+			@RequestParam(name="flag", defaultValue="") String flag, 
+			@RequestParam(name="flagEntreprise", defaultValue="") String flagEntreprise){	
 		List<Personne> listPersonne = cabMetier.findAllPersonne();
 		List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 		model.addAttribute("listPersonne", listPersonne);
 		model.addAttribute("listEntreprise", listEntreprise);
+		if(messageSucces.isEmpty()==false)
+			model.addAttribute("messageSucces", messageSucces);
+		if(messageErreur.isEmpty()==false)
+			model.addAttribute("messageErreur", messageErreur);
+		if(messageDoublon.isEmpty()==false)
+			model.addAttribute("messageDoublon", messageDoublon);
+		if(flag.isEmpty()==false)
+			model.addAttribute("flag", flag);
+		if(flagEntreprise.isEmpty()==false)
+			model.addAttribute("flagEntreprise", flagEntreprise);
 		return "beneficiaire";
 	}
 	
@@ -493,7 +568,7 @@ public class CabController {
 		if(typeBeneficiaire.equals("Particulier")) {
 			
 		if(nomPersonne.isBlank() || prenom.isBlank() || cni.isBlank() || nin.isBlank() || dateDelivrance == null) {
-			model.addAttribute("messageChampsObligatoires", "Tous les champs sont obligatoires");
+			model.addAttribute("messageErreur", "Tous les champs sont obligatoires");
 			 model.addAttribute("nomPersonne", nomPersonne);
 			 model.addAttribute("prenom", prenom);
 			 model.addAttribute("cni", cni);
@@ -530,7 +605,6 @@ public class CabController {
 			 if (matcherCEDEAO.find() == false) {
 				 messageNin = "Le numéro CEDEAO doit comporter 17 chiffres";
 				 model.addAttribute("messageNin", messageNin);
-				 model.addAttribute("messageCni", messageCni);
 				 model.addAttribute("nomPersonne", nomPersonne);
 				 model.addAttribute("prenom", prenom);
 				 model.addAttribute("cni", cni);
@@ -562,19 +636,19 @@ public class CabController {
 	}
 } 
 	personne = cabMetier.ajoutPersonne(idPersonne, nomPersonne, prenom, cni, nin, dateDelivrance);
-	model.addAttribute("messageSucces", cni+ " enregistré");
 	List<Personne> listPersonne = cabMetier.findAllPersonne();
 	List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 	model.addAttribute("listPersonne", listPersonne);
 	model.addAttribute("listEntreprise", listEntreprise);
-	return "beneficiaire";
+	messageSucces = cni+ " enregistré";
+	return "redirect:/beneficiaire?messageSucces="+messageSucces;
 	
 
 }
 		
 		if(typeBeneficiaire.equals("Entreprise")) {
 				if(nomEntreprise.isBlank() || ninea.isBlank()) {
-				model.addAttribute("messageChampsObligatoires", "Tous les champs sont obligatoires");
+				model.addAttribute("messageErreur", "Tous les champs sont obligatoires");
 				model.addAttribute("nomEntreprise", nomEntreprise);
 				model.addAttribute("ninea", ninea);
 				model.addAttribute("typeBeneficiaire", typeBeneficiaire);
@@ -582,6 +656,7 @@ public class CabController {
 				List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 				model.addAttribute("listPersonne", listPersonne);
 				model.addAttribute("listEntreprise", listEntreprise);
+				model.addAttribute("flagEntreprise", "Erreur");
 				return "beneficiaire";
 			}
 				
@@ -596,220 +671,211 @@ public class CabController {
 					List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 					model.addAttribute("listPersonne", listPersonne);
 					model.addAttribute("listEntreprise", listEntreprise);
+					model.addAttribute("flagEntreprise", "Erreur");
 				return "beneficiaire";
 			}
 		}
 				}
 			
 			entreprise = cabMetier.ajoutEntreprise(idEntreprise, nomEntreprise, ninea);
-			model.addAttribute("messageSucces", nomEntreprise+" enregistrée");
+			
 			List<Personne> listPersonne = cabMetier.findAllPersonne();
 			List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 			model.addAttribute("listPersonne", listPersonne);
 			model.addAttribute("listEntreprise", listEntreprise);
-			return "beneficiaire";
+			messageSucces = nomEntreprise+" enregistrée";
+			flagEntreprise = "Succes";
+			return "redirect:/beneficiaire?messageSucces="+messageSucces+"&flagEntreprise="+flagEntreprise;
 		}
+		
 		return "redirect:/beneficiaire";
 	}
 	
 	
 	@RequestMapping("/typededocument")
-	public String typeDeDocument(@ModelAttribute("unTypeDocument") TypeDocument unTypeDocument, Model model) {
+	public String typeDeDocument(@ModelAttribute("unTypeDocument") TypeDocument unTypeDocument, Model model,
+			@RequestParam(name="messageSucces", defaultValue="") String messageSucces,
+			@RequestParam(name="messageErreur", defaultValue="") String messageErreur,
+			@RequestParam(name="messageDoublon", defaultValue="") String messageDoublon,
+			@RequestParam(name="flag", defaultValue="") String flag) {
 		List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 		model.addAttribute("unTypeDocument", unTypeDocument);
 		model.addAttribute("listTypeDocument", listTypeDocument);
+		if(messageSucces.isEmpty()==false)
+			model.addAttribute("messageSucces", messageSucces);
+		if(messageErreur.isEmpty()==false)
+			model.addAttribute("messageErreur", messageErreur);
+		if(messageDoublon.isEmpty()==false)
+			model.addAttribute("messageDoublon", messageDoublon);
+		if(flag.isEmpty()==false)
+			model.addAttribute("flag", flag);
 		return "typededocument";
 	}
 	
 	@RequestMapping("/referentielTypeDocument")
 	public String ajoutTypeDocument(Model model, @ModelAttribute("unTypeDocument") TypeDocument unTypeDocument, Long idTypeDocument, String typeDoc) {
 		if(typeDoc.isBlank()) {
-			model.addAttribute("messageChampsObligatoires", "Donner un type");
-			model.addAttribute("unTypeDocument", unTypeDocument);
+			
+			
 			model.addAttribute("typeDoc", typeDoc);
 			List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 			model.addAttribute("listTypeDocument", listTypeDocument);
-			return "typededocument";
+			messageErreur = "Donner un type";
+			return "redirect:/typededocument?messageErreur="+messageErreur;
 		}
 		
 		if(cabMetier.chercherTypeDocumentParTypeDocument(typeDoc)!=null) {
-			model.addAttribute("messageDoublon", cabMetier.chercherTypeDocumentParTypeDocument(typeDoc).getTypeDoc()+" existe déjà");
-			model.addAttribute("unTypeDocument", unTypeDocument);
+			
+		
 			model.addAttribute("typeDoc", typeDoc);
 			List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 			model.addAttribute("listTypeDocument", listTypeDocument);
-			return "typededocument";
+			messageDoublon = cabMetier.chercherTypeDocumentParTypeDocument(typeDoc).getTypeDoc()+" existe déjà";
+			return "redirect:/typededocument?messageDoublon="+messageDoublon;
 		}
 		
 		unTypeDocument=cabMetier.ajoutTypeDocument(idTypeDocument, typeDoc);
 		List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
-		model.addAttribute("unTypeDocument", unTypeDocument);
+		
 		model.addAttribute("listTypeDocument", listTypeDocument);
-		model.addAttribute("messageSucces", typeDoc+" enregistré(e)");
-		return "typededocument";
+		messageSucces = typeDoc+" enregistré(e)";
+		return "redirect:/typededocument?messageSucces="+messageSucces;
 	}
 	
 	@RequestMapping("/localisation")
 	public String localisation(@ModelAttribute("uneCommune") Commune uneCommune, 
 			@ModelAttribute("uneCommuneArrondissement") CommuneArrondissement uneCommuneArrondissement,
 			@ModelAttribute("unDepartement") Departement unDepartement,
-			@ModelAttribute("uneRegion") Region uneRegion, Model model) {
+			@ModelAttribute("uneRegion") Region uneRegion, Model model, 
+			@RequestParam(name="messageSucces", defaultValue="") String messageSucces,
+			@RequestParam(name="messageErreur", defaultValue="") String messageErreur,
+			@RequestParam(name="flag", defaultValue="") String flag) {
 		
-		model.addAttribute("uneCommune", uneCommune);
-		model.addAttribute("uneCommuneArrondissement", uneCommuneArrondissement);
-		model.addAttribute("unDepartement", unDepartement);
-		model.addAttribute("uneRegion", uneRegion);
 		List<Commune> listCommune = cabMetier.findAllCommune();
 		model.addAttribute("listCommune", listCommune);
+		if(messageSucces.isEmpty()==false)
+			model.addAttribute("messageSucces", messageSucces);
+		if(messageErreur.isEmpty()==false)
+			model.addAttribute("messageErreur", messageErreur);
+		if(flag.isEmpty()==false)
+			model.addAttribute("flag", flag);
 		return "localisation";
 	}
 	
 	@RequestMapping("/referentielLocalisation")
-	public String ajoutLocalisation(Model model, String commune, String communeArrond, String departement, String region ) {
+	public String ajoutLocalisation(@ModelAttribute("uneCommune") Commune uneCommune, 
+			@ModelAttribute("uneCommuneArrondissement") CommuneArrondissement uneCommuneArrondissement,
+			@ModelAttribute("unDepartement") Departement unDepartement,
+			@ModelAttribute("uneRegion") Region uneRegion, Model model, String libelleCommune, 
+			String libelleCommuneArrond, String libelleDepartement, String libelleRegion ) {
 		
-		if(commune.isBlank() && communeArrond.isBlank() && departement.isBlank() && region.isBlank()) {
+		if(libelleCommune.isBlank() && libelleCommuneArrond.isBlank() && libelleDepartement.isBlank() && libelleRegion.isBlank()) {
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
-			model.addAttribute("messageChampsObligatoires", "Tous les champs sont obligatoires");
+			model.addAttribute("messageErreur", "Tous les champs sont obligatoires");
+			
 		
 		}
-		if(commune.isBlank()==false && (communeArrond.isBlank() || departement.isBlank() || region.isBlank())) {
-			if(cabMetier.findByCommune(commune)!=null) {
-				model.addAttribute("messageDoublon", commune+" existe déjà");
-				model.addAttribute("commune", commune);
-				model.addAttribute("communeArrond", communeArrond);
-				model.addAttribute("departement", departement);
-				model.addAttribute("region", region);
+		if(libelleCommune.isBlank()==false && (libelleCommuneArrond.isBlank() || libelleDepartement.isBlank() || libelleRegion.isBlank())) {
+			if(cabMetier.findByCommune(libelleCommune)!=null) {
+				model.addAttribute("messageDoublon", libelleCommune+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
+				
 			
 			}else {
-			model.addAttribute("messageChampsObligatoires", "Renseigner la commune d'arrondissement, le département et la région");
-			model.addAttribute("commune", commune);
-			model.addAttribute("communeArrond", communeArrond);
-			model.addAttribute("departement", departement);
-			model.addAttribute("region", region);
+			model.addAttribute("messageErreur", "Renseigner la commune d'arrondissement, le département et la région");
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
 		return "localisation";
 			}
 		}
-		if(communeArrond.isBlank()==false && (departement.isBlank() || region.isBlank())) {
-			if(cabMetier.findByCommuneArrondissement(communeArrond) != null) {
-				model.addAttribute("messageDoublon", communeArrond+" existe déjà");
-				model.addAttribute("commune", commune);
-				model.addAttribute("communeArrond", communeArrond);
-				model.addAttribute("departement", departement);
-				model.addAttribute("region", region);
+		if(libelleCommuneArrond.isBlank()==false && (libelleDepartement.isBlank() || libelleRegion.isBlank())) {
+			if(cabMetier.findByCommuneArrondissement(libelleCommuneArrond) != null) {
+				model.addAttribute("messageDoublon", libelleCommuneArrond+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 			return "localisation";
 				
 			} else {
-			model.addAttribute("messageChampsObligatoires", "Renseigner le département et la région");
-			model.addAttribute("commune", commune);
-			model.addAttribute("communeArrond", communeArrond);
-			model.addAttribute("departement", departement);
-			model.addAttribute("region", region);
+			model.addAttribute("messageErreur", "Renseigner le département et la région");
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
 		return "localisation";
 			}
 		}
-		if(departement.isBlank()== false && region.isBlank()) {
-			if(cabMetier.findByDepartement(departement) != null) {
-				model.addAttribute("messageDoublon", departement+" existe déjà");
-				model.addAttribute("commune", commune);
-				model.addAttribute("communeArrond", communeArrond);
-				model.addAttribute("departement", departement);
+		if(libelleDepartement.isBlank()== false && libelleRegion.isBlank()) {
+			if(cabMetier.findByDepartement(libelleDepartement) != null) {
+				model.addAttribute("messageDoublon", libelleDepartement+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 			return "localisation";
 			}else {
-			model.addAttribute("messageChampsObligatoires", "Renseigner la région");
-			model.addAttribute("commune", commune);
-			model.addAttribute("communeArrond", communeArrond);
-			model.addAttribute("departement", departement);
+			model.addAttribute("messageErreur", "Renseigner la région");
+			
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
 		return "localisation";
 			}
-		} else if(departement.isBlank()== false && region.isBlank()== false && (commune.isBlank() && communeArrond.isBlank())) {
+		} else if(libelleDepartement.isBlank()== false && libelleRegion.isBlank()== false && (libelleCommune.isBlank() && libelleCommuneArrond.isBlank())) {
 		
-			if(cabMetier.findByDepartement(departement) != null) {
-				model.addAttribute("messageDoublon", departement+" existe déjà");
-				model.addAttribute("departement", departement);
-				model.addAttribute("region", region);
+			if(cabMetier.findByDepartement(libelleDepartement) != null) {
+				model.addAttribute("messageDoublon", libelleDepartement+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				return "localisation";	
 			}
 			
-			cabMetier.ajoutDepartement(departement, region);
-			model.addAttribute("messageSucces", departement+" enregistré");
-			model.addAttribute("departement", departement);
-			model.addAttribute("region", region);
+			cabMetier.ajoutDepartement(libelleDepartement, libelleRegion);
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
-			return "localisation";
+			messageSucces = libelleDepartement+" enregistré";
+			return "redirect:/localisation?messageSucces="+messageSucces;
 		}
 		
-		if((commune.isBlank() && communeArrond.isBlank() && departement.isBlank() && region.isBlank()==false)) {
-			if(cabMetier.findByRegion(region)!= null) {
-				model.addAttribute("messageDoublon", region+" existe déjà");
-				model.addAttribute("region", region);
+		if((libelleCommune.isBlank() && libelleCommuneArrond.isBlank() && libelleDepartement.isBlank() && libelleRegion.isBlank()==false)) {
+			if(cabMetier.findByRegion(libelleRegion)!= null) {
+				model.addAttribute("messageDoublon", libelleRegion+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 			return "localisation";
 		}else {
-			cabMetier.ajoutRegion(region);
-			model.addAttribute("messageSucces", region+" enregistrée");
+			cabMetier.ajoutRegion(libelleRegion);
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
-			return "localisation";
+			messageSucces = libelleRegion+" enregistrée";
+			return "redirect:/localisation?messageSucces="+messageSucces;
 		}
 		}
 		
-		if(commune.isBlank() && communeArrond.isBlank()==false && departement.isBlank()==false && region.isBlank()==false) {
-			if(cabMetier.findByCommuneArrondissement(communeArrond)!=null) {
-				model.addAttribute("messageDoublon", communeArrond+" existe déjà");
-				model.addAttribute("communeArrond", communeArrond);
-				model.addAttribute("departement", departement);
-				model.addAttribute("region", region);
+		if(libelleCommune.isBlank() && libelleCommuneArrond.isBlank()==false && libelleDepartement.isBlank()==false && libelleRegion.isBlank()==false) {
+			if(cabMetier.findByCommuneArrondissement(libelleCommuneArrond)!=null) {
+				model.addAttribute("messageDoublon", libelleCommuneArrond+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				return "localisation";	
 			}
-			cabMetier.ajoutCommuneArrondissement(communeArrond, departement, region);
-			model.addAttribute("messageSucces", communeArrond+" enregistrée");
-			model.addAttribute("departement", departement);
-			model.addAttribute("region", region);
+			cabMetier.ajoutCommuneArrondissement(libelleCommuneArrond, libelleDepartement, libelleRegion);
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
-			return "localisation";
+			messageSucces = libelleCommuneArrond+" enregistrée";
+			return "redirect:/localisation?messageSucces="+messageSucces;
 		}
 		
-		if(commune.isBlank()==false && communeArrond.isBlank()==false && departement.isBlank()==false && region.isBlank()==false) {
+		if(libelleCommune.isBlank()==false && libelleCommuneArrond.isBlank()==false && libelleDepartement.isBlank()==false && libelleRegion.isBlank()==false) {
 						
-			if(cabMetier.findByCommune(commune)!=null) {
-				model.addAttribute("messageDoublon", commune+" existe déjà");
-				model.addAttribute("commune", commune);
-				model.addAttribute("communeArrond", communeArrond);
-				model.addAttribute("departement", departement);
-				model.addAttribute("region", region);
+			if(cabMetier.findByCommune(libelleCommune)!=null) {
+				model.addAttribute("messageDoublon", libelleCommune+" existe déjà");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				return "localisation";	
 			}
 			
-			cabMetier.ajoutCommune(commune, communeArrond, departement, region);
-			model.addAttribute("messageSucces", commune+" enregistrée");
-			model.addAttribute("communeArrond", communeArrond);
-			model.addAttribute("departement", departement);
-			model.addAttribute("region", region);
+			cabMetier.ajoutCommune(libelleCommune, libelleCommuneArrond, libelleDepartement, libelleRegion);
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
-			return "localisation";
+			messageSucces = libelleCommune+" enregistrée";
+			return  "redirect:/localisation?messageSucces="+messageSucces;
 		}
 			
 		List<Commune> listCommune = cabMetier.findAllCommune();
@@ -858,8 +924,8 @@ public class CabController {
 		return object;
 	}
 	@RequestMapping(value="/supprimerPersonne", method=RequestMethod.GET)
-	public String deletePersonne(@ModelAttribute("unePersonne") Personne unePersonne, @ModelAttribute("uneEntreprise") Entreprise uneEntreprise, 
-			Model model, Long id) {
+	public String deletePersonne(@ModelAttribute("unePersonne") Personne unePersonne, 
+			@ModelAttribute("uneEntreprise") Entreprise uneEntreprise, Model model, Long id) {
 		
 		List <Documents> documents= new ArrayList<>();
 		documents=cabMetier.findByCni(cabMetier.chercherPersonneParId(id).getCni());
@@ -871,18 +937,20 @@ public class CabController {
 			model.addAttribute("unePersonne", unePersonne);
 			model.addAttribute("listPersonne", listPersonne);
 			model.addAttribute("listEntreprise", listEntreprise);
-			model.addAttribute("messagePersonneDocument", cabMetier.chercherPersonneParId(id).getCni()+"  est lié à un document.");
-			model.addAttribute("flagSuppression", "a");
-			return "beneficiaire";
+			messageErreur = cabMetier.chercherPersonneParId(id).getCni()+"  est lié à un document.";
+			flag = "personne";
+			return "redirect:/beneficiaire?messageErreur="+messageErreur+"&flag="+flag;
 		}
+		String nomPersonneASupprimer = cabMetier.chercherPersonneParId(id).getNomPersonne();
+		String prenomPersonneASupprimer = cabMetier.chercherPersonneParId(id).getPrenom();
 		cabMetier.supprimerPersonne(id);
 		List<Personne> listPersonne = cabMetier.findAllPersonne();
 		List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 		model.addAttribute("listPersonne", listPersonne);
 		model.addAttribute("listEntreprise", listEntreprise);
-		model.addAttribute("messageSucces", "Particulier  a été supprimé." );
-		model.addAttribute("flagSuppression", "a");
-		return "beneficiaire";
+		messageSucces = nomPersonneASupprimer+" "+ prenomPersonneASupprimer+"  à été supprimé(e)" ;
+		flag = "personne";
+		return "redirect:/beneficiaire?messageSucces="+messageSucces+"&flag="+flag;
 	}	
 	
 	@RequestMapping(value="/supprimerEntreprise", method=RequestMethod.GET)
@@ -899,18 +967,19 @@ public class CabController {
 			model.addAttribute("unePersonne", unePersonne);
 			model.addAttribute("listPersonne", listPersonne);
 			model.addAttribute("listEntreprise", listEntreprise);
-			model.addAttribute("messageEntrepriseDocument", cabMetier.chercherEntreprise(id).getNomEntreprise()+" est liée à un document.");
-			model.addAttribute("flagSuppression", "a");
-			return "beneficiaire";
+			messageErreur = cabMetier.chercherEntreprise(id).getNomEntreprise()+" est liée à un document.";
+			flag =  "entreprise";
+			return "redirect:/beneficiaire?messageErreur="+messageErreur+"&flag="+flag;
 		}
+		String entrepriseASupprimer = cabMetier.chercherEntreprise(id).getNomEntreprise();
 		cabMetier.supprimerEntreprise(id);
 		List<Personne> listPersonne = cabMetier.findAllPersonne();
 		List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 		model.addAttribute("listPersonne", listPersonne);
 		model.addAttribute("listEntreprise", listEntreprise);
-		model.addAttribute("messageSucces", "L'entreprise a été supprimée");
-		model.addAttribute("flagSuppression", "a");
-		return "beneficiaire";
+		messageSucces = entrepriseASupprimer+" "+"à été supprimée";
+		flag =  "entreprise";
+		return "redirect:/beneficiaire?messageSucces="+messageSucces+"&flag="+flag;
 	}	
 	
 	@RequestMapping(value="/modifierPersonne", method=RequestMethod.GET)
@@ -930,48 +999,47 @@ public class CabController {
 	
 	@RequestMapping(value="/modifierEntreprise", method=RequestMethod.GET)
 	public String modifierEntreprise(@ModelAttribute("unDocument") Documents doc, @ModelAttribute("unePersonne") Personne unePersonne,
-			@ModelAttribute("uneEntreprise") Entreprise uneEntreprise, Model model, Long id, 
-			@RequestParam(name="flagEntreprise",defaultValue="") String  flagEntreprise) {
+			@ModelAttribute("uneEntreprise") Entreprise uneEntreprise, Model model, Long id) {
 			uneEntreprise= cabMetier.chercherEntreprise(id);
-			flagEntreprise="1";
 			model.addAttribute("uneEntreprise", uneEntreprise);
 			List<Personne> listPersonne = cabMetier.findAllPersonne();
 			List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 			model.addAttribute("listPersonne", listPersonne);
-			model.addAttribute("listEntreprise", listEntreprise);
-			model.addAttribute("flagEntreprise", flagEntreprise);
-			
-			
+			model.addAttribute("listEntreprise", listEntreprise);	
+			model.addAttribute("flagEntreprise", "Entreprise");
 		return "beneficiaire";
 	}
 	
 	@RequestMapping(value="/supprimerTypeDocument", method=RequestMethod.GET)
 	public String deleteTypeDocument(@ModelAttribute("unTypeDocument") TypeDocument unTypeDocument, Model model, Long id) {
 		List <Documents> documents= new ArrayList<>();
-		//String nineaASupprimer=cabMetier.chercherEntreprise(id).getNinea();
 		documents=cabMetier.findByTypeDocument(cabMetier.findByIdTypeDocument(id).getTypeDoc());
 		
 		if(documents.isEmpty()==false) {
 			List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 			model.addAttribute("unTypeDocument", unTypeDocument);
 			model.addAttribute("listTypeDocument", listTypeDocument);
-			model.addAttribute("messageTypeDocument", cabMetier.findByIdTypeDocument(id).getTypeDoc()+" est lié à un document.");
-			return "typededocument";
+			messageErreur = cabMetier.findByIdTypeDocument(id).getTypeDoc()+" est lié à un document.";
+			flag = "Suppression";
+			return "redirect:/typededocument?messageErreur="+messageErreur+"&flag="+flag;
 		}
+		String typeDocASupprimer = cabMetier.findByIdTypeDocument(id).getTypeDoc();
 		cabMetier.supprimerTypeDocument(id);
 		List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 		model.addAttribute("unTypeDocument", unTypeDocument);
 		model.addAttribute("listTypeDocument", listTypeDocument);
-		model.addAttribute("messageSucces", "Le type de document a été supprimé");
-		return "typededocument";
+		messageSucces = typeDocASupprimer+" à été supprimé";
+		flag ="Suppression";
+		return "redirect:/typededocument?messageSucces="+messageSucces+"&flag="+flag;
 	}
 	
 	@RequestMapping(value="/modifierTypeDocument", method=RequestMethod.GET)
 	public String modifierTypeDocument(@ModelAttribute("unTypeDocument") TypeDocument unTypeDocument, Model model, Long id) {
+		
 		unTypeDocument = cabMetier.findByIdTypeDocument(id);
 			model.addAttribute("unTypeDocument", unTypeDocument);
 			List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
-			model.addAttribute("listTypeDocument", listTypeDocument);		
+			model.addAttribute("listTypeDocument", listTypeDocument);
 			
 		return "typededocument";
 	}
@@ -988,101 +1056,98 @@ public class CabController {
 		if(documents.isEmpty()==false) {
 			
 			model.addAttribute("uneCommune", uneCommune);
-			model.addAttribute("messageCommune", cabMetier.findByIdCommune(id).getLibelleCommune()+" est lié à un document.");
 			List<Commune> listCommune = cabMetier.findAllCommune();
 			model.addAttribute("listCommune", listCommune);
-			return "localisation";
+			messageErreur = cabMetier.findByIdCommune(id).getLibelleCommune()+" est lié à un document.";
+			flag="Erreur";
+			return "redirect:/localisation?messageErreur="+messageErreur+"&flag="+flag;
 		}
 		String communeASupprimer=cabMetier.findByIdCommune(id).getLibelleCommune();
 		cabMetier.supprimerCommune(id);
 		List<Commune> listCommune = cabMetier.findAllCommune();
 		model.addAttribute("listCommune", listCommune);
-		model.addAttribute("messageSuccesModif", communeASupprimer+" a été supprimée");
-		return "localisation";
+		messageSucces = communeASupprimer+" à été supprimée";
+		flag = "Succes";
+		return "redirect:/localisation?messageSucces="+messageSucces+"&flag="+flag;
 	}	
 	
 	@RequestMapping(value="/modifierLocalisation")
-	public String modifierLocalisation(@ModelAttribute("unDocument") Documents doc, 
-			@ModelAttribute("uneCommune") Commune uneCommune, 
-			Model model, String libelleCommune, String communeArrond, 
-			String departement, String region, String communeModifier,
+	public String modifierLocalisation(@ModelAttribute("uneCommune") Commune uneCommune, 
+			@ModelAttribute("uneCommuneArrondissement") CommuneArrondissement uneCommuneArrondissement,
+			@ModelAttribute("unDepartement") Departement unDepartement,
+			@ModelAttribute("uneRegion") Region uneRegion,
+			
+			Model model, String libelleCommune, String libelleCommuneArrond, 
+			String libelleDepartement, String libelleRegion, String communeModifier,
 			String communeArrondModifier, String departementModifier, String regionModifier) {
 			
 		if(communeModifier.isBlank()==false ){
 			if(cabMetier.findByCommune(libelleCommune)==null) {
-				model.addAttribute("uneCommune", uneCommune);
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
-				model.addAttribute("messageCommuneModif", libelleCommune+"  n'existe pas");
-				model.addAttribute("flagTab","1");
+				model.addAttribute("messageErreur", libelleCommune+"  n'existe pas");
+				model.addAttribute("flag", "Erreur");
+				
 				return "localisation";
 			}else {
-			cabMetier.modifierCommune(libelleCommune, communeModifier);
-			model.addAttribute("uneCommune", uneCommune);
-			
-			List<Commune> listCommune = cabMetier.findAllCommune();
-			model.addAttribute("listCommune", listCommune);
-			model.addAttribute("messageSuccesModif", libelleCommune+" a été modifiée");
-			model.addAttribute("flagTab","1");
-			return "localisation";
+				cabMetier.modifierCommune(libelleCommune, communeModifier);
+				List<Commune> listCommune = cabMetier.findAllCommune();
+				model.addAttribute("listCommune", listCommune);
+				messageSucces = libelleCommune+" a été modifiée";
+				flag="Succes";
+				return "redirect:/localisation?messageSucces="+messageSucces+"&flag="+flag;
 			}
 		}
 		
 		if(communeArrondModifier.isBlank()==false) {
-			if(cabMetier.findByCommuneArrondissement(communeArrond)==null) {
-				model.addAttribute("uneCommune", uneCommune);
-				
+			if(cabMetier.findByCommuneArrondissement(libelleCommuneArrond)==null) {
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
-				model.addAttribute("messageCommuneModif", communeArrond+" n'existe pas");
+				model.addAttribute("messageErreur", libelleCommuneArrond+" n'existe pas");
+				model.addAttribute("flag", "Erreur");
 				return "localisation";
 			}else {
-			cabMetier.modifierCommuneArrondissement(communeArrond, communeArrondModifier);
-			model.addAttribute("uneCommune", uneCommune);
-		
-			List<Commune> listCommune = cabMetier.findAllCommune();
-			model.addAttribute("listCommune", listCommune);
-			model.addAttribute("messageSuccesModif", communeArrond+" a été modifiée");
-			return "localisation";
+				cabMetier.modifierCommuneArrondissement(libelleCommuneArrond, communeArrondModifier);
+				List<Commune> listCommune = cabMetier.findAllCommune();
+				model.addAttribute("listCommune", listCommune);
+				messageSucces = libelleCommuneArrond+" a été modifiée";
+				flag="Succes";
+				return "redirect:/localisation?messageSucces="+messageSucces+"&flag="+flag;
 			}
 		}
 		if(departementModifier.isBlank()==false) {
-			if(cabMetier.findByDepartement(departement)==null) {
-				model.addAttribute("uneCommune", uneCommune);
-				
+			if(cabMetier.findByDepartement(libelleDepartement)==null) {
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
-				model.addAttribute("messageCommuneModif", departement+"  n'existe pas");
+				model.addAttribute("messageErreur", libelleDepartement+"  n'existe pas");
+				model.addAttribute("flag", "Erreur");
 				return "localisation";
 			}else {
-			cabMetier.modifierDepartement(departement, departementModifier);
-			model.addAttribute("uneCommune", uneCommune);
-			
-			List<Commune> listCommune = cabMetier.findAllCommune();
-			model.addAttribute("listCommune", listCommune);
-			model.addAttribute("messageSuccesModif", departementModifier+" a été modifié");
-			return "localisation";
+				cabMetier.modifierDepartement(libelleDepartement, departementModifier);
+				List<Commune> listCommune = cabMetier.findAllCommune();
+				model.addAttribute("listCommune", listCommune);
+				messageSucces = libelleDepartement+" a été modifié";
+				flag="Succes";
+				return "redirect:/localisation?messageSucces="+messageSucces+"&flag="+flag;
 			}
 		}
 		if(regionModifier.isBlank()==false) {
-			if(cabMetier.findByRegion(region)==null) {
-				model.addAttribute("uneCommune", uneCommune);
+			if(cabMetier.findByRegion(libelleRegion)==null) {
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
-				model.addAttribute("messageCommuneModif", region+"  n'existe pas");
+				model.addAttribute("messageErreur", libelleRegion+"  n'existe pas");
+				model.addAttribute("flag", "Erreur");
 				return "localisation";
 			}else {
-			cabMetier.modifierRegion(region, regionModifier);
-			model.addAttribute("uneCommune", uneCommune);
-			List<Commune> listCommune = cabMetier.findAllCommune();
-			model.addAttribute("listCommune", listCommune);
-			model.addAttribute("messageSuccesModif", region+" a été modifiée");
-			return "localisation";
-			}
+				cabMetier.modifierRegion(libelleRegion, regionModifier);
+				List<Commune> listCommune = cabMetier.findAllCommune();
+				model.addAttribute("listCommune", listCommune);
+				messageSucces = libelleRegion+" a été modifiée";
+				flag="Succes";
+				return "redirect:/localisation?messageSucces="+messageSucces+"&flag="+flag;
+				}
 		}
 			
-		model.addAttribute("uneCommune", uneCommune);
-		
 		List<Commune> listCommune = cabMetier.findAllCommune();
 		model.addAttribute("listCommune", listCommune);
 		return "localisation";
@@ -1090,17 +1155,24 @@ public class CabController {
 	}
 	
 	@RequestMapping("/responsable")
-	public String responsableDocument(@ModelAttribute ("unResponsable") Responsable unResponsable, Model model){
+	public String responsableDocument(@ModelAttribute ("unResponsable") Responsable unResponsable, Model model,
+			@RequestParam(name="messageSucces", defaultValue="") String messageSucces, 
+			@RequestParam(name="flag", defaultValue="") String flag){
 		
 		List<Responsable> listResponsable=cabMetier.findAllResponsable();
 		model.addAttribute("unResponsable", unResponsable);
 		model.addAttribute("listResponsable", listResponsable);
+		if(messageSucces.isEmpty()==false)
+				model.addAttribute("messageSucces", messageSucces);
+		if(flag.isEmpty()==false)
+			model.addAttribute("flag", flag);
 		return "responsable";
 	}
 	
 	@RequestMapping("/referentielResponsable")
 	public String ajoutResponsable(@Valid @ModelAttribute("unResponsable") Responsable unResponsable, Errors errors, Model model, 
 			Long idResponsable, String nomResponsable, String prenomResponsable, String fonction) {
+		
 		if(errors.hasErrors()) {
 			List<Responsable> listResponsable=cabMetier.findAllResponsable();
 			model.addAttribute("listResponsable", listResponsable);
@@ -1110,20 +1182,30 @@ public class CabController {
 		cabMetier.ajoutResponsable(idResponsable, nomResponsable, prenomResponsable, fonction);
 		List<Responsable> listResponsable=cabMetier.findAllResponsable();
 		model.addAttribute("listResponsable", listResponsable);
-		model.addAttribute("messageSucces", nomResponsable+" "+prenomResponsable+" a été enregistré(e)");
-		return "responsable";
+		messageSucces = nomResponsable+" "+prenomResponsable+" a été enregistré(e)";
+		byte[] utf8 = messageSucces.getBytes();
+		try {
+			byte[] latin1 = new String(utf8, "UTF-8").getBytes("ISO-8859-1");
+			System.out.println(latin1+"OOOOOOOOOOOOOOOOOOOOOOO");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "redirect:/responsable?messageSucces="+messageSucces;
 	}
 	
 	@RequestMapping("/supprimerResponsable")
 	public String supprimerResponsable(@ModelAttribute("unResponsable") Responsable unResponsable, Model model, Long id) {
+		
 		String nomRespASupprimer=cabMetier.findByIdResponsable(id).getNomResponsable();
 		String prenomRespASupprimer=cabMetier.findByIdResponsable(id).getPrenomResponsable();
 		cabMetier.supprimerResponsable(id);
 		List<Responsable> listResponsable=cabMetier.findAllResponsable();
 		model.addAttribute("listResponsable", listResponsable);
-		model.addAttribute("messageResponsable", prenomRespASupprimer+" "+ nomRespASupprimer+" a été supprimé(e)");
-		model.addAttribute("flag", "a");
-		return "responsable";
+		messageSucces = prenomRespASupprimer+" "+ nomRespASupprimer+" a été supprimé(e)";
+		flag = "Succes";
+		return "redirect:/responsable?messageSucces="+messageSucces+"&flag="+flag;
+		
 	}
 	
 	@RequestMapping("/modifierResponsable")
@@ -1137,21 +1219,27 @@ public class CabController {
 	
 	@RequestMapping("/utilisateur")
 	public String utilisateur(@ModelAttribute("unUtilisateur") Utilisateur unUtilisateur, Errors errors, 
-		@ModelAttribute("unProfil") Profil unProfil, Model model) {
+		@ModelAttribute("unProfil") Profil unProfil, Model model, 
+		@RequestParam(name="messageSucces",defaultValue="") String  messageSucces,
+		@RequestParam(name="flag",defaultValue="") String  flag) {
 		List<Utilisateur> listUtilisateur = cabMetier.findAllUtilisateur();
 		List<Profil> listProfil=cabMetier.findAllProfil();
 		model.addAttribute("unUtilisateur", unUtilisateur);
 		model.addAttribute("unProfil", unProfil);
 		model.addAttribute("listProfil", listProfil);
 		model.addAttribute("listUtilisateur", listUtilisateur);
+		if(messageSucces.isEmpty()==false)
+			model.addAttribute("messageSucces", messageSucces);
+		if(flag.isEmpty()==false)
+			model.addAttribute("flag", flag);
 		return "utilisateur";
 	}
 	
 	@RequestMapping("/referentielUtilisateur")
 	public String ajoutUtilisateur(@Valid @ModelAttribute("unUtilisateur") Utilisateur unUtilisateur, Errors errors, 
-			@ModelAttribute("unProfil") Profil unProfil, Model model, 
-			Long idUtilisateur, String nomUtilisateur, String prenomUtilisateur, String email, String password, 
-			String nomProfil) {
+			@ModelAttribute("unProfil") Profil unProfil, Model model, Long idUtilisateur, String nomUtilisateur, 
+			String prenomUtilisateur, String email, String password, String nomProfil) {
+		
 		if(errors.hasErrors()) {
 			List<Utilisateur> listUtilisateur = cabMetier.findAllUtilisateur();
 			model.addAttribute("listUtilisateur", listUtilisateur);
@@ -1160,14 +1248,26 @@ public class CabController {
 			return "utilisateur";
 		}
 		
+		if(idUtilisateur==null) {
+			if(cabMetier.findByEmail(email).isEmpty()==false) {
+				
+				List<Utilisateur> listUtilisateur = cabMetier.findAllUtilisateur();
+				model.addAttribute("listUtilisateur", listUtilisateur);
+				List<Profil> listProfil=cabMetier.findAllProfil();
+				model.addAttribute("listProfil", listProfil);
+				model.addAttribute("messageDoublon", email+" existe déjà");
+				return "utilisateur";
+			}
+	}
+		
 		cabMetier.ajoutUtilisateur(idUtilisateur, nomUtilisateur, prenomUtilisateur, email, password, nomProfil);
 		List<Utilisateur> listUtilisateur = cabMetier.findAllUtilisateur();
 		model.addAttribute("unUtilisateur", unUtilisateur);
 		model.addAttribute("listUtilisateur", listUtilisateur);
 		List<Profil> listProfil=cabMetier.findAllProfil();
 		model.addAttribute("listProfil", listProfil);
-		model.addAttribute("messageSucces", nomUtilisateur+" "+prenomUtilisateur+" a été enregistré(e)");
-		return "utilisateur";
+		messageSucces = nomUtilisateur+" "+prenomUtilisateur+" a été enregistré(e)";
+		return "redirect:/utilisateur?messageSucces="+messageSucces;
 		
 	}
 	
@@ -1176,15 +1276,16 @@ public class CabController {
 			@ModelAttribute("unProfil") Profil unProfil, Model model, Long id) {
 		String nomutASupprimer = cabMetier.findByIdUtilisateur(id).getNomUtilisateur();
 		String prenomutASupprimer = cabMetier.findByIdUtilisateur(id).getPrenomUtilisateur();
+	
 		cabMetier.supprimerUtilisateur(id);
 		List<Utilisateur> listUtilisateur = cabMetier.findAllUtilisateur();
 		model.addAttribute("listUtilisateur", listUtilisateur);
 		List<Profil> listProfil=cabMetier.findAllProfil();
 		model.addAttribute("listProfil", listProfil);
-		model.addAttribute("messageSucces", nomutASupprimer+" "+prenomutASupprimer+" a été supprimé(e)");
-		model.addAttribute("flag", "a");
+		messageSucces = nomutASupprimer+" "+prenomutASupprimer+" a été supprimé(e)";	
+		flag= "Succes";
 		
-		return "utilisateur";
+		return "redirect:/utilisateur?messageSucces="+messageSucces+"&flag="+flag;
 	}
 	
 	@RequestMapping("/modifierUtilisateur")
@@ -1200,36 +1301,48 @@ public class CabController {
 	}
 	
 	@RequestMapping("/profil")
-	public String profilUtilisateur(@ModelAttribute ("unProfil") Profil unProfil, Model model){
+	public String profilUtilisateur(@ModelAttribute ("unProfil") Profil unProfil, Model model,
+			@RequestParam(name="messageDoublon",defaultValue="") String  messageDoublon,
+			@RequestParam(name="messageSucces",defaultValue="") String  messageSucces){
 		
 		List<Profil> listProfil=cabMetier.findAllProfil();
 		model.addAttribute("listProfil", listProfil);
 		model.addAttribute("unProfil", unProfil);
+		if(messageDoublon.isEmpty()==false)
+		model.addAttribute("messageDoublon", messageDoublon);
+		if(messageSucces.isEmpty()==false)
+		model.addAttribute("messageSucces", messageSucces);
 		
 		return "profil";
 	}
 	
 	@RequestMapping("/referentielProfil")
 	public String ajoutProfil(@ModelAttribute("unProfil") Profil unProfil, Model model, String profil) {
-		
+		if(cabMetier.findByProfil(profil)!=null) {
+			String messageDoublon=null;
+			List<Profil> listProfil=cabMetier.findAllProfil();
+			model.addAttribute("listProfil", listProfil);
+			messageDoublon=profil+" existe déjà";
+			return "redirect:/profil?messageDoublon="+messageDoublon;
+			
+		}
+		String messageSucces = null;
 		cabMetier.ajoutProfil(profil);
 		List<Profil> listProfil=cabMetier.findAllProfil();
 		model.addAttribute("listProfil", listProfil);
-		
-		model.addAttribute("messageSucces", profil+" a été enregistré");
-		return "profil";
+		messageSucces = profil+" a été enregistré";
+		return "redirect:/profil?messageSucces="+messageSucces;
 	}
 	
 	@RequestMapping("/supprimerProfil")
 	public String supprimerProfil(@ModelAttribute("unProfil") Profil unProfil, Model model, Long id) {
 		String profilASupprimer = cabMetier.findByIdProfil(id).get().getNomProfil();
-		
+		String messageSucces = null;
 		cabMetier.supprimerProfil(id);
 		List<Profil> listProfil=cabMetier.findAllProfil();
 		model.addAttribute("listProfil", listProfil);
-		model.addAttribute("messageSucces2", profilASupprimer+" a été supprimé");
-		model.addAttribute("flag", "a");
-		
-		return "profil";
+		messageSucces = profilASupprimer+" a été supprimé";
+		return "redirect:/profil?messageSucces="+messageSucces;
 	}
+	
 }

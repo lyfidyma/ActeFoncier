@@ -21,6 +21,33 @@ textarea:focus {
 }
 
 </style>
+ <script type="text/javascript" th:if="${flagEntreprise}"> 
+ $(document).ready(function(){	
+	 const sel = document.querySelector('select');
+	 sel.value = 'Entreprise'; 
+	 sel.dispatchEvent(new Event('change', {'view': window,'bubbles': true}));
+
+ })		
+</script>
+			
+
+<script type="text/javascript" > 
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageErreur').fadeOut('fast');},5000);
+})
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageDoublon').fadeOut('fast');},5000);
+})
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageSucces').fadeOut('fast');},5000);
+})
+</script>
+ 
  
 </head>
 <body>
@@ -31,24 +58,26 @@ textarea:focus {
 	<div class="container">
 
 					<div class="panel-body">
-					 <p th:if="${messagePersonneDocument}" th:text="${messagePersonneDocument}" style= color:red></p>
-					  <p th:if="${messageEntrepriseDocument}" th:text="${messageEntrepriseDocument}" style= color:red></p>
+					 
 					<ul class="nav nav-pills" id="monTab">
-  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
-  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Particulier</a></li>
-  <li><a class="nav-item nav-link" href="#p3" data-toggle="tab">Entreprise</a></li>
+  <li><a class="nav-item nav-link active" href="#p1" id="tabOne" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" id="tabTwo" data-toggle="tab">Particulier</a></li>
+  <li><a class="nav-item nav-link" href="#p3" id="tabThree" data-toggle="tab">Entreprise</a></li>
   
 </ul>
 <div class="tab-content">
+<br></br>
+					  <p id="messageErreur" th:if="${messageErreur}" th:text="${messageErreur}" style= color:red></p>
+					  <p id="messageDoublon" th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+				      <p id="messageSucces" th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+ <input type="hidden" id="flag" th:value="${flag}" />
  <div class="tab-pane active" id="p1">
- <br></br>
+
 						<form th:action="@{/referentielBeneficiaire}" method="post">
-						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
-							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
-							<p th:if="${messageChampsObligatoires}" th:text="${messageChampsObligatoires}" style= color:red></p>
+						
 							<div class="col-md-3">
-							   <label>Type</label>
-							    <select id="typeBeneficiaire" name="typeBeneficiaire"  th:value="${typeBeneficiaire}" class="form-control" onchange="showDiv('forEntreprise', this); showDivParticulier('forParticulier', this)">
+					   <label>Type</label>
+							    <select id="typeBeneficiaire" name="typeBeneficiaire"  class="form-control" onchange="showDiv('forEntreprise', this); showDivParticulier('forParticulier', this)">
 							      <option value="" hidden>------------</option>
 							      <option value="Entreprise">Entreprise</option>
 							       <option value="Particulier" selected>Particulier</option>						       
@@ -97,7 +126,7 @@ textarea:focus {
 						  
 						   <div class="col-md-3" >
 						     	<label for="nin" class="form-label">Numéro CEDEAO</label>
-							    <input type="text" th:field="*{nin}" class="form-control" placeholder="Numéro CEDEAO"/>
+							    <input id="nin" type="text" th:field="*{nin}" class="form-control" placeholder="Numéro CEDEAO"/>
 							    <p th:if="${messageNin}" th:text="${messageNin}" style= color:red></p>
 						  </div>
 						  <div class="col-md-3">
@@ -118,13 +147,14 @@ textarea:focus {
 						  <div class="col-md-6">
 						  
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <a class="btn btn-warning" th:href="@{/beneficiaire}">Annuler</a>
 					    
 					  </div>
 					 
 						</form>
 						</div>
 						<div class="tab-pane" id="p2">
-						<br></br>
+						
 						<h4 th:if="${listPersonne.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée personne</h4>
 						<div class="table-responsive" th:if="${listPersonne.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
@@ -166,23 +196,21 @@ textarea:focus {
 						</table>
 						
 							</div>
-							
-							</div>
-						<script type="text/javascript" th:if="${flagSuppression}">
+							<script type="text/javascript" >
 
 $(document).ready(function(){
-	
-	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-        localStorage.setItem('activeTab', $(e.target).attr('href'));
-    });
-    var activeTab = localStorage.getItem('activeTab');
-    if(activeTab){
-        $('#monTab a[href="' + activeTab + '"]').tab('show');
+	if($("#flag").val()=="personne"){
+        $('#tabTwo').tab('show');
     }
+	if($("#flag").val()=="entreprise"){
+		$('#tabThree').tab('show');
+	}
 });
 	
 
 </script>
+				</div>
+						
 						</div>
 						 
 </div>

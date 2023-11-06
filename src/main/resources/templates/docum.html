@@ -5,7 +5,6 @@
 <head>
 <meta charset="UTF-8"/>
 <title>Consultation</title>
-
 	
 	<style>
 	th{
@@ -14,8 +13,14 @@
 	td{
 	font-size:13px;
 	}
-
-  
+.pagination > .active > a{
+	color:purple;
+    background-color: white ;
+    border-color:#ddd;
+}
+.pagination > .disabled > a{
+    background-color: lightblue ;
+}
 	</style>
 </head>
 <body>
@@ -26,24 +31,21 @@
 	<h4 th:if="${listDocuments.isEmpty()}==true" style="color:red; text-align:center">Aucun document </h4>
 	</div>
 		<div class="container"  th:if="${listDocuments.isEmpty()}==false">
-		 <div class="col-md-4">
+		 <div class="col-md-11">
      		 <a th:href="@{/excelExport}" class="btn btn-success" style="border: 1px solid green; background-color: white; color: green;">Export vers Excel 
  			<i class="fa fa-file-excel-o" aria-hidden="true"></i></a>
  			 </div>
- 			 <div class="dropdown col-md-4" >
+ 			 <div class="dropdown col-md-1" th:object="${unTypeDocument}">
   <button class="btn btn-warning dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     Filtre  &nbsp;&nbsp;<span class="caret"></span></button>
   <div class="dropdown-menu">
-  <ul>
-    <li ><a class="dropdown-item" th:href="@{cons(motCle='Bail',page=${currentPage},size=${size})}">Bail</a></li>
-   <li><a class="dropdown-item" th:href="@{cons(motCle='Arrêté',page=${currentPage},size=${size})}">Arrêté</a></li>
-   <li><a class="dropdown-item" th:href="@{cons(motCle='Décision',page=${currentPage},size=${size})}">Décision</a></li>
-    <li><a class="dropdown-item" th:href="@{cons(motCle='Décret',page=${currentPage},size=${size})}">Décret</a></li>
-     <li><a class="dropdown-item" th:href="@{cons(motCle='Autres',page=${currentPage},size=${size})}">Autres</a></li>
+  <ul th:each="t:${type}">
+    <li ><a class="dropdown-item" th:text="${t.typeDoc}"  th:href="@{cons(keySearch=${t.typeDoc},page=${currentPage},size=${size})}"></a></li>
+  
     </ul>
   </div>
 </div>
-     		 	<form th:action="@{cons}" id="searchForm" method="get">   		 	
+     		 	<!-- <form th:action="@{cons}" id="searchForm" method="get">   		 	
      				<div class="input-group col-md-4">
         	  		    <input id="motCle" type="text" class="form-control" name="motCle" th:value=${motCle}
                 	placeholder="chercher"/>   
@@ -51,7 +53,7 @@
                  <button type="submit" class="btn btn-info"><span class="glyphicon glyphicon-search"></span></button>
             	</div>
             	</div>
-          		</form>
+          		</form> -->
           	</div>
           	
          	<p></p>
@@ -101,52 +103,61 @@
 									<td th:if="${d.statutDocument} eq 'rejeté'" style="background-color:#F3767E; text-align:center" th:text="${d.statutDocument}"></td>
 									<td th:if="${d.statutDocument} eq 'approuvé'" style="background-color:#90EE90; text-align:center" th:text="${d.statutDocument}"></td>
 									
-								<td><a th:href="@{visualiser(id=${d.idDocument})}"><i class="fas fa-phone"></i> <span class="glyphicon glyphicon-eye-open"></span></a></td>
-								<td th:if="${d.statutDocument} eq 'saisi' or ${d.statutDocument} eq 'rejeté' "><a th:href="@{modifier(id=${d.idDocument})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
+								<td><a th:href="@{visualiser(id=${d.idDocument})}"><i class="fas fa-phone"></i> <span class="glyphicon glyphicon-eye-open" title="Détails" ></span></a></td>
+								<td th:if="${d.statutDocument} eq 'saisi' or ${d.statutDocument} eq 'rejeté' "><a th:href="@{modifier(id=${d.idDocument})}"><span class="glyphicon glyphicon-pencil" title="Editer"  style=color:green></span></a></td>
 								<td th:if="${d.statutDocument} eq 'transmis' or ${d.statutDocument} eq 'approuvé'"><span class="glyphicon glyphicon-pencil"></span></td>
-								<td th:if="${d.statutDocument} eq 'saisi'"><a th:href="@{supprimer(id=${d.idDocument},page=${currentPage},size=${size})}"  onclick="return confirm('Voulez-vous supprimer cet acte?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>
+								<td th:if="${d.statutDocument} eq 'saisi'"><a th:href="@{supprimer(id=${d.idDocument},page=${currentPage},size=${size})}"  onclick="return confirm('Voulez-vous supprimer cet acte?');"><span class="glyphicon glyphicon-trash" title="Supprimer" style=color:red></span></a></td>
 								<td th:if="${d.statutDocument} eq 'transmis' or ${d.statutDocument} eq 'approuvé' or ${d.statutDocument} eq 'rejeté'"><span class="glyphicon glyphicon-trash"></span></td>																				
 								</tr>	
 						</table>
 						
 							<!-- Pagination -->
 <nav aria-label="pagination">
-<div th:if="${totalPages > 0}">
+<div  th:if="${totalPages > 0}">
       <div class="row col-sm-10">
        	 <div class="col-md">
-       	 	<span>
-     		 	<a th:if="${currentPage > 0}" th:href="@{cons(page=0)}">Début</a>
-     		 	<span th:unless="${currentPage >= 1}">Début</span>
-     		 </span> &nbsp;
-      	 	<span>
-     		 	<a th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1})}">Préc.</a>
-     		 	<span th:unless="${currentPage >= 1}">Préc.</span>
-     		 </span> &nbsp; 
-        	<span th:each="i: ${#numbers.sequence(0, totalPages-1)}">
-        		<a th:if="${currentPage!=i}" th:href="@{cons(page=${i})}">[[${i}]]</a>
-        		<span th:unless="${currentPage !=i}">[[${i}]]</span> &nbsp; &nbsp;
-     		</span>
-     		 <span>
-     		 	<a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1})}">Suiv.</a>
-     		 	<span th:unless="${currentPage < totalPages-1}">Suiv.</span>
-     		 </span> &nbsp; 
-     		 <span>
-     		 	<a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1})}">Fin</a>
-     		 	<span th:unless="${currentPage < totalPages-1}">Fin</span>
-     		 </span>
+       	 <ul class="pagination">
+       	 	
+     		 	<!-- <li th:if="${motCle==null} and ${keySearch==null}"><a th:if="${currentPage > 0}" th:href="@{cons(page=0)}">Début</a></li>
+     		 	<li th:if="${motCle!=null}"><a th:if="${currentPage > 0}" th:href="@{cons(page=0 , motCle=${motCle})}">Début</a></li>
+     		 	<li th:if="${keySearch!=null}"><a th:if="${currentPage > 0}" th:href="@{cons(page=0 , keySearch=${keySearch})}">Début</a></li>
+     		 	<li th:unless="${currentPage >= 1}">Début</li> -->
+     		 
+     		 	<li class="page-item" th:if="${motCle==null} and ${keySearch==null}"><a class="page-link" th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1})}">&larr;</a></li>
+     		 	<li  class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1}, motCle=${motCle})}">&larr;</a></li>
+     		 	<li  class="page-item" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1}, keySearch=${keySearch})}">&larr;</a></li>
+     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPage >= 1}">&larr;</a></li>
      		  
+        		<th:block th:each="i: ${#numbers.sequence(0, totalPages-1)}" >
+        		<li class="page-item active" th:if="${motCle==null} and ${keySearch==null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{cons(page=${i})}">[[${i}]]</a></li>
+        		<li class="page-item active" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{cons(page=${i}, motCle=${motCle})}">[[${i}]]</a></li>
+        		<li class="page-item active" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{cons(page=${i}, keySearch=${keySearch})}">[[${i}]]</a></li>
+        		<li class="page-item disabled"><a class="page-link" th:unless="${currentPage !=i}">[[${i}]]</a></li>
+     			</th:block>
+     		
+     		 	<li  class="page-item" th:if="${motCle==null} and ${keySearch==null}" ><a class="page-link" th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1})}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1}, motCle=${motCle})}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1}, keySearch=${keySearch})}">&rarr;</a></li>
+     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPage < totalPages-1}">&rarr;</a></li>
+     		 
+     		 	<!-- <li th:if="${motCle==null} and ${keySearch==null}"><a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1})}">Fin</a></li>
+     		 	<li th:if="${motCle!=null}"><a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1}, motCle=${motCle})}">Fin</a></li>
+     		 	<li th:if="${keySearch!=null}"><a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1}, keySearch=${keySearch})}">Fin</a></li>
+     		 	<li th:unless="${currentPage < totalPages-1}">Fin</li> -->
+     		
+     		  </ul>
      		  </div>
      		 
       </div>
    </div>
    </nav>
   <div>
-  <span>Total documents :</span><span th:text="${totalItems}"></span>
-  </div>
+  Total documents : <span th:text="${totalItems}"></span>
 						</div>
 					</div>
 				</div>
 			</div>
+		</div>
 		</div>
 </body>
 </html>

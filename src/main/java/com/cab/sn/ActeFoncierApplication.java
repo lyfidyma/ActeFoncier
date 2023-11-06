@@ -19,5 +19,7 @@ public class ActeFoncierApplication{
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+	
+	
 
 }

@@ -1,6 +1,5 @@
 package com.cab.sn.metier;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class UserDetail implements UserDetailsService {
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		Optional<Utilisateur> utilisateur = utilisateurReporitory.findByEmail(email);
         if(utilisateur==null){
-               new NoSuchElementException("Utilisateur n'existe pas");
+               throw new UsernameNotFoundException("Email non trouvé");
              }
       Set<GrantedAuthority> authorities = utilisateur.get().getProfil().stream()
               .map((role) -> new SimpleGrantedAuthority(role.getNomProfil()))

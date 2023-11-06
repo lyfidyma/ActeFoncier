@@ -14,7 +14,7 @@ h4{
 label{
 	font-size:12px;
 	font-family:Arial;
-	color:#889599;
+	
 }
 input[type=text]:focus {
   background-color: lightcyan;
@@ -25,11 +25,31 @@ textarea:focus {
 .error{
 	color:red;
 }
+input[type=file]::file-selector-button {
+  margin-right: 10px;
+  border: none;
+  background: #696D70  ;
+  padding: 4px 12px;
+  color: #fff;
+  cursor: pointer;
+  
+}
+
+input[type=file]::file-selector-button:hover {
+  background: #0d45a5;
+}
 
 
 
 </style>
+ <script type="text/javascript" th:if="${flagEntreprise}"> 
+ $(document).ready(function(){	
+	 const sel = document.querySelector("#typeBeneficiaire");
+	 sel.value = 'Entreprise'; 
+	 sel.dispatchEvent(new Event('change', {'view': window,'bubbles': true}));
 
+ })		
+</script>
 </head>
 <body>
 	<div layout:fragment="content">
@@ -39,6 +59,9 @@ textarea:focus {
 					<div class="panel-heading">Nouveau document</div>
 					
 					<div class="panel-body">
+					
+       							<p style="color:red">[[${messageFile}]]</p>
+      						
 						<form th:action="@{/sauvegarderDocument}" method="post" th:object="${unDocument}" enctype="multipart/form-data" onsubmit="return confirm('Voulez-vous enregistrer?')">	
 						<p th:if="${messageDoublon}" th:text="${messageDoublon}" style= color:red></p>
 						<div th:each="d:${unDocument}">
@@ -77,16 +100,16 @@ textarea:focus {
 							    <label for="responsable" class="form-label">Responsable du document</label>
 							    <input type="text" list="list-responsable" th:field="*{responsableDocument}" class="form-control" placeholder="Responsable" />
 							  <datalist id="list-responsable">
-							   <option th:each="c:${listResponsable}" th:value="${c.fonction}" th:text="${c.fonction}"></option>
+							   <option th:each="c:${listResponsable}" th:value="${c.prenomResponsable}+' '+${c.nomResponsable}" th:text="${c.prenomResponsable}+' '+${c.nomResponsable}"></option>
 							   </datalist>
 							  </div>
+							  
 							  <br style="clear: both;"/>
 							  &ensp;
 						   <h4>Bénéficiare</h4>
 						   <hr/>
 						   <p></p>
-						   <!-- <fieldset style="border:2px groove #999; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
-						<legend style="font-size:14px; background-color:ligthgreen"><b>Bénéficiaire</b></legend> -->
+						  
 							  <div class="col-md-3">
 							   <label>Type</label>
 							    <select id="typeBeneficiaire" th:field="*{typeBeneficiaire}" class="form-control" onchange="showDiv('forEntreprise', this)">
@@ -96,25 +119,97 @@ textarea:focus {
 							    </select>
 							    <p th:if="${#fields.hasErrors('typeBeneficiaire')}" th:errors="*{typeBeneficiaire}" th:errorclass="error"></p>
 							  </div>
+							  </div>
 							  <script>
       							function showDiv(divId, element) {
       							   document.getElementById(divId).style.display = element.value == "Entreprise" ? 'block' : 'none';
+
+      							   
     							  }
   							  </script> 
   							  
   							  <div th:each="d:${unDocument}">
-  							  <div class="col-md-3" th:object="${unePersonne}">
+  							  	<div id="forEntreprise" style="display: none;" th:object="${uneEntreprise}" >
+							   <div class="col-md-3">
+							   <label>Ninea</label>
+							    <input type="text" th:field="*{ninea}" id="ninea" class="form-control"  placeholder="Ninea" aria-label="ninea"
+							     th:onchange="getEntreprise()"/>	    
+							  </div>
+							  <div class="col-md-6">
+							   <label>Nom de l'entreprise</label>
+							   <input type="text" id="nomEntreprise" th:field="*{nomEntreprise}" class="form-control"
+							   			placeholder="Nom de l'Entreprise" />
+							   			</div>
+							   			
+							   			
+							  </div>
+							  <br style="clear: both;"/>
+						  		<p></p>	
+							   <script>
+						  
+						  function getEntreprise() {
+							    
+								  /*  window.location='/getBeneficiaire?cni='+$("#cni").val();    */
+								  var ninea=$("#ninea").val();
+							 	  $.get("/getEntreprise", {ninea:ninea}, function (data) {  
+							 		  if(!data){
+										  document.getElementById("nomEntreprise").value= "";
+										  document.getElementById("nomEntreprise").readOnly= false;
+							 			  
+							 		  }else{
+										  document.getElementById("nomEntreprise").value= data.nomEntreprise;
+										  document.getElementById("nomEntreprise").readOnly= true;
+							 		  }
+							  }); 
+							  }
+						  
+  						  </script>
+  				 		   	 
+  							  <div th:object="${unePersonne}">			
+  							  	  
+  							  <div class="col-md-3" > 
+						 	 </div>						 	 
+  							  <div class="col-md-3" >
   							  <label for="cni" class="form-label">Cni</label>
 							    <input type="text" id="cni" th:field="*{cni}" class="form-control" placeholder="Numéro de la pièce d'identité"
 							    th:onchange="getPersonne()"/>
 						 		<p th:if="${messageCni}" th:text="${messageCni}" style= color:red></p>
 						 		 <p th:if="${#fields.hasErrors('cni')}" th:errors="*{cni}" th:errorclass="error"></p>
-						 		 <p> </p>
+						 		 </div >
+						 		 <div class="col-md-3" >
+						 		 <label for="nin" class="form-label">Numéro CEDEAO</label>
+							    <input type="text" id="nin" th:field="*{nin}" class="form-control" placeholder="Numéro CEDEAO"/>
+							    <p th:if="${messageCEDEAO}" th:text="${messageCEDEAO}" style= color:red></p>
+							    <p th:if="${#fields.hasErrors('nin')}" th:errors="*{nin}" th:errorclass="error"></p>
+							    </div >
+							    <div class="col-md-3">
+						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
+							    <input type="date" id="dateDelivrance" name="dateDelivrance" th:value="${dateDelivranceString}" class="form-control" />
+						  </div>
+						 	
+						 	
+						 	<br style="clear: both;"/>
+						  <p> </p>
+						  
+						  <div class="col-md-3" >
+						  </div>
+						   <div class="col-md-3" >
+							    <label>Nom</label>
+							    <input type="text" th:field="*{nomPersonne}" id="nomPersonne" class="form-control" placeholder="Nom" />
+							 <p th:if="${#fields.hasErrors('nomPersonne')}" th:errors="*{nomPersonne}" th:errorclass="error"></p>
+							 </div>
+							 <div class="col-md-6" th:object="${unePersonne}" >
+							   <label>Prénom</label>
+							    <input type="text" id="prenom" th:field="*{prenom}" class="form-control" placeholder="Prénom" />
+							 <p th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" th:errorclass="error"></p>
+							  </div>
+							   
+						 </div>
+						 
+						
 						 		 <script>
 						  
 						  function getPersonne() {
-							    
-								  /*  window.location='/getBeneficiaire?cni='+$("#cni").val();    */
 								  var cni=$("#cni").val();
 							 	  $.get("/getPersonne", {cni:cni}, function (data) {  
 							 		  if(!data){
@@ -140,59 +235,8 @@ textarea:focus {
 							  }); 
 							  }
   						  </script> 
-						     	<label for="nin" class="form-label">Numéro CEDEAO</label>
-							    <input type="text" id="nin" th:field="*{nin}" class="form-control" placeholder="Numéro CEDEAO"/>
-							    <p th:if="${messageCEDEAO}" th:text="${messageCEDEAO}" style= color:red></p>
-							    <p th:if="${#fields.hasErrors('nin')}" th:errors="*{nin}" th:errorclass="error"></p>
-						 	</div >
-							   
-							  
-							   <div class="col-md-6" id="forEntreprise" style="display: none;" th:object="${uneEntreprise}" >
-							   <label>Ninea</label>
-							    <input type="text" th:field="*{ninea}" id="ninea" class="form-control"  placeholder="Ninea" aria-label="ninea"
-							     th:onchange="getEntreprise()"/>	    
-							  <p></p>
-							   <label>Nom de l'entreprise</label>
-							   <input type="text" id="nomEntreprise" th:field="*{nomEntreprise}" class="form-control"
-							   			placeholder="Nom de l'Entreprise" />
-							  </div>
-							   <script>
 						  
-						  function getEntreprise() {
-							    
-								  /*  window.location='/getBeneficiaire?cni='+$("#cni").val();    */
-								  var ninea=$("#ninea").val();
-							 	  $.get("/getEntreprise", {ninea:ninea}, function (data) {  
-							 		  if(!data){
-										  document.getElementById("nomEntreprise").value= "";
-										  document.getElementById("nomEntreprise").readOnly= false;
-							 			  
-							 		  }else{
-										  document.getElementById("nomEntreprise").value= data.nomEntreprise;
-										  document.getElementById("nomEntreprise").readOnly= true;
-							 		  }
-							  }); 
-							  }
-  						  </script>
-
-						   <br style="clear: both;"/>
-						  		<p></p>			   
-						   <div class="col-md-3" th:object="${unePersonne}" >
-							    <label>Nom</label>
-							    <input type="text" th:field="*{nomPersonne}" id="nomPersonne" class="form-control" placeholder="Nom" />
-							 <p th:if="${#fields.hasErrors('nomPersonne')}" th:errors="*{nomPersonne}" th:errorclass="error"></p>
-							 </div>
-							 <div class="col-md-3" th:object="${unePersonne}" >
-							   <label>Prénom</label>
-							    <input type="text" id="prenom" th:field="*{prenom}" class="form-control" placeholder="Prénom" />
-							 <p th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}" th:errorclass="error"></p>
-							  </div>
-						   
-						   <div class="col-md-3" th:object="${unePersonne}">
-						     	<label for="dateDelivrance" class="form-label" style="font-size:12px">Date délivrance</label>
-							    <input type="date" id="dateDelivrance" name="dateDelivrance" th:value="${dateDelivranceString}" class="form-control" />
-						  </div>	
-						 </div>
+						  
 						
 						 <br style="clear: both;"/>
 						 &ensp;
@@ -282,6 +326,7 @@ textarea:focus {
       </div>
       <div id="collapse1" class="panel-collapse collapse">
        <div class="panel-body">
+      
         <fieldset style="border:1px groove; border-radius:8px; box-shadow:0 0 8px #999;padding:6px; ">
 						<legend style="font-size:14px;"><b></b></legend> 
 						  <div class="col-md-3" th:object="${unePieceJointe}">
@@ -302,7 +347,7 @@ textarea:focus {
 						   <div class="col-md-12" >
 						    &ensp;
 							<input type="file" name="file"  class="form-control" />
-						
+						 	
 					
 					 </div>
 					 </fieldset>
@@ -339,7 +384,7 @@ textarea:focus {
 						  </div>
 						  <div class="col-md-12" >
 						   <label></label>
-						 <input type="file" class="form-control" name="file1" />
+						 <input type="file" name="file1"  class="form-control" />
 					 </div>
 					   <p> </p>
 						   </fieldset>
@@ -367,6 +412,7 @@ textarea:focus {
 					  <div class="col-md-3">
 					 
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <a class="btn btn-warning" th:href="@{/ajouter}">Réinitialiser</a>
 					  </div>
 	
 	<!-- Fenetre modal -->				
@@ -375,9 +421,9 @@ textarea:focus {
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Document enregistré</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
-        </button>
+        </button> -->
       </div>
       <div class="modal-body" >
      

@@ -83,6 +83,13 @@ body {
   
 }
 
+.sidebar-search{
+margin-right: 10px;
+margin-top: 40px;
+margin-left: 15px;
+width: 90%;
+}
+
 .sidebar-footer{
 height: 50px;
 position: absolute;

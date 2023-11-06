@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
        xmlns:layout="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
       layout:decorate="~{template3}">
 <head>
@@ -21,21 +21,7 @@ textarea:focus {
 }
 
 </style>
-<script type="text/javascript" th:if="${flag}">
 
-$(document).ready(function(){
-	
-	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-        localStorage.setItem('activeTab', $(e.target).attr('href'));
-    });
-    var activeTab = localStorage.getItem('activeTab');
-    if(activeTab){
-        $('#monTab a[href="' + activeTab + '"]').tab('show');
-    }
-});
-	
-
-</script>
  
 </head>
 <body>
@@ -46,21 +32,32 @@ $(document).ready(function(){
 	<div class="container">
 
 					<div class="panel-body">
-					 <p th:if="${messagePersonneDocument}" th:text="${messagePersonneDocument}" style= color:red></p>
-					  <p th:if="${messageEntrepriseDocument}" th:text="${messageEntrepriseDocument}" style= color:red></p>
+					 
 					<ul class="nav nav-pills" id="monTab">
-  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
-  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste</a></li>
+  <li><a class="nav-item nav-link active" href="#p1" id="tabOne" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" id="tabTwo" data-toggle="tab">Liste</a></li>
   
   
 </ul>
 <div class="tab-content">
- <div class="tab-pane active" id="p1">
+
+<script type="text/javascript" > 
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageSucces').fadeOut('fast');},5000);
+})
+</script>
  <br></br>
-						<form th:action="@{/referentielResponsable}" method="post">
-						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
-							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+ 
+<p id="messageSucces" th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+<input type="hidden" id="flag" th:value="${flag}" />
+ <div class="tab-pane active" id="p1">
+ 							
 							
+						
+						<form th:action="@{/referentielResponsable}" method="post">
+												
   							     <div th:object="${unResponsable}">
 							  
 							    <label for="nom" class="form-label">Nom</label>
@@ -80,12 +77,12 @@ $(document).ready(function(){
 						  <p></p>
 						  
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <a class="btn btn-warning" th:href="@{/responsable}">Annuler</a>
 					 
 						</form>
 						</div>
 						<div class="tab-pane" id="p2">
-						<br></br>
-						<p th:if="${messageResponsable}" th:text="${messageResponsable}" class= "alert alert-success"></p>
+						
 						<h4 th:if="${listResponsable.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée responsable</h4>
 						<div class="table-responsive" th:if="${listResponsable.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
@@ -103,7 +100,22 @@ $(document).ready(function(){
 						</table>
 						
 						</div>
-						
+<script type="text/javascript" >
+
+$(document).ready(function(){
+	if($("#flag").val()){
+	/* $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    var activeTab = localStorage.getItem('activeTab');
+    if(activeTab){
+        $('#monTab a[href="' + activeTab + '"]').tab('show'); */
+        $('#tabTwo').tab('show');
+    }
+});
+	
+
+</script>
 						</div>
 							
 						

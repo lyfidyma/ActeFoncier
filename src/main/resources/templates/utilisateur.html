@@ -21,22 +21,8 @@ textarea:focus {
 }
 
 </style>
-<script type="text/javascript" th:if="${flag}">
 
-$(document).ready(function(){
-	
-	$('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-        localStorage.setItem('activeTab', $(e.target).attr('href'));
-    });
-    var activeTab = localStorage.getItem('activeTab');
-    if(activeTab){
-        $('#monTab a[href="' + activeTab + '"]').tab('show');
-    }
-});
-	
 
-</script>
- 
 </head>
 <body>
 
@@ -46,20 +32,34 @@ $(document).ready(function(){
 	<div class="container">
 
 					<div class="panel-body">
-					 <p th:if="${messagePersonneDocument}" th:text="${messagePersonneDocument}" style= color:red></p>
-					  <p th:if="${messageEntrepriseDocument}" th:text="${messageEntrepriseDocument}" style= color:red></p>
+					
 					<ul class="nav nav-pills" id="monTab">
-  <li><a class="nav-item nav-link active" href="#p1" data-toggle="tab">Nouveau</a></li>
-  <li><a class="nav-item nav-link" href="#p2" data-toggle="tab">Liste</a></li>
+  <li ><a class="nav-item nav-link active" href="#p1" id="tabOne" data-toggle="tab">Nouveau</a></li>
+  <li><a class="nav-item nav-link" href="#p2" id="tabTwo" data-toggle="tab">Liste</a></li>
   
   
 </ul>
 <div class="tab-content">
+<br></br>
+<script type="text/javascript" > 
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageDoublon').fadeOut('fast');},5000);
+})
+
+$(document).ready(function(){
+	setTimeout(function(){
+		$('#messageSucces').fadeOut('fast');},5000);
+})
+</script>
+							<p id="messageDoublon" th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
+							<p id="messageSucces" th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+ 							<input type="hidden" id="flag" th:value="${flag}" />
  <div class="tab-pane active" id="p1">
- <br></br>
-						<form th:action="@{/referentielUtilisateur}" method="post">
-						<p th:if="${messageDoublon}" th:text="${messageDoublon}" class= "alert alert-danger"></p>
-							<p th:if="${messageSucces}" th:text="${messageSucces}" class= "alert alert-success"></p>
+ 
+ 
+						<form th:action="@{/referentielUtilisateur}" method="post" id="formTabp1" name="formTabp1">
+						
 							
   							     <div th:object="${unUtilisateur}">
 							  
@@ -95,12 +95,13 @@ $(document).ready(function(){
 						  <p></p>
 						  
 					    <button type="submit" class="btn btn-primary">Enregistrer</button>
+					    <a class="btn btn-warning" th:href="@{/utilisateur}">Annuler</a>
 					 
 						</form>
+						
 						</div>
 						<div class="tab-pane" id="p2">
-						<br></br>
-						<p th:if="${messageUtilisateur}" th:text="${messageUtilisateur}" class= "alert alert-success"></p>
+						
 						<h4 th:if="${listUtilisateur.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée utilisateur</h4>
 						<div class="table-responsive" th:if="${listUtilisateur.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
@@ -112,7 +113,9 @@ $(document).ready(function(){
 									<td th:text="${d.nomUtilisateur}"></td>
 									<td th:text="${d.prenomUtilisateur}"></td>
 									<td th:text="${d.email}"></td>
-									<td th:text="${d.profil}"></td>
+									<th:block th:each="p:${d.profil}">
+									<td style="text-align:center" th:text="${p.nomProfil}"></td>
+									</th:block>
 								<td style="text-align:center"><a th:href="@{modifierUtilisateur(id=${d.idUtilisateur})}"><span class="glyphicon glyphicon-pencil" style=color:green></span></a></td>
 								<td style="text-align:center"><a th:href="@{supprimerUtilisateur(id=${d.idUtilisateur})}"  onclick="return confirm('Voulez-vous supprimer cet utilisateur?');"><span class="glyphicon glyphicon-trash" style=color:red></span></a></td>
 																		
@@ -120,7 +123,16 @@ $(document).ready(function(){
 						</table>
 						
 						</div>
-						
+<script type="text/javascript" >
+
+$(document).ready(function(){
+	if($("#flag").val()){
+        $('#tabTwo').tab('show');
+    }
+});
+	
+
+</script>
 						</div>
 							
 						

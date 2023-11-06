@@ -1,6 +1,7 @@
 package com.cab.sn.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,8 +14,11 @@ import com.cab.sn.entities.Documents;
 
 @Repository
 public interface DocumentsRepository extends JpaRepository<Documents, Long>{
-	@Query("select d from Documents d where d.numDocument like :x or d.typeDocument.typeDoc like :x or d.codeUniqueDocument like :x")
+	@Query("select d from Documents d where d.numDocument like :x OR d.typeDocument.typeDoc like :x OR d.codeUniqueDocument like :x	OR d.statutDocument like :x OR d.responsableDocument like :x OR d.commune.libelleCommune like :x")
 	public Page<Documents> chercher(@Param("x")String motCle, Pageable pageable);
+	
+	@Query("select d from Documents d where d.typeDocument.typeDoc = :x")
+	public Page<Documents> filtreTypeDocument(@Param("x")String keySearch, Pageable pageable);
 	
 	@Query("select d from Documents d where d.typeDocument.typeDoc like '%Bail%' and d.statutDocument = 'transmis'")
 	public List<Documents> findByTypeDocBailTransmis();
@@ -66,4 +70,5 @@ public interface DocumentsRepository extends JpaRepository<Documents, Long>{
 	
 	@Query("select d from Documents d where (d.numDocument like :x or d.typeDocument.typeDoc like :x or d.codeUniqueDocument like :x) and d.statutDocument = 'transmis'")
 	public Page<Documents> chercherDocumentAValider(@Param("x")String motCle, Pageable pageable);
+	
 }

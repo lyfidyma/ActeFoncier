@@ -1,5 +1,7 @@
 package com.cab.sn.dao;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,8 +13,8 @@ import com.cab.sn.entities.Personne;
 public interface PersonneRepository extends JpaRepository<Personne, Long>{
 
 	@Query("select p from Personne p where p.cni like :x")
-	public Personne chercherPersonne(@Param("x")String cniPersonne);
+	public Optional <Personne> chercherPersonne(@Param("x")String cniPersonne);
 	
 	@Query("select p from Personne p where p.idPersonne like :x")
-	public Personne chercherPersonneParId(@Param("x")Long id);
+	public Optional <Personne> chercherPersonneParId(@Param("x")Long id);
 }

@@ -13,7 +13,9 @@ label{
 	margin-left:60px;
 	padding:3px;
 }
-
+embed:hover {
+  box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+}
 
 </style>
 </head>
@@ -129,16 +131,18 @@ label{
 						</div>
 						
 						
-						<div th:each="pj:${piecesJointes}">
-						<label>Pièce jointe : </label>
+						
+					</div>
+					 <br style="clear: both;"/>
+					<p></p>
+					<div th:each="pj, iteration:${piecesJointes}" class="col-md-6">
+						<label>Pièce jointe <span th:text="${iteration.index}+1"></span> : </label>
 						<span th:text="${pj.numPj}"></span>
 						<span th:text="${pj.objetPj}"></span>
 						<span th:text="${pj.datePj}"></span>
-						<a th:href="@{${pj.cheminFichier}}" ><span th:text="${pj.cheminFichier}"></span></a>
-						  
+						<p><a  th:href="@{${pj.cheminFichier}}" ><embed th:src="${pj.cheminFichier}" width="50%" height="300px" > </embed>  </a></p>
+						   
 						</div>
-					</div>
-					<p></p>
 					 <br style="clear: both;"/>
 					 <p></p>
 					<div class="col-md-4">

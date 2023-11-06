@@ -2,10 +2,8 @@ package com.cab.sn.entities;
 
 import java.util.Set;
 
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,8 +31,7 @@ public class Utilisateur {
 	@Email(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", message = "Email non valide")
 	private String email;
 	private String password;
-	@ManyToMany
-    @LazyCollection(LazyCollectionOption.FALSE)
+	@ManyToMany(fetch = FetchType.EAGER)
     private Set<Profil> profil;
 	
 	public Utilisateur(String nomUtilisateur, String prenomUtilisateur, String email, String password) {
