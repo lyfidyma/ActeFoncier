@@ -276,6 +276,7 @@ input[type=file]::file-selector-button:hover {
 							   <option th:each="c:${listCommune}" th:value="${c.libelleCommune}" th:text="${c.libelleCommune}"></option>
 							   </datalist>
 							   <p th:if="${messageCommune}" th:text="${messageCommune}" style= color:red></p>
+							   <p th:if="${#fields.hasErrors('libelleCommune')}" th:errors="*{libelleCommune}" th:errorclass="error"></p>
 						  </div>	
   						  <script>
 						  
@@ -299,6 +300,7 @@ input[type=file]::file-selector-button:hover {
 						  <div class="col-md-3" th:object="${uneCommuneArrondissement}">
 						     	<label for="communeArrond" class="form-label">Commune d'arrondissement</label>
 							    <input type="text" id="communeArrond" th:field="*{libelleCommuneArrond}" name="communeArrond"  class="form-control" placeholder="Commune d'arrondissement" readonly/>
+						  		<p th:if="${#fields.hasErrors('libelleCommuneArrond')}" th:errors="*{libelleCommuneArrond}" th:errorclass="error"></p>
 						  </div>
 						  <div class="col-md-3" th:object="${unDepartement}">
 						     	<label for="departement" class="form-label">Département</label>

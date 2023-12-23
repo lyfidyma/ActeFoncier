@@ -44,17 +44,7 @@ public interface ICabMetier {
 	public Entreprise chercherEntreprise(Long id);
 	public Entreprise chercherEntrepriseParNinea(String ninea);
 	public List<Documents> tousLesDocuments();
-	public int totalBailTransmis();
-	public int totalArreteTransmis();
-	public int totalDecisionTransmis();
-	public int totalDecretTransmis();
-	public int totalAutresTransmis();
-	public int totalBailNonTransmis();
-	public int totalArreteNonTransmis();
-	public int totalDecisionNonTransmis();
-	public int totalDecretNonTransmis();
-	public int totalAutresNonTransmis();
-	public int totalTypeDoc(String typeDoc);
+	public int totalTypeDocument(String typeDoc, String statut);
 	public HashMap<String, Object> getTotalTypeDocDashboard();
 	public Documents afficherDonneesValidation(String codeUniqueDocument);
 	public Documents validerDocuments(Long id, String casApprouve, String casRejet, String nomApprobateur, 
@@ -113,6 +103,20 @@ public interface ICabMetier {
 	public void supprimerProfil(Long id);
 	public Optional<Profil> findByIdProfil(Long id);
 	public Profil findByProfil(String profil);
+	public Page<Documents> chercherDocumentParCriteres(String typeDocument, String numDocument, String codeDocument, LocalDate dateDocument, String responsableDocument, int page, int size);
+	public Page<Documents> chercherDocumentParBeneficiaire(String numCEDEAO, String cni, String ninea, int page, int size);
+	public Page<Documents> chercherDocumentParCommune(String commune, int page, int size);
+	public Page<Documents> chercherDocumentParTitreDePropriete(String titreGlobal, String nicad, int page, int size);
+	public List<Documents> chercherDocumentParCriteresPourExport(String typeDocument, String numDocument, String codeDocument, LocalDate dateDocument, String responsableDocument);
+	public List<Documents> chercherDocumentParBeneficiairePourExport(String numCEDEAO, String cni, String ninea);
+	public List<Documents> chercherDocumentParCommunePourExport(String commune);
+	public List<Documents> chercherDocumentParTitreDeProprietePourExport(String titreGlobal, String nicad);
+	public int totalDocumentBeneficiaire(String cniOuNinea, String typeDoc);
+	public int totalDocumentLocalisation(String site, String typeDoc);
+	public int totalDocumentCommune(String site, String typeDoc);
+	public int totalDocumentCommuneArrond(String site, String typeDoc);
+	public int totalDocumentDepartement(String site, String typeDoc);
+	public int totalDocumentRegion(String site, String typeDoc);
 
 
 }

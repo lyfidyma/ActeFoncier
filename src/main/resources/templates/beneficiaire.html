@@ -155,7 +155,7 @@ $(document).ready(function(){
 						</div>
 						<div class="tab-pane" id="p2">
 						
-						<h4 th:if="${listPersonne.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée personne</h4>
+						<h4 th:if="${listPersonne.isEmpty()}==true" style="color:red; text-align:center">Aucune personne</h4>
 						<div class="table-responsive" th:if="${listPersonne.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
 							<tr style="background-color:#DEF69A; ">
@@ -179,7 +179,7 @@ $(document).ready(function(){
 						</div>
 							<div class="tab-pane" id="p3">
 							<br></br>
-							<h4 th:if="${listEntreprise.isEmpty()}==true" style="color:red; text-align:center">Aucune donnée entreprise</h4>
+							<h4 th:if="${listEntreprise.isEmpty()}==true" style="color:red; text-align:center">Aucune entreprise</h4>
 							<div class="table-responsive" th:if="${listEntreprise.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
 							<tr style="background-color:#F6AC9A">

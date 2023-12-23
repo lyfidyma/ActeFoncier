@@ -86,8 +86,8 @@ $(document).ready(function(){
 						
 						
 						<div class="tab-pane" id="p2">
-						
-						<div class="table-responsive">
+						<h4 th:if="${listTypeDocument.isEmpty()}==true" style="color:red; text-align:center">Aucun type de document</h4>
+						<div class="table-responsive" th:if="${listTypeDocument.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
 							<tr style="background-color:#9AF6F6">
 							<th></th><th style="text-align:center">Type de document</th></tr>				

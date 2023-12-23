@@ -1,11 +1,15 @@
 package com.cab.sn.entities;
 
+import java.util.Collection;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
@@ -24,10 +28,14 @@ public class Departement {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long idDepartement;
 	private String libelleDepartement;
-	@OneToOne(fetch = FetchType.LAZY)
+	
+	@OneToMany(mappedBy = "departement")
+	private Collection<CommuneArrondissement> communeArrondissement;
+	
+	@ManyToOne
 	@JoinColumn(name="idRegion", updatable = true)
-
 	private Region region;
+	
 	public Departement(String libelleDepartement, Region region) {
 		super();
 		this.libelleDepartement = libelleDepartement;

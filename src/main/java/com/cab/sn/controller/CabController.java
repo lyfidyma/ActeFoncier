@@ -1,7 +1,6 @@
 package com.cab.sn.controller;
 
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,8 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.cab.sn.entities.Commune;
 import com.cab.sn.entities.CommuneArrondissement;
@@ -95,7 +93,7 @@ public class CabController {
 	
 	@RequestMapping("/cons")
 	public String consulterTousDoc(@ModelAttribute("unTypeDocument") TypeDocument typeDocument, Model model,
-			@RequestParam(name="page",defaultValue="0")int page,
+			@RequestParam(name="page",defaultValue="1")int page,
 			@RequestParam(name="size",defaultValue="10")int size,
 			String motCle, String keySearch) {
 		List<TypeDocument> type = cabMetier.listTypeDocument();
@@ -134,8 +132,8 @@ public class CabController {
 			Errors errors, 
 			@ModelAttribute("uneEntreprise") Entreprise entreprise, @Valid @ModelAttribute("unTypeDocument") TypeDocument typeDocument, Errors errorsTypeDocument, 
 			@ModelAttribute("unePieceJointe") PiecesJointes piecesJointes, @ModelAttribute("unePieceJointe2") PiecesJointes piecesJointes2,
-			@ModelAttribute("uneCommune") Commune commun, @ModelAttribute("uneCommuneArrondissement") CommuneArrondissement communeArrondissement, 
-			@ModelAttribute("unDepartement") Departement departement, @ModelAttribute("uneRegion") Region region, 
+			@Valid @ModelAttribute("uneCommune") Commune commun, Errors errorsCommune, @Valid @ModelAttribute("uneCommuneArrondissement") CommuneArrondissement communeArrondissement,
+			Errors errorsCommuneArrond,	@ModelAttribute("unDepartement") Departement departement, @ModelAttribute("uneRegion") Region region, 
 			Model model, Long idDocument, String numDocument, 
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate  dateDocument,
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateCreation, 
@@ -205,6 +203,48 @@ public class CabController {
 			  if(idDocument==null)
 				  	return "formulaire"; 
 			  return "modifier";
+		  }
+		  
+		  if(errorsCommune.hasErrors()) {
+			  List<Commune> listCommune = cabMetier.findAllCommune();
+				List<TypeDocument> type = cabMetier.listTypeDocument();
+					model.addAttribute("type",type);	
+					model.addAttribute("listCommune", listCommune);
+					if(dateDelivrance!=null)
+						model.addAttribute("dateDelivranceString", dateDelivrance.toString());
+						if(dateDocument!=null)
+						model.addAttribute("dateDocumentString", dateDocument.toString());
+						if(datePj!=null)
+						model.addAttribute("datePjString", datePj.toString());
+						if(datePj1!=null)
+							model.addAttribute("datePjString1", datePj1.toString());
+						if(typeBeneficiaire.equals("Entreprise"))
+							model.addAttribute("flagEntreprise", "entreprise");
+			  if(idDocument==null)
+				  	return "formulaire"; 
+			  return "modifier";
+			  
+		  }
+		  
+		  if(errorsCommuneArrond.hasErrors()) {
+			  List<Commune> listCommune = cabMetier.findAllCommune();
+				List<TypeDocument> type = cabMetier.listTypeDocument();
+					model.addAttribute("type",type);	
+					model.addAttribute("listCommune", listCommune);
+					if(dateDelivrance!=null)
+						model.addAttribute("dateDelivranceString", dateDelivrance.toString());
+						if(dateDocument!=null)
+						model.addAttribute("dateDocumentString", dateDocument.toString());
+						if(datePj!=null)
+						model.addAttribute("datePjString", datePj.toString());
+						if(datePj1!=null)
+							model.addAttribute("datePjString1", datePj1.toString());
+						if(typeBeneficiaire.equals("Entreprise"))
+							model.addAttribute("flagEntreprise", "entreprise");
+			  if(idDocument==null)
+				  	return "formulaire"; 
+			  return "modifier";
+			  
 		  }
 			
 			if(idDocument==null) {
@@ -407,90 +447,74 @@ public class CabController {
 	
 	@RequestMapping(value="/dashboard", method=RequestMethod.GET)
 	public String tableauDeBord(Model model) {
-		model.addAttribute("totalBailTransmis", cabMetier.totalBailTransmis());
-		model.addAttribute("totalArreteTransmis", cabMetier.totalArreteTransmis());
-		model.addAttribute("totalDecisionTransmis", cabMetier.totalDecisionTransmis());
-		model.addAttribute("totalDecretTransmis", cabMetier.totalDecretTransmis());
-		model.addAttribute("totalAutresTransmis", cabMetier.totalAutresTransmis());
 		
-		model.addAttribute("totalBailNonTransmis", cabMetier.totalBailNonTransmis());
-		model.addAttribute("totalArreteNonTransmis", cabMetier.totalArreteNonTransmis());
-		model.addAttribute("totalDecisionNonTransmis", cabMetier.totalDecisionNonTransmis());
-		model.addAttribute("totalDecretNonTransmis", cabMetier.totalDecretNonTransmis());
-		model.addAttribute("totalAutresNonTransmis", cabMetier.totalAutresNonTransmis());
+		int totalBailSaisi=cabMetier.totalTypeDocument("Bail", "saisi")+cabMetier.totalTypeDocument("Bail", "transmis")+
+				cabMetier.totalTypeDocument("Bail", "approuvé")+cabMetier.totalTypeDocument("Bail", "rejeté");
+		
+		int totalBailTransmis= cabMetier.totalTypeDocument("Bail", "transmis")+
+				cabMetier.totalTypeDocument("Bail", "approuvé")+cabMetier.totalTypeDocument("Bail", "rejeté");
+		model.addAttribute("totalBailTransmis", cabMetier.totalTypeDocument("Bail", "transmis"));
+		
+		int totalArreteSaisi = cabMetier.totalTypeDocument("Arrêté", "Saisi")+cabMetier.totalTypeDocument("Arrêté", "transmis")+
+				cabMetier.totalTypeDocument("Arrêté", "approuvé")+cabMetier.totalTypeDocument("Arrêté", "rejeté");
+		
+		int totalArreteTransmis = cabMetier.totalTypeDocument("Arrêté", "transmis")+
+				cabMetier.totalTypeDocument("Arrêté", "approuvé")+cabMetier.totalTypeDocument("Arrêté", "rejeté");
+		
+		int totalDecisionSaisi = cabMetier.totalTypeDocument("Décision", "Saisi")+cabMetier.totalTypeDocument("Décision", "transmis")+
+				cabMetier.totalTypeDocument("Décision", "approuvé")+cabMetier.totalTypeDocument("Décision", "rejeté");
+		
+		int totalDecisionTransmis = cabMetier.totalTypeDocument("Décision", "transmis")+
+				cabMetier.totalTypeDocument("Décision", "approuvé")+cabMetier.totalTypeDocument("Décision", "rejeté");
+		
+		int totalDecretSaisi = cabMetier.totalTypeDocument("Décret", "Saisi")+cabMetier.totalTypeDocument("Décret", "transmis")+
+				cabMetier.totalTypeDocument("Décret", "approuvé")+cabMetier.totalTypeDocument("Décret", "rejeté");
+		
+		int totalDecretTranmis = cabMetier.totalTypeDocument("Décret", "transmis")+
+				cabMetier.totalTypeDocument("Décret", "approuvé")+cabMetier.totalTypeDocument("Décret", "rejeté");
+		
+		int totalAutresSaisi = cabMetier.totalTypeDocument("Autres", "Saisi")+cabMetier.totalTypeDocument("Autres", "transmis")+
+				cabMetier.totalTypeDocument("Autres", "approuvé")+cabMetier.totalTypeDocument("Autres", "rejeté");
+		
+		int totalAutresTransmis = cabMetier.totalTypeDocument("Autres", "Saisi")+cabMetier.totalTypeDocument("Autres", "transmis")+
+				cabMetier.totalTypeDocument("Autres", "approuvé")+cabMetier.totalTypeDocument("Autres", "rejeté");
+		
+		model.addAttribute("totalBailTransmis", totalBailTransmis);
+		model.addAttribute("totalArreteTransmis", totalArreteTransmis);
+		model.addAttribute("totalDecisionTransmis", totalDecisionTransmis);
+		model.addAttribute("totalDecretTransmis", totalDecretTranmis);
+		model.addAttribute("totalAutresTransmis", totalAutresTransmis);
+		
+		model.addAttribute("totalBailNonTransmis", totalBailSaisi);
+		model.addAttribute("totalArreteNonTransmis", totalArreteSaisi);
+		model.addAttribute("totalDecisionNonTransmis", totalDecisionSaisi);
+		model.addAttribute("totalDecretNonTransmis", totalDecretSaisi);
+		model.addAttribute("totalAutresNonTransmis", totalAutresSaisi);
+		
+		model.addAttribute("totalBailValide",  cabMetier.totalTypeDocument("Bail", "approuvé"));
+		model.addAttribute("totalBailRejete",  cabMetier.totalTypeDocument("Bail", "rejeté"));
+		
+		model.addAttribute("totalArreteValide", cabMetier.totalTypeDocument("Arrêté", "approuvé"));
+		model.addAttribute("totalArreteRejete", cabMetier.totalTypeDocument("Arrêté", "rejeté"));
+		
+		model.addAttribute("totalDecisionValide", cabMetier.totalTypeDocument("Décision", "approuvé"));
+		model.addAttribute("totalDecisionRejete", cabMetier.totalTypeDocument("Décision", "rejeté"));
+		
+		model.addAttribute("totalDecretValide", cabMetier.totalTypeDocument("Décret", "approuvé"));
+		model.addAttribute("totalDecretRejete", cabMetier.totalTypeDocument("Décret", "rejeté"));
+		
+		model.addAttribute("totalAutresValide", cabMetier.totalTypeDocument("Autres", "approuvé"));
+		model.addAttribute("totalAutresRejete", cabMetier.totalTypeDocument("Autres", "rejeté"));
 		
 		model.addAttribute("diagTypeDoc", cabMetier.getTotalTypeDocDashboard());
 		return "dashboard";
 	}
 	
-	/*
-	 * @RequestMapping(value="/afficherDonneesValidation") public String
-	 * validerDocumnents(Model
-	 * model, @RequestParam(name="codeUniqueDocument",defaultValue="")String
-	 * codeUniqueDocument,
-	 * 
-	 * @RequestParam(name="messageValiderOuRejeter",defaultValue="")String
-	 * messageValiderOuRejeter) { String dateDelivranceString = "jj/mm/yyyy"; String
-	 * dateDocumentString = "jj/mm/yyyy"; //String
-	 * dateApprobationString="jj/mm/yyyy";
-	 * 
-	 * Documents doc = cabMetier.afficherDonneesValidation(codeUniqueDocument);
-	 * 
-	 * List <PiecesJointes> pj=
-	 * cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument());
-	 * if(cabMetier.afficherDonneesValidation(codeUniqueDocument).getDateDocument()!
-	 * =null) dateDocumentString =
-	 * cabMetier.afficherDonneesValidation(codeUniqueDocument).getDateDocument().
-	 * toString(); //if(cabMetier.modifierDocuments(id).getDateApprobation()!=null)
-	 * //
-	 * dateApprobationString=cabMetier.modifierDocuments(id).getDateApprobation().
-	 * toString(); Long idbenef =
-	 * cabMetier.afficherDonneesValidation(codeUniqueDocument).getBeneficiaire().
-	 * getIdBeneficiaire(); if(doc.getTypeBeneficiaire().equals("Particulier")) {
-	 * if(cabMetier.chercherPersonneParId(idbenef).getDateDelivrance()!=null)
-	 * dateDelivranceString =
-	 * cabMetier.chercherPersonneParId(idbenef).getDateDelivrance().toString(); }
-	 * else if(doc.getTypeBeneficiaire().equals("Entreprise")) {
-	 * if(cabMetier.chercherEntreprise(idbenef).getPersonne().getDateDelivrance()!=
-	 * null) dateDelivranceString =
-	 * cabMetier.chercherEntreprise(idbenef).getPersonne().getDateDelivrance().
-	 * toString(); }
-	 * if(cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument())!=null) {
-	 * if(cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument()).size()==1) { String
-	 * datePieceJointeString =
-	 * cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument()).get(0).getDatePj().toString();
-	 * model.addAttribute("datePieceJointeString", datePieceJointeString); }else
-	 * if(cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument()).size()==2) { String
-	 * datePieceJointeString =
-	 * cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument()).get(0).getDatePj().toString(); String
-	 * datePieceJointeString1 =
-	 * cabMetier.chercherPiecesJointes(cabMetier.afficherDonneesValidation(
-	 * codeUniqueDocument).getIdDocument()).get(0).getDatePj().toString();
-	 * model.addAttribute("datePieceJointeString", datePieceJointeString);
-	 * model.addAttribute("datePieceJointeString1", datePieceJointeString1); } }
-	 * 
-	 * model.addAttribute("unDocument",doc);
-	 * 
-	 * model.addAttribute("piecesJointes", pj);
-	 * model.addAttribute("dateDocumentString",dateDocumentString);
-	 * //model.addAttribute("dateApprobationString",dateApprobationString);
-	 * model.addAttribute("dateDelivranceString", dateDelivranceString);
-	 * model.addAttribute("messageValiderOuRejeter", messageValiderOuRejeter);
-	 * 
-	 * 
-	 * return "validation"; }
-	 */
 	
 	@RequestMapping(value= "/pageValidation")
 	public String pageValidation(Model model,
-			@RequestParam(name="page",defaultValue="0")int page,
-			@RequestParam(name="size",defaultValue="5")int size,
+			@RequestParam(name="page",defaultValue="1")int page,
+			@RequestParam(name="size",defaultValue="10")int size,
 			String motCle, @RequestParam(name="flag", defaultValue="") String flag) {
 		
 			Page<Documents> pageDocuments ;
@@ -502,7 +526,7 @@ public class CabController {
 				else {
 					pageDocuments = cabMetier.listDocumentsAValider(page, size);
 					model.addAttribute("listDocuments", pageDocuments);
-					model.addAttribute("motCle", motCle);
+					//model.addAttribute("motCle", motCle);
 				}
 				if(flag.isEmpty()==false)
 					model.addAttribute("flag", flag);
@@ -529,8 +553,7 @@ public class CabController {
 	}
 	@RequestMapping(value={"/beneficiaire"})
 	public String beneficiaire(@ModelAttribute("unePersonne") Personne unePersonne, 
-			@ModelAttribute("uneEntreprise") Entreprise uneEntreprise,
-			Model model, @RequestParam(name="messageSucces", defaultValue="") String messageSucces,
+			@ModelAttribute("uneEntreprise") Entreprise uneEntreprise, Model model, 	
 			@RequestParam(name="messageErreur", defaultValue="") String messageErreur,
 			@RequestParam(name="messageDoublon", defaultValue="") String messageDoublon,
 			@RequestParam(name="flag", defaultValue="") String flag, 
@@ -539,12 +562,14 @@ public class CabController {
 		List<Entreprise> listEntreprise = cabMetier.findAllEntreprise();
 		model.addAttribute("listPersonne", listPersonne);
 		model.addAttribute("listEntreprise", listEntreprise);
-		if(messageSucces.isEmpty()==false)
-			model.addAttribute("messageSucces", messageSucces);
+		//if(messageSucces.isEmpty()==false)
+		//	model.addAttribute("messageSucces", messageSucces);
+			//model.addAttribute("messageSucces", messageSucces.replace("�", "é"));
 		if(messageErreur.isEmpty()==false)
 			model.addAttribute("messageErreur", messageErreur);
 		if(messageDoublon.isEmpty()==false)
 			model.addAttribute("messageDoublon", messageDoublon);
+			//model.addAttribute("messageDoublon", messageDoublon.replace("�", "é"));
 		if(flag.isEmpty()==false)
 			model.addAttribute("flag", flag);
 		if(flagEntreprise.isEmpty()==false)
@@ -556,7 +581,7 @@ public class CabController {
 	public String ajoutBeneficiaire(@ModelAttribute ("unePersonne") Personne personne, @ModelAttribute ("uneEntreprise") Entreprise entreprise,
 			Model model, String typeBeneficiaire, Long idPersonne, String nomPersonne, String prenom, String cni, String nin, 
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate dateDelivrance, Long idEntreprise, String nomEntreprise, String ninea, 
-			boolean checkbox) {
+			boolean checkbox, RedirectAttributes ra) {
 		
 		String messageCni = "";
 		String messageNin = "";
@@ -641,7 +666,9 @@ public class CabController {
 	model.addAttribute("listPersonne", listPersonne);
 	model.addAttribute("listEntreprise", listEntreprise);
 	messageSucces = cni+ " enregistré";
-	return "redirect:/beneficiaire?messageSucces="+messageSucces;
+	ra.addFlashAttribute("messageSucces", messageSucces);
+	//return "redirect:/beneficiaire?messageSucces="+messageSucces;
+	return "redirect:/beneficiaire";
 	
 
 }
@@ -685,7 +712,9 @@ public class CabController {
 			model.addAttribute("listEntreprise", listEntreprise);
 			messageSucces = nomEntreprise+" enregistrée";
 			flagEntreprise = "Succes";
-			return "redirect:/beneficiaire?messageSucces="+messageSucces+"&flagEntreprise="+flagEntreprise;
+			ra.addFlashAttribute("messageSucces", messageSucces);
+			//return "redirect:/beneficiaire?messageSucces="+messageSucces+"&flagEntreprise="+flagEntreprise;
+			return "redirect:/beneficiaire?flagEntreprise="+flagEntreprise;
 		}
 		
 		return "redirect:/beneficiaire";
@@ -702,11 +731,11 @@ public class CabController {
 		model.addAttribute("unTypeDocument", unTypeDocument);
 		model.addAttribute("listTypeDocument", listTypeDocument);
 		if(messageSucces.isEmpty()==false)
-			model.addAttribute("messageSucces", messageSucces);
+			model.addAttribute("messageSucces", messageSucces.replace("�", "é"));
 		if(messageErreur.isEmpty()==false)
 			model.addAttribute("messageErreur", messageErreur);
 		if(messageDoublon.isEmpty()==false)
-			model.addAttribute("messageDoublon", messageDoublon);
+			model.addAttribute("messageDoublon", messageDoublon.replace("�", "é"));
 		if(flag.isEmpty()==false)
 			model.addAttribute("flag", flag);
 		return "typededocument";
@@ -730,7 +759,7 @@ public class CabController {
 			model.addAttribute("typeDoc", typeDoc);
 			List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 			model.addAttribute("listTypeDocument", listTypeDocument);
-			messageDoublon = cabMetier.chercherTypeDocumentParTypeDocument(typeDoc).getTypeDoc()+" existe déjà";
+			messageDoublon = cabMetier.chercherTypeDocumentParTypeDocument(typeDoc).getTypeDoc()+" existe déja";
 			return "redirect:/typededocument?messageDoublon="+messageDoublon;
 		}
 		
@@ -754,7 +783,7 @@ public class CabController {
 		List<Commune> listCommune = cabMetier.findAllCommune();
 		model.addAttribute("listCommune", listCommune);
 		if(messageSucces.isEmpty()==false)
-			model.addAttribute("messageSucces", messageSucces);
+			model.addAttribute("messageSucces", messageSucces.replace("�", "é"));
 		if(messageErreur.isEmpty()==false)
 			model.addAttribute("messageErreur", messageErreur);
 		if(flag.isEmpty()==false)
@@ -778,7 +807,7 @@ public class CabController {
 		}
 		if(libelleCommune.isBlank()==false && (libelleCommuneArrond.isBlank() || libelleDepartement.isBlank() || libelleRegion.isBlank())) {
 			if(cabMetier.findByCommune(libelleCommune)!=null) {
-				model.addAttribute("messageDoublon", libelleCommune+" existe déjà");
+				model.addAttribute("messageDoublon", libelleCommune+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				
@@ -792,7 +821,7 @@ public class CabController {
 		}
 		if(libelleCommuneArrond.isBlank()==false && (libelleDepartement.isBlank() || libelleRegion.isBlank())) {
 			if(cabMetier.findByCommuneArrondissement(libelleCommuneArrond) != null) {
-				model.addAttribute("messageDoublon", libelleCommuneArrond+" existe déjà");
+				model.addAttribute("messageDoublon", libelleCommuneArrond+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 			return "localisation";
@@ -806,7 +835,7 @@ public class CabController {
 		}
 		if(libelleDepartement.isBlank()== false && libelleRegion.isBlank()) {
 			if(cabMetier.findByDepartement(libelleDepartement) != null) {
-				model.addAttribute("messageDoublon", libelleDepartement+" existe déjà");
+				model.addAttribute("messageDoublon", libelleDepartement+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 			return "localisation";
@@ -820,7 +849,7 @@ public class CabController {
 		} else if(libelleDepartement.isBlank()== false && libelleRegion.isBlank()== false && (libelleCommune.isBlank() && libelleCommuneArrond.isBlank())) {
 		
 			if(cabMetier.findByDepartement(libelleDepartement) != null) {
-				model.addAttribute("messageDoublon", libelleDepartement+" existe déjà");
+				model.addAttribute("messageDoublon", libelleDepartement+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				return "localisation";	
@@ -835,7 +864,7 @@ public class CabController {
 		
 		if((libelleCommune.isBlank() && libelleCommuneArrond.isBlank() && libelleDepartement.isBlank() && libelleRegion.isBlank()==false)) {
 			if(cabMetier.findByRegion(libelleRegion)!= null) {
-				model.addAttribute("messageDoublon", libelleRegion+" existe déjà");
+				model.addAttribute("messageDoublon", libelleRegion+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 			return "localisation";
@@ -850,7 +879,7 @@ public class CabController {
 		
 		if(libelleCommune.isBlank() && libelleCommuneArrond.isBlank()==false && libelleDepartement.isBlank()==false && libelleRegion.isBlank()==false) {
 			if(cabMetier.findByCommuneArrondissement(libelleCommuneArrond)!=null) {
-				model.addAttribute("messageDoublon", libelleCommuneArrond+" existe déjà");
+				model.addAttribute("messageDoublon", libelleCommuneArrond+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				return "localisation";	
@@ -865,7 +894,7 @@ public class CabController {
 		if(libelleCommune.isBlank()==false && libelleCommuneArrond.isBlank()==false && libelleDepartement.isBlank()==false && libelleRegion.isBlank()==false) {
 						
 			if(cabMetier.findByCommune(libelleCommune)!=null) {
-				model.addAttribute("messageDoublon", libelleCommune+" existe déjà");
+				model.addAttribute("messageDoublon", libelleCommune+" existe déja");
 				List<Commune> listCommune = cabMetier.findAllCommune();
 				model.addAttribute("listCommune", listCommune);
 				return "localisation";	
@@ -1028,7 +1057,7 @@ public class CabController {
 		List<TypeDocument> listTypeDocument = cabMetier.listTypeDocument();
 		model.addAttribute("unTypeDocument", unTypeDocument);
 		model.addAttribute("listTypeDocument", listTypeDocument);
-		messageSucces = typeDocASupprimer+" à été supprimé";
+		messageSucces = typeDocASupprimer+" a été supprimé";
 		flag ="Suppression";
 		return "redirect:/typededocument?messageSucces="+messageSucces+"&flag="+flag;
 	}
@@ -1158,12 +1187,11 @@ public class CabController {
 	public String responsableDocument(@ModelAttribute ("unResponsable") Responsable unResponsable, Model model,
 			@RequestParam(name="messageSucces", defaultValue="") String messageSucces, 
 			@RequestParam(name="flag", defaultValue="") String flag){
-		
 		List<Responsable> listResponsable=cabMetier.findAllResponsable();
 		model.addAttribute("unResponsable", unResponsable);
 		model.addAttribute("listResponsable", listResponsable);
 		if(messageSucces.isEmpty()==false)
-				model.addAttribute("messageSucces", messageSucces);
+				model.addAttribute("messageSucces", messageSucces.replace("�", "é"));
 		if(flag.isEmpty()==false)
 			model.addAttribute("flag", flag);
 		return "responsable";
@@ -1183,14 +1211,7 @@ public class CabController {
 		List<Responsable> listResponsable=cabMetier.findAllResponsable();
 		model.addAttribute("listResponsable", listResponsable);
 		messageSucces = nomResponsable+" "+prenomResponsable+" a été enregistré(e)";
-		byte[] utf8 = messageSucces.getBytes();
-		try {
-			byte[] latin1 = new String(utf8, "UTF-8").getBytes("ISO-8859-1");
-			System.out.println(latin1+"OOOOOOOOOOOOOOOOOOOOOOO");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		return "redirect:/responsable?messageSucces="+messageSucces;
 	}
 	
@@ -1229,7 +1250,7 @@ public class CabController {
 		model.addAttribute("listProfil", listProfil);
 		model.addAttribute("listUtilisateur", listUtilisateur);
 		if(messageSucces.isEmpty()==false)
-			model.addAttribute("messageSucces", messageSucces);
+			model.addAttribute("messageSucces", messageSucces.replace("�", "é"));
 		if(flag.isEmpty()==false)
 			model.addAttribute("flag", flag);
 		return "utilisateur";
@@ -1255,7 +1276,7 @@ public class CabController {
 				model.addAttribute("listUtilisateur", listUtilisateur);
 				List<Profil> listProfil=cabMetier.findAllProfil();
 				model.addAttribute("listProfil", listProfil);
-				model.addAttribute("messageDoublon", email+" existe déjà");
+				model.addAttribute("messageDoublon", email+" existe déja");
 				return "utilisateur";
 			}
 	}
@@ -1309,9 +1330,9 @@ public class CabController {
 		model.addAttribute("listProfil", listProfil);
 		model.addAttribute("unProfil", unProfil);
 		if(messageDoublon.isEmpty()==false)
-		model.addAttribute("messageDoublon", messageDoublon);
+		model.addAttribute("messageDoublon", messageDoublon.replace("�", "é"));
 		if(messageSucces.isEmpty()==false)
-		model.addAttribute("messageSucces", messageSucces);
+		model.addAttribute("messageSucces", messageSucces.replace("�", "é"));
 		
 		return "profil";
 	}
@@ -1322,7 +1343,7 @@ public class CabController {
 			String messageDoublon=null;
 			List<Profil> listProfil=cabMetier.findAllProfil();
 			model.addAttribute("listProfil", listProfil);
-			messageDoublon=profil+" existe déjà";
+			messageDoublon=profil+" existe déja";
 			return "redirect:/profil?messageDoublon="+messageDoublon;
 			
 		}
@@ -1344,5 +1365,215 @@ public class CabController {
 		messageSucces = profilASupprimer+" a été supprimé";
 		return "redirect:/profil?messageSucces="+messageSucces;
 	}
+	
+	@RequestMapping("/getDocumentParCriteres")
+	public String chercherDocumentParCriteres(Model model, String typeDocument, String numDocument, String codeDocument, 
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDocument, String responsableDocument, 
+			@RequestParam(name="page",defaultValue="1")int page,
+			@RequestParam(name="size",defaultValue="10")int size,
+			@RequestParam(name="pageResult",defaultValue="1")int pageResult,
+			@RequestParam(name="sizeResult",defaultValue="10")int sizeResult)	{
+		Page <Documents> documents = null;
+			documents = cabMetier.chercherDocumentParCriteres(typeDocument, numDocument, codeDocument, dateDocument, 
+					responsableDocument, pageResult, sizeResult);
+		
+		model.addAttribute("resultatsDocuments", documents);
+		model.addAttribute("currentPageDoc", pageResult);
+		model.addAttribute("sizeDoc", sizeResult); 
+		model.addAttribute("totalItemsDoc", documents.getTotalElements());
+		model.addAttribute("totalPagesDoc", documents.getTotalPages());
+		model.addAttribute("typeDocument", typeDocument);
+		model.addAttribute("numDocument", numDocument);
+		model.addAttribute("codeDocument", codeDocument);
+		model.addAttribute("dateDocument", dateDocument);
+		model.addAttribute("responsableDocument", responsableDocument);
+		model.addAttribute("flag", "ok");
+		
+		Page<Documents> listDocuments = cabMetier.listDocuments(page, size);
+		model.addAttribute("listDocuments", listDocuments);
+		List<TypeDocument> type = cabMetier.listTypeDocument();
+		model.addAttribute("type",type);
+		model.addAttribute("currentPage", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalItems", listDocuments.getTotalElements());
+		model.addAttribute("totalPages", listDocuments.getTotalPages());
+		
+		return "docum";
+		
+	}
+	
+	@RequestMapping("/getDocumentParBeneficiaire")
+	public String chercherDocumentParBeneficiaire(Model model, String numCEDEAO, String cni, String ninea,
+			@RequestParam(name="page",defaultValue="1")int page,
+			@RequestParam(name="size",defaultValue="10")int size,
+			@RequestParam(name="pageResult",defaultValue="1")int pageResult,
+			@RequestParam(name="sizeResult",defaultValue="10")int sizeResult)	{
+		Page <Documents> documents = null;
+			
+		if(cni.isBlank() == false || numCEDEAO.isBlank() == false || ninea.isBlank() == false)
+			documents = cabMetier.chercherDocumentParBeneficiaire(numCEDEAO, cni, ninea, pageResult, sizeResult);
+		 
+		model.addAttribute("resultatsDocuments", documents);
+		model.addAttribute("currentPageDoc", pageResult);
+		model.addAttribute("sizeDoc", sizeResult); 
+		model.addAttribute("totalItemsDoc", documents.getTotalElements());
+		model.addAttribute("totalPagesDoc", documents.getTotalPages());
+		model.addAttribute("numCEDEAO", numCEDEAO);
+		model.addAttribute("cni", cni);
+		model.addAttribute("ninea", ninea);
+		model.addAttribute("flag", "ok");
+		
+		Page<Documents> listDocuments = cabMetier.listDocuments(page, size);
+		model.addAttribute("listDocuments", listDocuments);
+		List<TypeDocument> type = cabMetier.listTypeDocument();
+		model.addAttribute("type",type);
+		model.addAttribute("currentPage", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalItems", listDocuments.getTotalElements());
+		model.addAttribute("totalPages", listDocuments.getTotalPages());
+		
+		return "docum";
+		
+	}
+	
+	@RequestMapping("/getDocumentParCommune")
+	public String chercherDocumentParCommune(Model model, String commune,
+			@RequestParam(name="page",defaultValue="1")int page,
+			@RequestParam(name="size",defaultValue="10")int size,
+			@RequestParam(name="pageResult",defaultValue="1")int pageResult,
+			@RequestParam(name="sizeResult",defaultValue="10")int sizeResult)	{
+		Page <Documents> documents = null;
+		  documents=cabMetier.chercherDocumentParCommune(commune, pageResult, sizeResult);
+		 
+		model.addAttribute("resultatsDocuments", documents);
+		model.addAttribute("currentPageDoc", pageResult);
+		model.addAttribute("sizeDoc", sizeResult); 
+		model.addAttribute("totalItemsDoc", documents.getTotalElements());
+		model.addAttribute("totalPagesDoc", documents.getTotalPages());
+		model.addAttribute("commune", commune);
+		model.addAttribute("flag", "ok");
+		
+		Page<Documents> listDocuments = cabMetier.listDocuments(page, size);
+		model.addAttribute("listDocuments", listDocuments);
+		List<TypeDocument> type = cabMetier.listTypeDocument();
+		model.addAttribute("type",type);
+		model.addAttribute("currentPage", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalItems", listDocuments.getTotalElements());
+		model.addAttribute("totalPages", listDocuments.getTotalPages());
+		
+		return "docum";
+		
+	}
+	
+	@RequestMapping("/getDocumentParTitreDePropriete")
+	public String chercherDocumentParTitre(Model model, String titreGlobal, String nicad,
+			@RequestParam(name="page",defaultValue="1")int page,
+			@RequestParam(name="size",defaultValue="10")int size,
+			@RequestParam(name="pageResult",defaultValue="1")int pageResult,
+			@RequestParam(name="sizeResult",defaultValue="10")int sizeResult)	{
+		Page <Documents> documents = null;
+		  documents=cabMetier.chercherDocumentParTitreDePropriete(titreGlobal, nicad, pageResult, sizeResult);
+		 
+		model.addAttribute("resultatsDocuments", documents);
+		model.addAttribute("currentPageDoc", pageResult);
+		model.addAttribute("sizeDoc", sizeResult); 
+		model.addAttribute("totalItemsDoc", documents.getTotalElements());
+		model.addAttribute("totalPagesDoc", documents.getTotalPages());
+		model.addAttribute("titreGlobal", titreGlobal);
+		model.addAttribute("nicad", nicad);
+		model.addAttribute("flag", "ok");
+		
+		Page<Documents> listDocuments = cabMetier.listDocuments(page, size);
+		model.addAttribute("listDocuments", listDocuments);
+		List<TypeDocument> type = cabMetier.listTypeDocument();
+		model.addAttribute("type",type);
+		model.addAttribute("currentPage", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalItems", listDocuments.getTotalElements());
+		model.addAttribute("totalPages", listDocuments.getTotalPages());
+		
+		return "docum";
+		
+	}
+	
+	@RequestMapping("/getBeneficiaireStatistiques")
+	@ResponseBody
+	public Object getBeneficiaireStatistiques(String benef) {
+		
+		Map<String, Object> object = new HashMap<>();
+		int totalBailBenef = cabMetier.totalDocumentBeneficiaire(benef, "Bail");
+		int totalArreteBenef = cabMetier.totalDocumentBeneficiaire(benef, "Arrêté");
+		int totalDecisionBenef = cabMetier.totalDocumentBeneficiaire(benef, "Décision");
+		int totalDecretBenef = cabMetier.totalDocumentBeneficiaire(benef, "Décret");
+		int totalAutresBenef = cabMetier.totalDocumentBeneficiaire(benef, "Autres");
+		
+		object.put("prenomEtNom", cabMetier.findByCni(benef).get(0).getPersonne().getPrenom()+' '+cabMetier.findByCni(benef).get(0).getPersonne().getNomPersonne());
+		object.put("totalBailBeneficiaire", totalBailBenef);
+		object.put("totalArreteBeneficiaire", totalArreteBenef);
+		object.put("totalDecisionBeneficiaire", totalDecisionBenef);
+		object.put("totalDecretBeneficiaire", totalDecretBenef);
+		object.put("totalAutresBeneficiaire", totalAutresBenef);
+		return object;
+		
+	}
+	
+	@RequestMapping("/getLocalisationStatistiques")
+	@ResponseBody
+	public Object getLocalisationStatistiques(String loc, String localisation) {
+		
+		Map<String, Object> object = new HashMap<>();
+		int totalBailLoc = 0 ;
+		int totalArreteLoc = 0;
+		int totalDecisionLoc = 0 ;
+		int totalDecretLoc = 0 ;
+		int totalAutresLoc = 0 ;
+		if(localisation.equals("tous")){
+			totalBailLoc = cabMetier.totalDocumentLocalisation(loc, "Bail");
+			totalArreteLoc = cabMetier.totalDocumentLocalisation(loc, "Arrêté");
+			totalDecisionLoc = cabMetier.totalDocumentLocalisation(loc, "Décision");
+			totalDecretLoc = cabMetier.totalDocumentLocalisation(loc, "Décret");
+			totalAutresLoc = cabMetier.totalDocumentLocalisation(loc, "Autres");
+		}
+		else	if(localisation.equals("commune")) {
+			totalBailLoc = cabMetier.totalDocumentCommune(loc, "Bail");
+			totalArreteLoc = cabMetier.totalDocumentCommune(loc, "Arrêté");
+			totalDecisionLoc = cabMetier.totalDocumentCommune(loc, "Décision");
+			totalDecretLoc = cabMetier.totalDocumentCommune(loc, "Décret");
+			totalAutresLoc = cabMetier.totalDocumentCommune(loc, "Autres");
+		}
+		
+		else	if(localisation.equals("communeArrond")) {
+			totalBailLoc = cabMetier.totalDocumentCommuneArrond(loc, "Bail");
+			totalArreteLoc = cabMetier.totalDocumentCommuneArrond(loc, "Arrêté");
+			totalDecisionLoc = cabMetier.totalDocumentCommuneArrond(loc, "Décision");
+			totalDecretLoc = cabMetier.totalDocumentCommuneArrond(loc, "Décret");
+			totalAutresLoc = cabMetier.totalDocumentCommuneArrond(loc, "Autres");
+		}
+		
+		else	if(localisation.equals("departement")) {
+			totalBailLoc = cabMetier.totalDocumentDepartement(loc, "Bail");
+			totalArreteLoc = cabMetier.totalDocumentDepartement(loc, "Arrêté");
+			totalDecisionLoc = cabMetier.totalDocumentDepartement(loc, "Décision");
+			totalDecretLoc = cabMetier.totalDocumentDepartement(loc, "Décret");
+			totalAutresLoc = cabMetier.totalDocumentDepartement(loc, "Autres");
+		}
+		
+		else	if(localisation.equals("region")) {
+			totalBailLoc = cabMetier.totalDocumentRegion(loc, "Bail");
+			totalArreteLoc = cabMetier.totalDocumentRegion(loc, "Arrêté");
+			totalDecisionLoc = cabMetier.totalDocumentRegion(loc, "Décision");
+			totalDecretLoc = cabMetier.totalDocumentRegion(loc, "Décret");
+			totalAutresLoc = cabMetier.totalDocumentRegion(loc, "Autres");
+		}
+		object.put("totalBailLocalisation", totalBailLoc);
+		object.put("totalArreteLocalisation", totalArreteLoc);
+		object.put("totalDecisionLocalisation", totalDecisionLoc);
+		object.put("totalDecretLocalisation", totalDecretLoc);
+		object.put("totalAutresLocalisation", totalAutresLoc);
+		return object;
+		
+	}
+	
 	
 }

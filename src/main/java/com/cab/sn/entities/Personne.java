@@ -44,6 +44,9 @@ public class Personne{
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	private LocalDate dateDelivrance ;
 	
+	@OneToMany(mappedBy = "personne")
+	private Collection<Documents> doc;
+	
 	public Personne(String cni, String nomPersonne, String prenom, String nin, LocalDate dateDelivrance) {
 		super();
 		this.cni = cni;

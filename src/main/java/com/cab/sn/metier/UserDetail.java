@@ -33,7 +33,7 @@ public class UserDetail implements UserDetailsService {
       Set<GrantedAuthority> authorities = utilisateur.get().getProfil().stream()
               .map((role) -> new SimpleGrantedAuthority(role.getNomProfil()))
               .collect(Collectors.toSet());
-      return new org.springframework.security.core.userdetails.User(email, passwordEncoder.encode(utilisateur.get().getPassword()),authorities);
+      return new org.springframework.security.core.userdetails.User(email, utilisateur.get().getPassword(),authorities);
   }
 
 }

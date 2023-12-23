@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.CascadeType;
@@ -14,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
@@ -66,21 +66,26 @@ public class Documents {
 	private String motifRejet;
 	@DateTimeFormat(pattern="dd/mm/yyyy")
 	private Date dateRejet;
-	@OneToOne
+	
+	@ManyToOne
 	@JoinColumn(name="idPersonne", updatable=true)
 	private Personne personne;
-	@OneToOne
-	@JoinColumn(name="idEntreprise", updatable=true)
+	
+	@ManyToOne
+	@JoinColumn(name="idEntreprise", updatable = true)
 	private Entreprise entreprise;
-	@OneToOne
+	
+	@ManyToOne
 	@JoinColumn(name="idCommune", updatable = true)
 	private Commune commune;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="idTypeDocument", updatable = true)
 	private TypeDocument typeDocument;
+	
 	@OneToMany(mappedBy = "documents", cascade = CascadeType.ALL)
 	private Collection<PiecesJointes> piecesJointes;
+	
 	public Documents(@NotEmpty(message = "Renseigner le numéro du document") String numDocument,
 			String codeUniqueDocument, LocalDate dateDocument,
 			@NotEmpty(message = "Renseigner le titre") String titreGlobal, String objetDocument, String statutDocument,
@@ -131,33 +136,4 @@ public class Documents {
 		this.piecesJointes = piecesJointes;
 	}
 	
-	
-	/*
-	 * public Documents(String numDocument, String codeUniqueDocument, LocalDate
-	 * dateDocument, String titreGlobal, String objetDocument, String
-	 * statutDocument, String typeBeneficiaire, String responsableDocument, String
-	 * lot, String nicad, String superficie, Beneficiaire beneficiaire, Commune
-	 * commune, TypeDocument typeDocument) { super(); this.numDocument =
-	 * numDocument; this.codeUniqueDocument = codeUniqueDocument; this.dateDocument
-	 * = dateDocument; this.titreGlobal = titreGlobal; this.objetDocument =
-	 * objetDocument; this.statutDocument = statutDocument; this.typeBeneficiaire =
-	 * typeBeneficiaire; this.responsableDocument = responsableDocument; this.lot =
-	 * lot; this.nicad = nicad; this.superficie = superficie; this.beneficiaire =
-	 * beneficiaire; this.commune = commune; this.typeDocument = typeDocument; }
-	 * public Documents(String numDocument, LocalDate dateDocument, String
-	 * titreGlobal, String objetDocument, String statutDocument, String
-	 * typeBeneficiaire, String responsableDocument, String lot, String nicad, Date
-	 * dateApprobation, String superficie, Beneficiaire beneficiaire, Commune
-	 * commune, TypeDocument typeDocument, Collection<PiecesJointes> piecesJointes)
-	 * { super(); this.numDocument = numDocument; this.dateDocument = dateDocument;
-	 * this.titreGlobal = titreGlobal; this.objetDocument = objetDocument;
-	 * this.statutDocument = statutDocument; this.typeBeneficiaire =
-	 * typeBeneficiaire; this.responsableDocument = responsableDocument; this.lot =
-	 * lot; this.nicad = nicad; this.dateApprobation = dateApprobation;
-	 * this.superficie = superficie; this.beneficiaire = beneficiaire; this.commune
-	 * = commune; this.typeDocument = typeDocument; this.piecesJointes =
-	 * piecesJointes; }
-	 */
-	
-
 }

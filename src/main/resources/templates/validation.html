@@ -24,6 +24,15 @@ textarea:focus {
 	color:red;
 }
 
+.pagination > .active > a{
+	color:purple;
+    background-color: white ;
+    border-color:#ddd;
+}
+.pagination > .disabled > a{
+    background-color: lightblue ;
+}
+
 </style>
 
 </head>
@@ -109,29 +118,25 @@ if(flagValider == "Rejeter"){
 						
 							<!-- Pagination -->
 <nav aria-label="pagination">
-<div th:if="${totalPages > 0}">
+<div th:if="${totalPages > 1}">
       <div class="row col-sm-10">
        	 <div class="col-md">
-       	 	<span>
-     		 	<a th:if="${currentPage > 0}" th:href="@{pageValidation(page=0)}">Début</a>
-     		 	<span th:unless="${currentPage >= 1}">Début</span>
-     		 </span> &nbsp;
-      	 	<span>
-     		 	<a th:if="${currentPage > 0}" th:href="@{pageValidation(page=${currentPage - 1})}">Préc.</a>
-     		 	<span th:unless="${currentPage >= 1}">Préc.</span>
-     		 </span> &nbsp; 
-        	<span th:each="i: ${#numbers.sequence(0, totalPages-1)}">
-        		<a th:if="${currentPage!=i}" th:href="@{pageValidation(page=${i})}">[[${i}]]</a>
-        		<span th:unless="${currentPage !=i}">[[${i}]]</span> &nbsp; &nbsp;
-     		</span>
-     		 <span>
-     		 	<a th:if="${currentPage < totalPages-1}" th:href="@{pageValidation(page=${currentPage + 1})}">Suiv.</a>
-     		 	<span th:unless="${currentPage < totalPages-1}">Suiv.</span>
-     		 </span> &nbsp; 
-     		 <span>
-     		 	<a th:if="${currentPage < totalPages-1}" th:href="@{pageValidation(page=${totalPages-1})}">Fin</a>
-     		 	<span th:unless="${currentPage < totalPages-1}">Fin</span>
-     		 </span>
+       	 	 <ul class="pagination">
+      	 	<li class="page-item" th:if="${motCle==null}"><a class="page-link" th:if="${currentPage > 1}" th:href="@{pageValidation(page=${currentPage - 1})}">&larr;</a></li>
+      	 	<li class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage > 1}" th:href="@{pageValidation(page=${currentPage - 1}, motCle=${motCle})}">&larr;</a></li>
+     		<li class="page-item"><a class="page-link" th:unless="${currentPage >= 1}">&larr;</a></li>
+     		 
+     		 <th:block th:each="i: ${#numbers.sequence(1, totalPages)}" >
+        		<li class="page-item active" th:if="${motCle==null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{pageValidation(page=${i})}">[[${i}]]</a></li>
+        		<li class="page-item active" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{pageValidation(page=${i}, motCle=${motCle})}">[[${i}]]</a></li>
+        		<li class="page-item disabled"><a class="page-link" th:unless="${currentPage !=i}">[[${i}]]</a></li>
+     		</th:block>
+     		
+     		 <li class="page-item" th:if="${motCle==null}"><a class="page-link" th:if="${currentPage < totalPages}" th:href="@{pageValidation(page=${currentPage + 1})}">&rarr;</a></li>
+     		 <li class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage < totalPages}" th:href="@{pageValidation(page=${currentPage + 1}, motCle=${motCle})}">&rarr;</a></li>
+     		 <li class="page-item"><a class="page-link" th:unless="${currentPage <= totalPages}">&rarr;</a></li>
+     		
+     		 </ul>
      		  
      		  </div>
      		 

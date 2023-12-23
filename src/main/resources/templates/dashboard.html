@@ -5,8 +5,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Tableau de bord</title>
+
 <!-- Bootstrap core JavaScript-->
-       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
     <script type="text/javascript" th:src="@{/js/diagramme.js}"></script>
   
 </head>
@@ -15,7 +18,7 @@
  <div layout:fragment="content">
 		<div class="container">
 		
-		<!-- Diagramme Type de document -->
+		<!-- Diagramme à barres -->
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-3">
@@ -48,7 +51,18 @@ data: {
    data: vTotalTypeDoc,
  }],
 },
-
+options: {
+    scales: {
+        yAxes: [{
+            ticks: {
+                beginAtZero: true
+            }
+        }]
+    },
+    legend: {
+        display: false,
+      },
+}
 });
 
 </script>                 
@@ -59,8 +73,171 @@ data: {
                 </div>
             </div>
         </div>
-        
-<!--          Diagramme en cercle  -->
+     </div>  
+     <br></br>
+     
+     
+     <!--Ensemble des documents d'un bénéficiaire-->
+    
+     <div class="row">
+    <div class="card mb-6">
+        <div class="card-header">
+            <i class="fa fa-table"></i> Statistiques bénéficiaire
+        </div>
+        <div class="card-body" >
+        <div class="col-md-2 input-group">
+        <input type="text" class="form-control" id="beneficiaire" placeholder="cni ou ninea" 
+        />
+         <span class="btn btn-secondary input-group-addon"  th:onclick="getBeneficiaireStatistiques()">ok</span>
+         </div>
+        <br></br>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" style="width:40%" >
+                    <thead>
+                    <tr >
+                    	<th style=text-align:center>Bénéficiaire</th>
+                        <th style=text-align:center>Bail</th>
+                        <th style=text-align:center>Arrêté</th>
+                        <th style=text-align:center>Décision</th>
+                        <th style=text-align:center>Décret</th>
+                        <th style=text-align:center>Autres</th>
+                    </tr>
+                    </thead>
+                    
+                    <tbody>
+                    <tr>
+                        <td id="idBenef" style=text-align:center ></td>
+                        <td id="bail" style=text-align:center ></td>
+                        <td id="arrete" style=text-align:center ></td>
+                        <td id="decision" style=text-align:center ></td>
+                        <td id="decret" style=text-align:center ></td>
+                        <td id="autres" style=text-align:center ></td>
+                    </tr>
+                   
+                    </tbody>
+                </table>
+            </div>
+            
+   <script>
+  function getBeneficiaireStatistiques(){
+	  var benef=$("#beneficiaire").val();
+ 	  $.get("/getBeneficiaireStatistiques", {benef:benef}, function (data) {  
+ 		  if(!data){
+			  document.getElementById("beneficiaire").innerHTML = benef;
+ 			  
+ 		  }else{
+			  document.getElementById("idBenef").innerHTML = data.prenomEtNom;
+			  document.getElementById("bail").innerHTML = data.totalBailBeneficiaire;
+			  document.getElementById("arrete").innerHTML = data.totalArreteBeneficiaire;
+			  document.getElementById("decision").innerHTML = data.totalDecisionBeneficiaire;
+			  document.getElementById("decret").innerHTML = data.totalDecretBeneficiaire;
+			  document.getElementById("autres").innerHTML = data.totalAutresBeneficiaire;
+ 		  }
+  }); 
+	  
+  }
+   </script> 
+        </div>
+        <div class="card-footer small text-muted" >Dernière mise à jour le <span th:text="${#calendars.format(#calendars.createNow(), 'dd MMM yyyy HH:mm')}"></span> </div>
+    </div>
+    </div>
+     
+     <!--Ensemble des documents d'une localisation-->
+    
+     <div class="row">
+    <div class="card mb-6">
+        <div class="card-header">
+            <i class="fa fa-table"></i> Statistiques localisation
+        </div>
+        <div class="card-body" >
+        <div class="col-md-2 input-group">
+        <input type="text" class="form-control" id="idLoc" placeholder="Localisation" />
+         <span class="btn btn-secondary input-group-addon"  th:onclick="getLocalisationStatistiques()">ok</span>
+         </div>
+        <input type="radio" value="commune" name="localisation" id="idCommune"/>&nbsp;&nbsp;<span>Commune</span>
+        <br/>
+         <input type="radio" value="communeArrond" name="localisation" id="idCommuneArrond"/>&nbsp;&nbsp;<span>Commune d'arrondissement</span>
+         <br/>
+         <input type="radio" value="departement" name="localisation" id="idDepartement"/>&nbsp;&nbsp;<span>Département</span>
+         <br/>
+         <input type="radio" value="region" name="localisation" id="idRegion"/>&nbsp;&nbsp;<span>Région</span>
+        <br/>
+         <input type="radio" value="tous" name="localisation" id="idTous" checked/>&nbsp;&nbsp;<span>Tous</span>
+        <br></br>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" style="width:40%" >
+                    <thead>
+                    <tr >
+                    	<th style=text-align:center>Site</th>
+                        <th style=text-align:center>Bail</th>
+                        <th style=text-align:center>Arrêté</th>
+                        <th style=text-align:center>Décision</th>
+                        <th style=text-align:center>Décret</th>
+                        <th style=text-align:center>Autres</th>
+                    </tr>
+                    </thead>
+                    
+                    <tbody>
+                    <tr>
+                        <td id="tabLoc" style=text-align:center ></td>
+                        <td id="bailLoc" style=text-align:center ></td>
+                        <td id="arreteLoc" style=text-align:center ></td>
+                        <td id="decisionLoc" style=text-align:center ></td>
+                        <td id="decretLoc" style=text-align:center ></td>
+                        <td id="autresLoc" style=text-align:center ></td>
+                    </tr>
+                   
+                    </tbody>
+                </table>
+            </div>
+            
+   <script>
+  function getLocalisationStatistiques(){
+	  var loc = $("#idLoc").val();
+	  var localisation;
+	  
+	  if(document.getElementById("idTous").checked == true){
+		  localisation ="tous";
+	  }
+	  if(document.getElementById("idCommune").checked == true){
+		  localisation ="commune";
+	  }
+	  if(document.getElementById("idCommuneArrond").checked == true){
+		  localisation ="communeArrond";
+	  }
+	  if(document.getElementById("idDepartement").checked == true){
+		  localisation ="departement";
+	  }
+	  if(document.getElementById("idRegion").checked == true){
+		  localisation ="region";
+	  }
+	  alert(localisation);
+	
+ 	  $.get("/getLocalisationStatistiques", {loc:loc, localisation:localisation}, function (data) {  
+ 		  if(!data){
+			  document.getElementById("idLoc").innerHTML = loc;
+ 			  
+ 		  }else{
+			  document.getElementById("tabLoc").innerHTML = loc;
+			  document.getElementById("bailLoc").innerHTML = data.totalBailLocalisation;
+			  document.getElementById("arreteLoc").innerHTML = data.totalArreteLocalisation;
+			  document.getElementById("decisionLoc").innerHTML = data.totalDecisionLocalisation;
+			  document.getElementById("decretLoc").innerHTML = data.totalDecretLocalisation;
+			  document.getElementById("autresLoc").innerHTML = data.totalAutresLocalisation;
+ 		  }
+  }); 
+	  
+  }
+   </script> 
+        </div>
+        <div class="card-footer small text-muted" >Dernière mise à jour le <span th:text="${#calendars.format(#calendars.createNow(), 'dd MMM yyyy HH:mm')}"></span> </div>
+    </div>
+    </div>
+      
+<!--         Cercle  -->
+<div class="row" >
+<div class="col-lg-8">
+ </div>
         <div class="col-lg-4">
            
             <div class="card mb-3">
@@ -70,11 +247,10 @@ data: {
                 <div class="card-body">
                     <input type="hidden" th:id="kTypeDocument" th:value="${diagTypeDoc.kTypeDocument}"/>
                     <input type="hidden" th:id="vTotalTypeDoc" th:value="${diagTypeDoc.vTotalTypeDoc}"/>
-                    <input type="hidden" th:id="kPercent" th:value="${diagTypeDoc.kPercent}"/>
-                    <canvas id="myPieChart" width="100%" height="100"></canvas>
+                    <canvas id="myPieChart" width="100%" height="70"></canvas>
            <script>
 
-//-- Diagramme en cercle
+//-- Cercle
 var kTypeDocument = $("#kTypeDocument").val();
 kTypeDocument = kTypeDocument.replace("[","").replace("]","").split(",");
 
@@ -84,13 +260,62 @@ vTotalTypeDoc = vTotalTypeDoc.replace("[","").replace("]","").split(",");
 var ctx = document.getElementById("myPieChart");
 var myPieChart = new Chart(ctx, {
   type: 'pie',
+  
   data: {
-    labels: kTypeDocument,
+    labels: kTypeDocument,  
     datasets: [{
+    	labels:kTypeDocument,
       data: vTotalTypeDoc,
-      backgroundColor: ['#007bff', '#dc3545', '#ffc107', '#28a745'],
-    }],
+      backgroundColor: ['#007bff', '#dc3545', '#ffc107', '#28a745']
+    }]
   },
+  options: {
+	  tooltips: {
+ 
+          callbacks: {
+              label: function(tooltipItem, data) {
+                  var allData = data.datasets[tooltipItem.datasetIndex].data;
+                  var tooltipLabel = data.labels[tooltipItem.index];
+                  var tooltipData = allData[tooltipItem.index];
+                  var total = 0;
+                  for (var i in allData) {
+                      total += parseFloat(allData[i]);
+                  }
+                  var tooltipPercentage = Math.round((tooltipData / total) * 100);
+                  return tooltipLabel + ':  (' + tooltipPercentage + '%)';
+              }
+             
+          }
+  
+      },
+      
+	    title: {
+	        display: true,
+	        text: "Pourcentage"
+	      },
+	      legend: {
+	          display: true,
+	          position:"bottom",
+	        },
+	      
+	      plugins: {
+	          datalabels: {
+	            formatter: (value, ctx) => {
+	            	let sum = 0;
+	                let dataArr = ctx.chart.data.datasets[0].data;
+	                dataArr.map(data => {
+	                  sum += Number(data);
+	                });
+
+	                let percentage = (value * 100 / sum).toFixed(0) + '%';
+	                return percentage;
+	            },
+	          },
+	        },
+	      
+  },
+  
+  
 });
 
 </script>                 
@@ -99,15 +324,16 @@ var myPieChart = new Chart(ctx, {
             </div>
         </div> 
     </div>
-		<p></p>
+		
+		<div class="row">
 		<!-- Tableau statistiques des transmissions-->
-    <div class="card mb-3">
+    <div class="card mb-6">
         <div class="card-header">
             <i class="fa fa-table"></i> Statistiques transmission
         </div>
         <div class="card-body" >
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" style="width:80%" >
+                <table class="table table-bordered" id="dataTable" style="width:60%" >
                     <thead>
                     <tr >
                     	<th>Statut</th>
@@ -130,6 +356,14 @@ var myPieChart = new Chart(ctx, {
                     </tfoot>
                     <tbody>
                     <tr>
+                        <td>Saisi</td>
+                        <td style=text-align:center th:text="${totalBailNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalArreteNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalDecisionNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalDecretNonTransmis}"></td>
+                        <td style=text-align:center th:text="${totalAutresNonTransmis}"></td>
+                    </tr>
+                    <tr>
                         <td>Transmis</td>
                         <td style=text-align:center th:text="${totalBailTransmis}"></td>
                         <td style=text-align:center th:text="${totalArreteTransmis}"></td>
@@ -138,12 +372,20 @@ var myPieChart = new Chart(ctx, {
                         <td style=text-align:center th:text="${totalAutresTransmis}"></td>
                     </tr>
                     <tr>
-                        <td>Non transmis</td>
-                        <td style=text-align:center th:text="${totalBailNonTransmis}"></td>
-                        <td style=text-align:center th:text="${totalArreteNonTransmis}"></td>
-                        <td style=text-align:center th:text="${totalDecisionNonTransmis}"></td>
-                        <td style=text-align:center th:text="${totalDecretNonTransmis}"></td>
-                        <td style=text-align:center th:text="${totalAutresNonTransmis}"></td>
+                        <td>Rejeté</td>
+                        <td style=text-align:center th:text="${totalBailRejete}"></td>
+                        <td style=text-align:center th:text="${totalArreteRejete}"></td>
+                        <td style=text-align:center th:text="${totalDecisionRejete}"></td>
+                        <td style=text-align:center th:text="${totalDecretRejete}"></td>
+                        <td style=text-align:center th:text="${totalAutresRejete}"></td>
+                    </tr>
+                    <tr>
+                        <td>Validé</td>
+                        <td style=text-align:center th:text="${totalBailValide}"></td>
+                        <td style=text-align:center th:text="${totalArreteValide}"></td>
+                        <td style=text-align:center th:text="${totalDecisionValide}"></td>
+                        <td style=text-align:center th:text="${totalDecretValide}"></td>
+                        <td style=text-align:center th:text="${totalAutresValide}"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -154,7 +396,7 @@ var myPieChart = new Chart(ctx, {
     </div>
   
   
-  
+  </div>
   </div>
         
 

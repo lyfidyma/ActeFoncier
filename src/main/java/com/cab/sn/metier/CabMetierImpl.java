@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
@@ -82,6 +82,8 @@ public class CabMetierImpl implements ICabMetier{
 	public UtilisateurRepository utilisateurRepository;
 	@Autowired
 	public ProfilRepository profilRepository;
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
 	/**
 	 *
@@ -316,17 +318,17 @@ public class CabMetierImpl implements ICabMetier{
 	
 	@Override
 	public Page<Documents> listDocuments(int page, int size) { 
-			 	return docRepository.findAll(PageRequest.of(page, size, Sort.by("dateCreation").descending()));			
+			 	return docRepository.findAll(PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));			
 	}	
 	
 	@Override
 	public Page<Documents> chercherDocuments(String motCle, int page, int size){
-		return docRepository.chercher(motCle, PageRequest.of(page, size));
+		return docRepository.chercher(motCle, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));
 	}
 	
 	@Override
 	public Page<Documents> filtreTypeDocuments(String keySearch, int page, int size){
-		return docRepository.filtreTypeDocument(keySearch, PageRequest.of(page, size));
+		return docRepository.filtreTypeDocument(keySearch, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));
 	}
 	
 	@Override
@@ -389,61 +391,13 @@ public class CabMetierImpl implements ICabMetier{
 	public List<Documents> tousLesDocuments() {
 		return docRepository.findAll();
 	}
-
-	@Override
-	public int totalBailTransmis() {	
-		return docRepository.findByTypeDocBailTransmis().size();
-	}
-
-	@Override
-	public int totalArreteTransmis() {
-		return docRepository.findByTypeDocArreteTransmis().size();
-	}
-
-	@Override
-	public int totalDecisionTransmis() {
-		return docRepository.findByTypeDocDécisionTransmis().size();
-	}
-
-	@Override
-	public int totalDecretTransmis() {
-		return docRepository.findByTypeDocDecretTransmis().size();
-	}
-
-	@Override
-	public int totalAutresTransmis() {
-		return docRepository.findByTypeDocAutresTransmis().size();
-	}
-
-	@Override
-	public int totalTypeDoc(String typeDoc) {
-		return docRepository.findByTypeDoc(typeDoc).size();
-	}
-
 	
 	@Override
-	public int totalBailNonTransmis() {
-		return docRepository.findByTypeDocBailNonTransmis().size();
-	}
-
-	@Override
-	public int totalArreteNonTransmis() {
-		return docRepository.findByTypeDocArreteNonTransmis().size();
-	}
-
-	@Override
-	public int totalDecisionNonTransmis() {
-		return docRepository.findByTypeDocDécisionNonTransmis().size();
-	}
-
-	@Override
-	public int totalDecretNonTransmis() {
-		return docRepository.findByTypeDocDecretNonTransmis().size();
-	}
-
-	@Override
-	public int totalAutresNonTransmis() {
-		return docRepository.findByTypeDocAutresNonTransmis().size();
+	public int totalTypeDocument(String typeDoc, String statut) {
+		if(docRepository.findByTypeDocumentAndStatutDocument(typeDoc, statut)!=null) 
+			return docRepository.findByTypeDocumentAndStatutDocument(typeDoc, statut).size();
+		else 
+			return 0;
 	}
 
 	@Override
@@ -452,7 +406,6 @@ public class CabMetierImpl implements ICabMetier{
 		
 		List<Documents> listDocuments = docRepository.findAll();
 		List<String> typeDocument = new ArrayList<>();
-		List<Long> percentValue = new ArrayList<>();
 		
 		for(Documents doc:listDocuments) {
 			typeDocument.add(doc.getTypeDocument().getTypeDoc());
@@ -461,22 +414,11 @@ public class CabMetierImpl implements ICabMetier{
 		
 		Map <String, Long > map = typeDocument.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 		
-		Long totalPercent = map.values().stream().mapToLong(Long::longValue).sum();
-		float per=0;
-		for(Long value:map.values()) {
-			
-			
-			percentValue.add((value/totalPercent)*100);
-			per=(value/totalPercent)*100;
-			
-		}
-		
+	//	Long totalPercent = map.values().stream().mapToLong(Long::longValue).sum();
 		
 		typeDocMap.put("kTypeDocument", map.keySet());
 		typeDocMap.put("vTotalTypeDoc", map.values());
-		typeDocMap.put("kPercent", percentValue);
-
-		
+				
 		return typeDocMap;
 	}
 	
@@ -523,12 +465,12 @@ public class CabMetierImpl implements ICabMetier{
 
 	@Override
 	public Page<Documents> listDocumentsAValider(int page, int size) {
-		return docRepository.findByStatutTransmis(PageRequest.of(page, size, Sort.by("dateCreation").descending()));	
+		return docRepository.findByStatutTransmis(PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));	
 	}
 
 	@Override
 	public Page<Documents> chercherDocumentAValider(String motCle, int page, int size) {
-		return docRepository.chercherDocumentAValider(motCle, PageRequest.of(page, size));
+		return docRepository.chercherDocumentAValider(motCle, PageRequest.of(page-1, size));
 	}
 
 	@Override
@@ -866,7 +808,7 @@ public class CabMetierImpl implements ICabMetier{
 		Set<Profil> roles = Stream.of(profilRole)
                 .collect(Collectors.toCollection(HashSet::new));
 		if(id==null) {
-			utilisateur = utilisateurRepository.save(new Utilisateur(nom, prenom, email, password));
+			utilisateur = utilisateurRepository.save(new Utilisateur(nom, prenom, email, passwordEncoder.encode(password)));
 			utilisateur.setProfil(roles);
 		}
 		else if(id!=null) {
@@ -877,7 +819,7 @@ public class CabMetierImpl implements ICabMetier{
 			utilisateur.setProfil(roles);
 			
 			if(password.isBlank()==false)
-				utilisateur.setPassword(password);
+				utilisateur.setPassword(passwordEncoder.encode(password));
 			utilisateurRepository.save(utilisateur);
 		}
 		
@@ -940,6 +882,121 @@ public class CabMetierImpl implements ICabMetier{
 	@Override
 	public Optional <Responsable> findByFonction(String fonction) {
 		return responsableReposistory.findByFonction(fonction);
+	}
+
+	@Override
+	public Page<Documents> chercherDocumentParCriteres(String typeDocument, String numDocument, String codeDocument,
+			LocalDate dateDocument, String responsableDocument, int page, int size) {
+		if(docRepository.chercherDocumentParCriteres(typeDocument, numDocument, codeDocument, dateDocument, responsableDocument, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()))!=null)
+			return docRepository.chercherDocumentParCriteres(typeDocument, numDocument, codeDocument, dateDocument, responsableDocument, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));
+		else
+			return null;
+	}
+
+	@Override
+	public Page<Documents> chercherDocumentParBeneficiaire(String numCEDEAO, String cni, String ninea, int page,
+			int size) {
+		if(docRepository.chercherDocumentParBeneficiaire(numCEDEAO, cni, ninea, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()))!=null)
+			return docRepository.chercherDocumentParBeneficiaire(numCEDEAO, cni, ninea, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));
+		else
+			return null;
+	}
+
+	@Override
+	public Page<Documents> chercherDocumentParCommune(String commune, int page, int size) {
+		if(docRepository.chercherDocumentParCommune(commune,PageRequest.of(page-1, size, Sort.by("dateCreation").descending()))!=null)
+			return docRepository.chercherDocumentParCommune(commune,PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));
+		else
+			return null;
+	}
+
+	@Override
+	public Page<Documents> chercherDocumentParTitreDePropriete(String titreGlobal, String nicad, int page, int size) {
+		if(docRepository.chercherDocumentParTitreDePropriete(titreGlobal, nicad, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()))!=null)
+			return docRepository.chercherDocumentParTitreDePropriete(titreGlobal, nicad, PageRequest.of(page-1, size, Sort.by("dateCreation").descending()));
+		else
+			return null;
+	}
+
+	@Override
+	public List<Documents> chercherDocumentParCriteresPourExport(String typeDocument, String numDocument,
+			String codeDocument, LocalDate dateDocument, String responsableDocument) {
+		if(docRepository.chercherDocumentParCriteresPourExport(typeDocument, numDocument, codeDocument, dateDocument, responsableDocument)!=null)
+			return docRepository.chercherDocumentParCriteresPourExport(typeDocument, numDocument, codeDocument, dateDocument, responsableDocument);
+		else
+			return null;
+	}
+
+	@Override
+	public List<Documents> chercherDocumentParBeneficiairePourExport(String numCEDEAO, String cni, String ninea) {
+		if(docRepository.chercherDocumentParBeneficiairePourExport(numCEDEAO, cni, ninea)!=null)
+			return docRepository.chercherDocumentParBeneficiairePourExport(numCEDEAO, cni, ninea);
+		else
+			return null;
+	}
+
+	@Override
+	public List<Documents> chercherDocumentParCommunePourExport(String commune) {
+		if(docRepository.chercherDocumentParCommunePourExport(commune)!=null)
+			return docRepository.chercherDocumentParCommunePourExport(commune);
+		else
+			return null;
+	}
+
+	@Override
+	public List<Documents> chercherDocumentParTitreDeProprietePourExport(String titreGlobal, String nicad) {
+		if(docRepository.chercherDocumentParTitreDeProprietePourExport(titreGlobal, nicad)!=null)
+			return docRepository.chercherDocumentParTitreDeProprietePourExport(titreGlobal, nicad);
+		else
+			return null;
+	}
+
+	@Override
+	public int totalDocumentBeneficiaire(String cniOuNinea, String typeDoc) {
+		if(docRepository.findByBeneficiaireAndTypeDocument(cniOuNinea, typeDoc)!=null) 
+			return docRepository.findByBeneficiaireAndTypeDocument(cniOuNinea, typeDoc).size();
+		else 
+			return 0;
+	}
+
+	@Override
+	public int totalDocumentLocalisation(String site, String typeDoc) {
+		if(docRepository.findByLocalisationAndTypeDocument(site, typeDoc)!=null) 
+			return docRepository.findByLocalisationAndTypeDocument(site, typeDoc).size();
+		else 
+			return 0;
+	}
+
+	@Override
+	public int totalDocumentCommune(String site, String typeDoc) {
+		if(docRepository.findByCommuneAndTypeDocument(site, typeDoc)!=null) 
+			return docRepository.findByCommuneAndTypeDocument(site, typeDoc).size();
+		else 
+			return 0;
+	}
+
+	@Override
+	public int totalDocumentCommuneArrond(String site, String typeDoc) {
+		if(docRepository.findByCommuneArrondAndTypeDocument(site, typeDoc)!=null) 
+			return docRepository.findByCommuneArrondAndTypeDocument(site, typeDoc).size();
+		else 
+			return 0;
+	}
+
+	@Override
+	public int totalDocumentDepartement(String site, String typeDoc) {
+		if(docRepository.findByDepartementAndTypeDocument(site, typeDoc)!=null) 
+			return docRepository.findByDepartementAndTypeDocument(site, typeDoc).size();
+		else 
+			return 0;
+	}
+
+	@Override
+	public int totalDocumentRegion(String site, String typeDoc) {
+		if(docRepository.findByRegionAndTypeDocument(site, typeDoc)!=null) 
+			return docRepository.findByRegionAndTypeDocument(site, typeDoc).size();
+		else 
+			return 0;
 	}
 	
 	

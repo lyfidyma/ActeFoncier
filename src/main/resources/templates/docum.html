@@ -25,9 +25,23 @@
 </head>
 <body>
 	<div layout:fragment="content">
-	<div>
 	<h4>&nbsp;&nbsp;Consultation</h4>
 						   <hr/>
+						   
+						   <div class="container">
+
+					<div class="panel-body">
+					 
+					<ul class="nav nav-pills" id="monTab">
+  <li><a class="nav-item nav-link active" href="#p1" id="tabOne" data-toggle="tab">Liste</a></li>
+  <li><a class="nav-item nav-link" href="#p2" id="tabTwo" data-toggle="tab">Etat</a></li>
+  
+  
+</ul>
+<div class="tab-content">
+<input type="hidden" id="flag" th:value="${flag}" />
+	<div class="tab-pane active" id="p1">
+	<div>
 	<h4 th:if="${listDocuments.isEmpty()}==true" style="color:red; text-align:center">Aucun document </h4>
 	</div>
 		<div class="container"  th:if="${listDocuments.isEmpty()}==false">
@@ -61,7 +75,7 @@
  			
    
          
-		<div class="container" th:if="${listDocuments.isEmpty()}==false">
+		<div class="container" >
 			<div class="col-md">
 				<div class="panel panel-success">
 				
@@ -113,7 +127,7 @@
 						
 							<!-- Pagination -->
 <nav aria-label="pagination">
-<div  th:if="${totalPages > 0}">
+<div  th:if="${totalPages > 1}">
       <div class="row col-sm-10">
        	 <div class="col-md">
        	 <ul class="pagination">
@@ -123,22 +137,22 @@
      		 	<li th:if="${keySearch!=null}"><a th:if="${currentPage > 0}" th:href="@{cons(page=0 , keySearch=${keySearch})}">Début</a></li>
      		 	<li th:unless="${currentPage >= 1}">Début</li> -->
      		 
-     		 	<li class="page-item" th:if="${motCle==null} and ${keySearch==null}"><a class="page-link" th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1})}">&larr;</a></li>
-     		 	<li  class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1}, motCle=${motCle})}">&larr;</a></li>
-     		 	<li  class="page-item" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage > 0}" th:href="@{cons(page=${currentPage - 1}, keySearch=${keySearch})}">&larr;</a></li>
-     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPage >= 1}">&larr;</a></li>
+     		 	<li class="page-item" th:if="${motCle==null} and ${keySearch==null}"><a class="page-link" th:if="${currentPage > 1}" th:href="@{cons(page=${currentPage-1})}">&larr;</a></li>
+     		 	<li  class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage > 1}" th:href="@{cons(page=${currentPage-1}, motCle=${motCle})}">&larr;</a></li>
+     		 	<li  class="page-item" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage > 1}" th:href="@{cons(page=${currentPage-1}, keySearch=${keySearch})}">&larr;</a></li>
+     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPage >=1}">&larr;</a></li>
      		  
-        		<th:block th:each="i: ${#numbers.sequence(0, totalPages-1)}" >
+        		<th:block th:each="i: ${#numbers.sequence(1, totalPages)}" >
         		<li class="page-item active" th:if="${motCle==null} and ${keySearch==null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{cons(page=${i})}">[[${i}]]</a></li>
         		<li class="page-item active" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{cons(page=${i}, motCle=${motCle})}">[[${i}]]</a></li>
         		<li class="page-item active" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage!=i}" th:href="@{cons(page=${i}, keySearch=${keySearch})}">[[${i}]]</a></li>
         		<li class="page-item disabled"><a class="page-link" th:unless="${currentPage !=i}">[[${i}]]</a></li>
      			</th:block>
      		
-     		 	<li  class="page-item" th:if="${motCle==null} and ${keySearch==null}" ><a class="page-link" th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1})}">&rarr;</a></li>
-     		 	<li  class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1}, motCle=${motCle})}">&rarr;</a></li>
-     		 	<li  class="page-item" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${currentPage + 1}, keySearch=${keySearch})}">&rarr;</a></li>
-     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPage < totalPages-1}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${motCle==null} and ${keySearch==null}" ><a class="page-link" th:if="${currentPage < totalPages}" th:href="@{cons(page=${currentPage + 1})}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${motCle!=null}"><a class="page-link" th:if="${currentPage < totalPages}" th:href="@{cons(page=${currentPage + 1}, motCle=${motCle})}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${keySearch!=null}"><a class="page-link" th:if="${currentPage < totalPages}" th:href="@{cons(page=${currentPage + 1}, keySearch=${keySearch})}">&rarr;</a></li>
+     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPage <= totalPages}">&rarr;</a></li>
      		 
      		 	<!-- <li th:if="${motCle==null} and ${keySearch==null}"><a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1})}">Fin</a></li>
      		 	<li th:if="${motCle!=null}"><a th:if="${currentPage < totalPages-1}" th:href="@{cons(page=${totalPages-1}, motCle=${motCle})}">Fin</a></li>
@@ -154,10 +168,219 @@
   <div>
   Total documents : <span th:text="${totalItems}"></span>
 						</div>
+						
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<div class="tab-pane" id="p2">
+		&ensp;
+		<div class="col-md-2">
+		<script>
+		function showIntRechercheDocument(){
+			document.getElementById("forDocument").style.display="block";
+			document.getElementById("forBeneficiaire").style.display="none";
+			document.getElementById("forLocalisation").style.display="none";
+			document.getElementById("forTitreDePropriete").style.display="none";
+		}
+		function showIntRechercheBeneficiaire(){
+			document.getElementById("forBeneficiaire").style.display="block";
+			document.getElementById("forDocument").style.display="none";
+			document.getElementById("forLocalisation").style.display="none";
+			document.getElementById("forTitreDePropriete").style.display="none";
+		}
+		function showIntRechercheLocalisation(){
+			document.getElementById("forLocalisation").style.display="block";
+			document.getElementById("forDocument").style.display="none";
+			document.getElementById("forBeneficiaire").style.display="none";
+			document.getElementById("forTitreDePropriete").style.display="none";
+		}
+		function showIntRechercheTitreDePropriete(){
+			document.getElementById("forTitreDePropriete").style.display="block";
+			document.getElementById("forLocalisation").style.display="none";
+			document.getElementById("forDocument").style.display="none";
+			document.getElementById("forBeneficiaire").style.display="none";
+		}
+			</script>
+			
+			<br></br>
+		<p>&nbsp;&nbsp;Rechercher par :</p>
+			<ul style="list-style-type:circle; line-height:180%" >
+					<li><a style="cursor:pointer" onclick="showIntRechercheDocument()">Document</a></li>
+					<li><a style="cursor:pointer" onclick="showIntRechercheBeneficiaire()">Bénéficiaire</a></li>
+					<li><a style="cursor:pointer" onclick="showIntRechercheLocalisation()">Localisation</a></li>
+					<li><a style="cursor:pointer" onclick="showIntRechercheTitreDePropriete()">Titre de propriété</a></li>
+			</ul>
+				
+			</div>
+			
+			<!-- Interface de recherche Document par plusieurs paramètres-->
+			<form th:action="@{getDocumentParCriteres}">
+			<div class="col-md-3" id="forDocument" style="display:none">
+			&ensp;
+				<input type="text" class = "form-control" name="typeDocument" id="typeDocument" placeholder="Type de document"/>
+				<input type="text" class = "form-control" name="numDocument" id="numDocument" placeholder="Numéro du document"/>
+				<input type="text" class = "form-control" name="codeDocument" id="codeDocument" placeholder="Code du document"/>
+				<input type="date" class= "form-control" name="dateDocument" id="dateDocument"/>
+				<input type="text" class = "form-control" name="responsableDocument" id="responsableDocument" placeholder="Responsable du document"/>
+				<br/>	
+				<input class="btn btn-info" style="color:black" type="submit" value="Rechercher">
+			</div>	
+			</form>
+			
+			<!-- Interface de recherche Document par Bénéficiaire -->
+			<form th:action="@{getDocumentParBeneficiaire}">
+			<div class="col-md-3" id="forBeneficiaire" style="display:none">
+			&ensp;
+				<input type="text" class = "form-control" name="cni" id="cni" placeholder="Carte nationale d'identité"/>
+				<input type="text" class = "form-control" name="numCEDEAO" id="numCEDEAO" placeholder="Numéro CEDEAO"/>
+				<input type="text" class = "form-control" name="ninea" id="ninea" placeholder="Ninea"/>
+				<br/>
+				<input class="btn btn-info" style="color:black" type="submit" value="Rechercher">
+			</div>	
+			</form>
+			
+			<!-- Interface de recherche Document par Localisation -->
+			<form th:action="@{getDocumentParCommune}">
+			<div class="col-md-3" id="forLocalisation" style="display:none">
+			&ensp;
+				<input type="text" class = "form-control" name="commune" id="commune" placeholder="Commune"/>
+				<br/>
+				<input  class="btn btn-info" style="color:black" type="submit" value="Rechercher">
+			</div>	
+			</form>
+			
+			<!-- Interface de recherche Document par Titre de propriété -->
+			<form th:action="@{getDocumentParTitreDePropriete}">
+			<div class="col-md-3" id="forTitreDePropriete" style="display:none">
+			&ensp;
+				<input type="text" class = "form-control" name="titreGlobal" id="titreGlobal" placeholder="Titre global"/>
+				<input type="text" class = "form-control" name="nicad" id="nicad" placeholder="Nicad"/>
+				<br/>
+				<input class="btn btn-info" style="color:black" type="submit" value="Rechercher">
+			</div>	
+			</form>
+			
+					<div class="container" >
+			<div class="col-md">
+			
+				<div class="panel panel-success">
+				
+					<!-- <div class="panel-heading">Consultation documents</div> -->
+					<div class="panel-body">
+					 
+					<div th:if="${resultatsDocuments}==null">
+	<h5 style="text-align:center">Cet onglet permet une recherche multicritère 
+	sur un ou plusieurs paramètres en même temps et offre la possibilité d’exporter ces résultats vers un fichier Excel et PDF. </h5>
+	</div>
+	<div th:if="${resultatsDocuments}!=null" >
+	<div style="text-align:right">
+     		 <a th:if="${resultatsDocuments}!=null"  th:href="@{/resultatsExcelExport(typeDocument=${typeDocument}, numDocument=${numDocument}, codeDocument=${codeDocument},
+     		 dateDocument=${dateDocument}, responsableDocument=${responsableDocument}, numCEDEAO=${numCEDEAO},
+     		 cni=${cni}, ninea=${ninea}, commune=${commune}, titreGlobal=${titreGlobal}, nicad=${nicad})}" class="btn btn-success" style="border: 1px solid green; background-color: white; color: green;">Excel 
+ 			<i class="fa fa-file-excel-o" aria-hidden="true"></i></a>
+ 			 </div>
+ 			
+						<table class="table table-striped">
+							<tr>
+							<th>Type document</th><th>Bénéficiaire</th><th>Numéro document</th><th>Date</th><th>Titre foncier</th>
+							<th>Nicad</th><th>Site</th><th>Code document</th><th>Responsable</th><th>Statut</th>
+							</tr>				
+								<tr th:each="d, iteration:${resultatsDocuments}">
+									<!-- <td th:text="${iteration.index+1}"></td> -->
+									<th:block th:each="td:${d.typeDocument}">
+									<td th:text="${td.typeDoc}"></td>
+									</th:block>
+									
+									<th:block th:if="${d.typeBeneficiaire} eq 'Particulier'">
+									<th:block th:each="p:${d.personne}">
+									<td th:text="${p.cni}"></td>
+									</th:block>
+									</th:block>
+									
+									<th:block th:if="${d.typeBeneficiaire} eq 'Entreprise'">
+									<th:block th:each="e:${d.entreprise}">
+									<td th:text="${e.ninea}"></td>
+									</th:block>
+									</th:block>
+									<td th:text="${d.numDocument}"></td>
+									<td th:text="${d.dateDocument}"></td>
+									<td th:text="${d.titreGlobal}"></td>	
+									<td th:text="${d.nicad}"></td>
+									<th:block th:each="c:${d.commune}">
+									<td th:text="${c.libelleCommune}"></td>
+									</th:block>
+									<td th:text="${d.codeUniqueDocument}"></td>
+									<td th:text="${d.responsableDocument}"></td>
+									
+									<td th:if="${d.statutDocument} eq 'saisi'" style=" text-align:center" th:text="${d.statutDocument}"></td>
+									<td th:if="${d.statutDocument} eq 'transmis'" style="background-color:#849FE5; text-align:center" th:text="${d.statutDocument}"></td>				
+									<td th:if="${d.statutDocument} eq 'rejeté'" style="background-color:#F3767E; text-align:center" th:text="${d.statutDocument}"></td>
+									<td th:if="${d.statutDocument} eq 'approuvé'" style="background-color:#90EE90; text-align:center" th:text="${d.statutDocument}"></td>
+									
+																											
+								</tr>	
+						</table>
+						
+							<!-- Pagination -->
+<nav aria-label="pagination">
+<div  th:if="${totalPagesDoc > 1}">
+      <div class="row col-sm-10">
+       	 <div class="col-md">
+       	 <ul class="pagination">
+     		 
+     		 	<li class="page-item" th:if="${typeDocument!=null}"><a class="page-link" th:if="${currentPageDoc > 1}" th:href="@{getDocumentParCriteres(pageResult=${currentPageDoc-1}, typeDocument=${typeDocument}, numDocument=${numDocument}, codeDocument=${codeDocument}, dateDocument=${dateDocument}, responsableDocument=${responsableDocument})}">&larr;</a></li>
+     		 	<li class="page-item" th:if="${cni!=null}"><a class="page-link" th:if="${currentPageDoc > 1}" th:href="@{getDocumentParBeneficiaire(pageResult=${currentPageDoc-1}, cni=${cni}, numCEDEAO=${numCEDEAO}, ninea=${ninea})}">&larr;</a></li>
+     		 	<li class="page-item" th:if="${commune!=null}"><a class="page-link" th:if="${currentPageDoc > 1}" th:href="@{getDocumentParCommune(pageResult=${currentPageDoc-1}, commune=${commune})}">&larr;</a></li>
+     		 	<li class="page-item" th:if="${titreGlobal!=null}"><a class="page-link" th:if="${currentPageDoc > 1}" th:href="@{getDocumentParTitreDePropriete(pageResult=${currentPageDoc-1}, titreGlobal=${titreGlobal}, nicad=${nicad})}">&larr;</a></li>
+     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPageDoc >=1}">&larr;</a></li>
+     		  
+        		<th:block th:each="i: ${#numbers.sequence(1, totalPagesDoc)}" >
+        		<li class="page-item active" th:if="${typeDocument!=null}"><a class="page-link" th:if="${currentPageDoc!=i}" th:href="@{getDocumentParCriteres(pageResult=${i}, typeDocument=${typeDocument}, numDocument=${numDocument}, codeDocument=${codeDocument}, dateDocument=${dateDocument}, responsableDocument=${responsableDocument})}">[[${i}]]</a></li>
+        		<li class="page-item active" th:if="${cni!=null}"><a class="page-link" th:if="${currentPageDoc!=i}" th:href="@{getDocumentParBeneficiaire(pageResult=${i}, cni=${cni}, numCEDEAO=${numCEDEAO}, ninea=${ninea})}">[[${i}]]</a></li>
+        		<li class="page-item active" th:if="${commune!=null}"><a class="page-link" th:if="${currentPageDoc!=i}" th:href="@{getDocumentParCommune(pageResult=${i}, commune=${commune})}">[[${i}]]</a></li>
+        		<li class="page-item active" th:if="${titreGlobal!=null}"><a class="page-link" th:if="${currentPageDoc!=i}" th:href="@{getDocumentParTitreDePropriete(pageResult=${i}, titreGlobal=${titreGlobal}, nicad=${nicad})}">[[${i}]]</a></li>
+        		<li class="page-item disabled"><a class="page-link" th:unless="${currentPageDoc !=i}">[[${i}]]</a></li>
+     			</th:block>
+     		
+     		 	<li  class="page-item" th:if="${typeDocument!=null}"><a class="page-link" th:if="${currentPageDoc < totalPagesDoc}" th:href="@{getDocumentParCriteres(pageResult=${currentPageDoc + 1}, typeDocument=${typeDocument}, numDocument=${numDocument}, codeDocument=${codeDocument}, dateDocument=${dateDocument}, responsableDocument=${responsableDocument})}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${cni!=null}"><a class="page-link" th:if="${currentPageDoc < totalPagesDoc}" th:href="@{getDocumentParBeneficiaire(pageResult=${currentPageDoc + 1}, cni=${cni}, numCEDEAO=${numCEDEAO}, ninea=${ninea})}">&rarr;</a></li>
+     		 	<li  class="page-item" th:if="${commune!=null}"><a class="page-link" th:if="${currentPageDoc < totalPagesDoc}" th:href="@{getDocumentParCommune(pageResult=${currentPageDoc + 1}, commune=${commune})}">&rarr;</a></li>
+     			<li  class="page-item" th:if="${titreGlobal!=null}"><a class="page-link" th:if="${currentPageDoc < totalPagesDoc}" th:href="@{getDocumentParTitreDePropriete(pageResult=${currentPageDoc + 1}, titreGlobal=${titreGlobal}, nicad=${nicad})}">&rarr;</a></li>
+     		 	<li  class="page-item"><a class="page-link" th:unless="${currentPageDoc <= totalPagesDoc}">&rarr;</a></li>
+     		
+     		  </ul>
+     		  </div>
+     		 
+      </div>
+   </div>
+   </nav>
+  <div>
+  Total documents : &nbsp;<span th:text="${totalItemsDoc}"></span>
+						</div>
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<script type="text/javascript" >
+
+$(document).ready(function(){
+	if($("#flag").val()){
+        $('#tabTwo').tab('show');
+    }
+});
+	
+
+</script>
+			
 		</div>
+		</div>
+		</div>
+		</div>
+		</div>
+		
 </body>
 </html>

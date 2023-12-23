@@ -214,8 +214,8 @@ function modifierLocalisation(){
 						 </div>
 						 
 						 <div class="tab-pane" id="p2">
-						
-						<div class="table-responsive">
+						<h4 th:if="${listCommune.isEmpty()}==true" style="color:red; text-align:center">Aucune localisation</h4>
+						<div class="table-responsive" th:if="${listCommune.isEmpty}==false">
 						<table class="table table-bordered" id="dataTable" style="width:100%;font-family:Courriel">
 							<tr style="background-color:#BE9AF6">
 							<th></th><th style="text-align:center">Commune</th><th style="text-align:center">Commune d'arrondissement</th>

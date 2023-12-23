@@ -42,7 +42,7 @@ public class SecurityConfig {
     public void configureUserDetailAuthentication( AuthenticationManagerBuilder auth) throws Exception {
     	auth.inMemoryAuthentication()
         .withUser("admin")
-        .password(passwordEncoder.encode("admin"))
+        .password("$2a$10$au1KPeWof3cvsjfKUGpWMOcssSQz2BFVYKzcar3hIOZF0RuJm9f.q")
         .roles("USER", "ADMIN");
         auth.userDetailsService(userDetail);
     }

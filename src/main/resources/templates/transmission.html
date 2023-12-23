@@ -26,7 +26,13 @@ embed:hover {
 			<input type="hidden" th:field="*{idDocument}" name="idDocument"/>
 				<div class="panel panel-default"  th:if="${unDocument}">
 					<div class="panel-heading" th:each="d:${unDocument}">Document
-					<span th:text="${d.codeUniqueDocument}"></span></div>
+					<span th:text="${d.codeUniqueDocument}"></span>
+					<div style="text-align:center">
+					<span th:if="${d.statutDocument} eq 'saisi' or ${d.statutDocument} eq 'rejeté' ">
+					<a th:href="@{modifier(id=${d.idDocument})}">
+					<span class="glyphicon glyphicon-pencil" title="Editer"  style="color:white; background:green; border-radius:100%; border:1px solid gray;  font-size: 2em; position: absolute; top: 2.7em; right: 2.7em;"></span></a></span></div>
+					</div>
+					
 					<div class="panel-body" th:each="d:${unDocument}">
 						<div class="col-md-6">
 						<div th:each="td:${d.typeDocument}">
